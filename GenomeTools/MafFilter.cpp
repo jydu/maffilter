@@ -200,7 +200,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Window size", ws);
         ApplicationTools::displayResult("Window step", st);
         ApplicationTools::displayResult("Max. gaps allowed in Window", gm);
-        AlignmentFilterMafIterator* iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm);
+        AlignmentFilterMafIterator* iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, false);
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
