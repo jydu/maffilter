@@ -197,10 +197,56 @@ int main(int args, char** argv)
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
         unsigned int gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
+        bool trash = outputFile == "none";
         ApplicationTools::displayResult("Window size", ws);
         ApplicationTools::displayResult("Window step", st);
         ApplicationTools::displayResult("Max. gaps allowed in Window", gm);
-        AlignmentFilterMafIterator* iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, false);
+        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        AlignmentFilterMafIterator* iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, !trash);
+        iterator->setLogStream(&log);
+        its.push_back(iterator);
+
+        if (!trash) {
+          compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+          filtering_ostream* out = new filtering_ostream;
+          if (compress == "none") {
+          } else if (compress == "gzip") {
+            out->push(gzip_compressor());
+          } else if (compress == "zip") {
+            out->push(zlib_compressor());
+          } else if (compress == "bzip2") {
+            out->push(bzip2_compressor());
+          } else
+            throw Exception("Bad output compression format: " + compress);
+          out->push(file_sink(outputFile));
+          ApplicationTools::displayResult("File compression for removed blocks", compress);
+
+          //Now build an adaptor for retrieving the trashed blocks:
+          AlignmentFilterTrashIterator* trashIt = new AlignmentFilterTrashIterator(iterator);
+          //Add an output iterator:
+          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          //And then synchronize the two iterators:
+          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          //Returns last iterator:
+          currentIterator = syncIt;
+          //Keep track of all those iterators:
+          its.push_back(trashIt);
+          its.push_back(syncIt);
+        } else {
+          //We only get the remaining blocks here:
+          currentIterator = iterator;
+        }
+      }
+
+
+      // +----------------------+
+      // | Block size filtering |
+      // +----------------------+
+      if (cmdName == "MinBlockSize") {
+        unsigned int minSize = ApplicationTools::getParameter<unsigned int>("min.size", cmdArgs, 0);
+        ApplicationTools::displayResult("Minimum block size required", minSize);
+        BlockSizeMafIterator* iterator = new BlockSizeMafIterator(currentIterator, minSize);
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -231,7 +277,6 @@ int main(int args, char** argv)
         currentIterator = iterator;
         its.push_back(iterator);
       }
-
     }
 
     //Now loop over the last iterator and that's it!
@@ -240,6 +285,10 @@ int main(int args, char** argv)
       cout << "."; cout.flush();
       delete block;
     }
+
+    //Clean memory:
+    for (size_t i = 0; i < its.size(); ++i)
+      delete its[i];
 
     maffilter.done();
   }
