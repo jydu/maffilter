@@ -72,7 +72,6 @@ ENDIF(CMAKE_INSTALL_PREFIX)
 
 #Find the libraries. The order is very important for staitc linkage, it won't
 #link if you change it!
-IMPROVED_FIND_LIBRARY(LIBS bpp-phyl Phyl/Tree.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-seq Seq/Alphabet.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-numcalc NumCalc/NumTools.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-utils Utils/Clonable.h)
