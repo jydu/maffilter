@@ -124,6 +124,7 @@ int main(int args, char** argv)
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);
     MafIterator* currentIterator = &parser;
     vector<MafIterator*> its;
+    vector<filtering_ostream*> ostreams;
     for (unsigned int a = 0; a < actions.size(); a++) {
       string cmdName;
       map<string, string> cmdArgs;
@@ -226,6 +227,7 @@ int main(int args, char** argv)
           } else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
+          ostreams.push_back(out);
           ApplicationTools::displayResult("File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
@@ -281,6 +283,7 @@ int main(int args, char** argv)
           } else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
+          ostreams.push_back(out);
           ApplicationTools::displayResult("File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
@@ -336,6 +339,7 @@ int main(int args, char** argv)
           } else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
+          ostreams.push_back(out);
           ApplicationTools::displayResult("File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
@@ -386,6 +390,7 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
+        ostreams.push_back(out);
         ApplicationTools::displayResult("File compression", compress);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("Output mask", mask);
@@ -401,6 +406,10 @@ int main(int args, char** argv)
       cout << "."; cout.flush();
       delete block;
     }
+
+    //Flush all streams:
+    for (size_t i = 0; i < ostreams.size(); ++i)
+      close(*ostreams[i]);
 
     //Clean memory:
     for (size_t i = 0; i < its.size(); ++i)
