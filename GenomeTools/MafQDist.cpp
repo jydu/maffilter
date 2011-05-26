@@ -52,12 +52,12 @@ using namespace std;
 #include <boost/iostreams/filter/zlib.hpp>
 using namespace boost::iostreams;
 
-// From Utils:
-#include <Utils/BppApplication.h>
+// From bpp-core:
+#include <Bpp/App/BppApplication.h>
 
-// From SeqLib:
-#include <Seq/MafAlignmentParser.h>
-#include <Seq/SequenceWithQuality.h>
+// From bpp-seq:
+#include <Bpp/Seq/Io/MafAlignmentParser.h>
+#include <Bpp/Seq/SequenceWithQuality.h>
 
 using namespace bpp;
 

@@ -38,30 +38,34 @@ ENDIF()
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
   #start:
   FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
+  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
 
   IF(BUILD_STATIC)
-    FIND_PATH(${lib_name}_LIBRARY_DIR lib${lib_name}.a HINTS ${CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH}/lib)
-    IF(${lib_name}_LIBRARY_DIR)
-      SET(${lib_name}_LIBRARY ${${lib_name}_LIBRARY_DIR}/lib${lib_name}.a)
-    ELSE(${lib_name}_LIBRARY_DIR)
-      MESSAGE(FATAL_ERROR "${lib_name} static library could not be found.")
-    ENDIF(${lib_name}_LIBRARY_DIR)
-  ELSE(BUILD_STATIC)
-    SET(${lib_name}_NAMES ${lib_name} ${lib_name}lib ${lib_name}dll)
+    SET(${lib_name}_STATIC_NAMES lib${lib_name}.a)
+    FIND_LIBRARY(${lib_name}_STATIC_LIBRARY NAMES ${${lib_name}_STATIC_NAMES})
+    IF(${lib_name}_STATIC_LIBRARY)
+      MESSAGE("-- Library ${lib_name} found here:")
+      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
+      MESSAGE("   static libraries: ${${lib_name}_STATIC_LIBRARY}")
+    ELSE()
+      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+    ENDIF()
+    #add the dependency:
+    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_STATIC_LIBRARY})
+  ELSE()
+    SET(${lib_name}_NAMES ${lib_name} ${lib_name}.lib ${lib_name}.dll)
     FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES})
-  ENDIF(BUILD_STATIC)
-
-  IF(${lib_name}_LIBRARY)
-    MESSAGE("-- Library ${lib_name} found here:")
-    MESSAGE("   includes : ${${lib_name}_INCLUDE_DIR}")
-    MESSAGE("   libraries: ${${lib_name}_LIBRARY}")
-  ELSE(${lib_name}_LIBRARY)
-    MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
-  ENDIF(${lib_name}_LIBRARY)
+    IF(${lib_name}_LIBRARY)
+      MESSAGE("-- Library ${lib_name} found here:")
+      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
+      MESSAGE("   dynamic libraries: ${${lib_name}_LIBRARY}")
+    ELSE()
+      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+    ENDIF()
+    #add the dependency:
+    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
+  ENDIF()
   
-  #add the dependency:
-  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
-  SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
 ENDMACRO(IMPROVED_FIND_LIBRARY)
 
 # Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
@@ -72,9 +76,9 @@ ENDIF(CMAKE_INSTALL_PREFIX)
 
 #Find the libraries. The order is very important for staitc linkage, it won't
 #link if you change it!
-IMPROVED_FIND_LIBRARY(LIBS bpp-seq Seq/Alphabet.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-numcalc NumCalc/NumTools.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-utils Utils/Clonable.h)
+IMPROVED_FIND_LIBRARY(LIBS bpp-phyl Bpp/Phyl/Tree.h)
+IMPROVED_FIND_LIBRARY(LIBS bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
+IMPROVED_FIND_LIBRARY(LIBS bpp-core Bpp/Clonable.h)
 
 # Find the zlib installation
 FIND_PACKAGE(ZLIB REQUIRED)

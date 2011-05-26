@@ -53,11 +53,11 @@ using namespace std;
 #include <boost/iostreams/filter/zlib.hpp>
 using namespace boost::iostreams;
 
-// From Utils:
-#include <Utils/BppApplication.h>
+// From bpp-core:
+#include <Bpp/App/BppApplication.h>
 
-// From SeqLib:
-#include <Seq/MafAlignmentParser.h>
+// From bpp-seq:
+#include <Bpp/Seq/Io/MafAlignmentParser.h>
 
 using namespace bpp;
 
@@ -87,7 +87,7 @@ int main(int args, char** argv)
     mafinfo.startTimer();
 
     string inputFile = ApplicationTools::getAFilePath("input.file", mafinfo.getParams(), true, true);
-    string compress = ApplicationTools::getStringParameter("compression", mafinfo.getParams(), "none");
+    string compress = ApplicationTools::getStringParameter("input.file.compression", mafinfo.getParams(), "none");
 
     filtering_istream stream;
     if (compress == "none") {
