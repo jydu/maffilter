@@ -379,6 +379,7 @@ int main(int args, char** argv)
       if (cmdName == "Output") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("Output file", outputFile);
         filtering_ostream* out = new filtering_ostream;
         if (compress == "none") {
         } else if (compress == "gzip") {
@@ -408,12 +409,14 @@ int main(int args, char** argv)
     }
 
     //Flush all streams:
-    for (size_t i = 0; i < ostreams.size(); ++i)
+    for (size_t i = 0; i < ostreams.size(); ++i) {
       close(*ostreams[i]);
+    }
 
     //Clean memory:
-    for (size_t i = 0; i < its.size(); ++i)
+    for (size_t i = 0; i < its.size(); ++i) {
       delete its[i];
+    }
 
     maffilter.done();
   }
