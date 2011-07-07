@@ -106,6 +106,8 @@ int main(int args, char** argv)
     ofstream out(outputFile.c_str(), ios::out);
     MafAlignmentParser parser(&stream);
 
+    string refsp = ApplicationTools::getStringParameter("ref_seq", mafinfo.getParams(), "none");
+    ApplicationTools::displayResult("Reference sequence for coords", refsp);
     out << "Score\tNbSequences\tNbSites\tCountSp\tBeginSp\tEndSp" << endl;
     while (MafBlock* block = parser.nextBlock())
     {
@@ -123,7 +125,7 @@ int main(int args, char** argv)
         size_t pos = name.find(".");
         if (pos != string::npos)
           name = name.substr(0, pos);
-        if (name == "Ggor")
+        if (name == refsp)
         {
           count++;
           unsigned int size = dynamic_cast<const MafSequence&>(block->getAlignment().getSequence(i)).getGenomicSize();

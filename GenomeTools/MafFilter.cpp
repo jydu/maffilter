@@ -373,6 +373,21 @@ int main(int args, char** argv)
       }
 
 
+      // +----------------------+
+      // | Chromosome filtering |
+      // +----------------------+
+      if (cmdName == "SelectChr") {
+        string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        ApplicationTools::displayResult("Reference species", ref);
+        string chr = ApplicationTools::getStringParameter("chromosome", cmdArgs, "");
+        ApplicationTools::displayResult("Chromosome", chr);
+        ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chr);
+        iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
       // +--------+
       // | Output |
       // +--------+
