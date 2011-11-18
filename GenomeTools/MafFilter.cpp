@@ -86,7 +86,7 @@ int main(int args, char** argv)
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 0.1.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 16/09/10 *" << endl;
+  cout << "*                                           Last Modif. 18/11/11 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -383,6 +383,52 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Chromosome", chr);
         ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chr);
         iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+      // +---------------------+
+      // | Duplicate filtering |
+      // +---------------------+
+      if (cmdName == "DuplicateFilter") {
+        string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        ApplicationTools::displayResult("Reference species", ref);
+        DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
+        iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+      // +---------------------+
+      // | Sequence statistics |
+      // +---------------------+
+      if (cmdName == "SequenceStatistics") {
+        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        vector<string> species;
+        getList(speciesList, species);
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        ApplicationTools::displayResult("Output file", outputFile);
+        auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
+        StlOutputStream* output = new StlOutputStream(ofs);
+        SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, species, output);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+      // +------------------------------+
+      // | Pairwise sequence statistics |
+      // +------------------------------+
+      if (cmdName == "PairwiseSequenceStatistics") {
+        string species1 = ApplicationTools::getStringParameter("species1", cmdArgs, "none");
+        string species2 = ApplicationTools::getStringParameter("species2", cmdArgs, "none");
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        ApplicationTools::displayResult("Output file", outputFile);
+        auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
+        StlOutputStream* output = new StlOutputStream(ofs);
+        PairwiseSequenceStatisticsMafIterator* iterator = new PairwiseSequenceStatisticsMafIterator(currentIterator, species1, species2, output);
         currentIterator = iterator;
         its.push_back(iterator);
       }
