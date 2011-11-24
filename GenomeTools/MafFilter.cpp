@@ -60,6 +60,7 @@ using namespace boost::iostreams;
 // From bpp-seq:
 #include <Bpp/Seq/Io/MafAlignmentParser.h>
 #include <Bpp/Seq/SequenceWithQuality.h>
+#include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
 
 using namespace bpp;
 
@@ -360,6 +361,66 @@ int main(int args, char** argv)
       }
 
 
+      
+      // +-------------------------+
+      // | Feature-based filtering |
+      // +-------------------------+
+      if (cmdName == "FeatureFilter") {
+        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
+        string refSpecies = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
+        string featureFile = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
+        string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
+        bool trash = outputFile == "none";
+        ApplicationTools::displayResult("Features to remove", featureFile + " (" + featureFormat + ")");
+        ApplicationTools::displayResult("features are for species", refSpecies);
+        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        if (featureFormat != "GFF")
+          throw Exception("Sorry, but so far, only GFF features are supported :(");
+        ifstream file(featureFile.c_str(), ios::in);
+        SequenceFeatureSet featuresSet;
+        GffFeatureReader reader(file);
+        reader.getAllFeatures(featuresSet);
+        FeatureFilterMafIterator* iterator = new FeatureFilterMafIterator(currentIterator, refSpecies, featuresSet, !trash);
+        iterator->setLogStream(&log);
+        iterator->verbose(verbose);
+        its.push_back(iterator);
+
+        if (!trash) {
+          compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+          filtering_ostream* out = new filtering_ostream;
+          if (compress == "none") {
+          } else if (compress == "gzip") {
+            out->push(gzip_compressor());
+          } else if (compress == "zip") {
+            out->push(zlib_compressor());
+          } else if (compress == "bzip2") {
+            out->push(bzip2_compressor());
+          } else
+            throw Exception("Bad output compression format: " + compress);
+          out->push(file_sink(outputFile));
+          ostreams.push_back(out);
+          ApplicationTools::displayResult("File compression for removed blocks", compress);
+
+          //Now build an adaptor for retrieving the trashed blocks:
+          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          //Add an output iterator:
+          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          //And then synchronize the two iterators:
+          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          //Returns last iterator:
+          currentIterator = syncIt;
+          //Keep track of all those iterators:
+          its.push_back(trashIt);
+          its.push_back(syncIt);
+        } else {
+          //We only get the remaining blocks here:
+          currentIterator = iterator;
+        }
+      }
+
+
+
       // +----------------------+
       // | Block size filtering |
       // +----------------------+
@@ -432,6 +493,33 @@ int main(int args, char** argv)
         currentIterator = iterator;
         its.push_back(iterator);
       }
+
+
+      
+      // +--------------------+
+      // | Feature extraction |
+      // +--------------------+
+      if (cmdName == "ExtractFeature") {
+        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
+        string refSpecies = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
+        string featureFile = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
+        string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
+        ApplicationTools::displayResult("Features to extract", featureFile + " (" + featureFormat + ")");
+        ApplicationTools::displayResult("features are for species", refSpecies);
+        if (featureFormat != "GFF")
+          throw Exception("Sorry, but so far, only GFF features are supported :(");
+        ifstream file(featureFile.c_str(), ios::in);
+        SequenceFeatureSet featuresSet;
+        GffFeatureReader reader(file);
+        reader.getAllFeatures(featuresSet);
+        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, featuresSet);
+        iterator->setLogStream(&log);
+        iterator->verbose(verbose);
+        its.push_back(iterator);
+
+        currentIterator = iterator;
+      }
+
 
 
       // +--------+
