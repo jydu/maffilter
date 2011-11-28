@@ -500,19 +500,38 @@ int main(int args, char** argv)
       // | Feature extraction |
       // +--------------------+
       if (cmdName == "ExtractFeature") {
-        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        string refSpecies = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
-        string featureFile = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
+        bool verbose         = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
+        bool ignoreStrand    = ApplicationTools::getBooleanParameter("ignore_strand", cmdArgs, false);
+        string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
+        string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
         ApplicationTools::displayResult("Features to extract", featureFile + " (" + featureFormat + ")");
-        ApplicationTools::displayResult("features are for species", refSpecies);
+        ApplicationTools::displayResult("Features are for species", refSpecies);
+        ApplicationTools::displayBooleanResult("Features are strand-aware", !ignoreStrand);
+        string featuresList = ApplicationTools::getStringParameter("feature.select", cmdArgs, "none");
         if (featureFormat != "GFF")
           throw Exception("Sorry, but so far, only GFF features are supported :(");
         ifstream file(featureFile.c_str(), ios::in);
         SequenceFeatureSet featuresSet;
         GffFeatureReader reader(file);
         reader.getAllFeatures(featuresSet);
-        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, featuresSet);
+        
+        vector<string> features;
+        if (featuresList != "all") { 
+          getList(featuresList, features);
+        } else {
+          set<string> tmp = featuresSet.getTypes();
+          features.insert(features.begin(), tmp.begin(), tmp.end());
+        }
+        if (features.size() == 0)
+          throw Exception("Error, no feature to extract!");
+        string lst = features[0];
+        for (size_t i = 1; i < features.size(); ++i)
+          lst += ", " + features[i];
+        ApplicationTools::displayResult("Features to extract", lst);
+        auto_ptr<SequenceFeatureSet> featuresSet2(featuresSet.getSubsetForType(features));
+
+        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, *featuresSet2, ignoreStrand);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
         its.push_back(iterator);
