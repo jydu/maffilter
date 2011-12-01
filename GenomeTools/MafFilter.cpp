@@ -249,6 +249,65 @@ int main(int args, char** argv)
       }
 
 
+      // +-----------------------+
+      // | Alignment filtering 2 |
+      // +-----------------------+
+      if (cmdName == "AlnFilter2") {
+        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
+        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        vector<string> species;
+        getList(speciesList, species);
+        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
+        unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
+        unsigned int gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
+        unsigned int pm = ApplicationTools::getParameter<unsigned int>("max.pos", cmdArgs, 0);
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
+        bool trash = outputFile == "none";
+        ApplicationTools::displayResult("Window size", ws);
+        ApplicationTools::displayResult("Window step", st);
+        ApplicationTools::displayResult("Max. gaps allowed per position", gm);
+        ApplicationTools::displayResult("Max. gap positions allowed", pm);
+        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        AlignmentFilter2MafIterator* iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, gm, pm, !trash);
+        iterator->setLogStream(&log);
+        iterator->verbose(verbose);
+        its.push_back(iterator);
+
+        if (!trash) {
+          compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+          filtering_ostream* out = new filtering_ostream;
+          if (compress == "none") {
+          } else if (compress == "gzip") {
+            out->push(gzip_compressor());
+          } else if (compress == "zip") {
+            out->push(zlib_compressor());
+          } else if (compress == "bzip2") {
+            out->push(bzip2_compressor());
+          } else
+            throw Exception("Bad output compression format: " + compress);
+          out->push(file_sink(outputFile));
+          ostreams.push_back(out);
+          ApplicationTools::displayResult("File compression for removed blocks", compress);
+
+          //Now build an adaptor for retrieving the trashed blocks:
+          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          //Add an output iterator:
+          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          //And then synchronize the two iterators:
+          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          //Returns last iterator:
+          currentIterator = syncIt;
+          //Keep track of all those iterators:
+          its.push_back(trashIt);
+          its.push_back(syncIt);
+        } else {
+          //We only get the remaining blocks here:
+          currentIterator = iterator;
+        }
+      }
+
+
+
       // +----------------+
       // | Mask filtering |
       // +----------------+
