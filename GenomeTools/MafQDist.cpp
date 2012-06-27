@@ -56,7 +56,7 @@ using namespace boost::iostreams;
 #include <Bpp/App/BppApplication.h>
 
 // From bpp-seq:
-#include <Bpp/Seq/Io/MafAlignmentParser.h>
+#include <Bpp/Seq/Io/Maf.all>
 #include <Bpp/Seq/SequenceWithQuality.h>
 
 using namespace bpp;

@@ -58,9 +58,10 @@ using namespace boost::iostreams;
 #include <Bpp/Text/StringTokenizer.h>
 
 // From bpp-seq:
-#include <Bpp/Seq/Io/MafAlignmentParser.h>
+#include <Bpp/Seq/Io/Maf.all>
 #include <Bpp/Seq/SequenceWithQuality.h>
 #include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
+#include <Bpp/Seq/Io/Clustal.h>
 
 using namespace bpp;
 
@@ -69,25 +70,25 @@ void help()
 
 }
 
-void getList(const string& desc, vector<string>& list) throw (Exception)
-{
-  if (desc == "none")
-    throw Exception("You must specify at least one species name.");
-  if (desc[0] == '(') {
-    StringTokenizer st(desc.substr(1, desc.size() - 2), ",");
-    while (st.hasMoreToken())
-      list.push_back(st.nextToken());
-  } else {
-    list.push_back(desc);
-  }
-}
+//void getList(const string& desc, vector<string>& list) throw (Exception)
+//{
+//  if (desc == "none")
+//    throw Exception("You must specify at least one element.");
+//  if (desc[0] == '(') {
+//    StringTokenizer st(desc.substr(1, desc.size() - 2), ",");
+//    while (st.hasMoreToken())
+//      list.push_back(st.nextToken());
+//  } else {
+//    list.push_back(desc);
+//  }
+//}
 
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 0.1.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 18/11/11 *" << endl;
+  cout << "*                                           Last Modif. 27/06/12 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -137,13 +138,15 @@ int main(int args, char** argv)
       // | Sequence subset |
       // +-----------------+
       if (cmdName == "Subset") {
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
         bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
         ApplicationTools::displayBooleanResult("All species should be in output blocks", strict);
         bool rmdupl = ApplicationTools::getBooleanParameter("rm.duplicates", cmdArgs, false);
         ApplicationTools::displayBooleanResult("Species should be present only once", rmdupl);
-        vector<string> species;
-        getList(speciesList, species);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'Subset'.");
+        //getList(speciesList, species);
         SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, rmdupl);
         iterator->setLogStream(&log);
         currentIterator = iterator;
@@ -155,9 +158,13 @@ int main(int args, char** argv)
       // | Block merging |
       // +---------------+
       if (cmdName == "Merge") {
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        vector<string> species;
-        getList(speciesList, species);
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        //vector<string> species;
+        //getList(speciesList, species);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'Merge'.");
+
         unsigned int distMax = ApplicationTools::getParameter<unsigned int>("dist.max", cmdArgs, 0);
         ApplicationTools::displayResult("Maximum distance allowed", distMax);
         BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax);
@@ -182,9 +189,12 @@ int main(int args, char** argv)
       // +--------------------+
       if (cmdName == "XFullGap") {
         bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        vector<string> species;
-        getList(speciesList, species);
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        //vector<string> species;
+        //getList(speciesList, species);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'XFullGap'.");
         FullGapFilterMafIterator* iterator = new FullGapFilterMafIterator(currentIterator, species);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -198,9 +208,12 @@ int main(int args, char** argv)
       // +---------------------+
       if (cmdName == "AlnFilter") {
         bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        vector<string> species;
-        getList(speciesList, species);
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        //vector<string> species;
+        //getList(speciesList, species);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'AlnFilter'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
         unsigned int gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
@@ -254,9 +267,12 @@ int main(int args, char** argv)
       // +-----------------------+
       if (cmdName == "AlnFilter2") {
         bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        vector<string> species;
-        getList(speciesList, species);
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        //vector<string> species;
+        //getList(speciesList, species);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'AlnFilter2'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
         unsigned int gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
@@ -313,9 +329,12 @@ int main(int args, char** argv)
       // +----------------+
       if (cmdName == "MaskFilter") {
         bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        vector<string> species;
-        getList(speciesList, species);
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        //vector<string> species;
+        //getList(speciesList, species);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'MaskFilter'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
         unsigned int mm = ApplicationTools::getParameter<unsigned int>("max.masked", cmdArgs, 0);
@@ -369,9 +388,12 @@ int main(int args, char** argv)
       // +-------------------+
       if (cmdName == "QualFilter") {
         bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        vector<string> species;
-        getList(speciesList, species);
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        //vector<string> species;
+        //getList(speciesList, species);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'QualFilter'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
         double       mq = ApplicationTools::getDoubleParameter("min.qual", cmdArgs, 0);
@@ -524,15 +546,30 @@ int main(int args, char** argv)
       // +---------------------+
       // | Sequence statistics |
       // +---------------------+
+      //if (cmdName == "SequenceStatistics") {
+      //  string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+      //  vector<string> species;
+      //  getList(speciesList, species);
+      //  string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+      //  ApplicationTools::displayResult("Output file", outputFile);
+      //  auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
+      //  StlOutputStream* output = new StlOutputStream(ofs);
+      //  SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, species, output);
+      //  currentIterator = iterator;
+      //  its.push_back(iterator);
+      //}
       if (cmdName == "SequenceStatistics") {
-        string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        vector<string> species;
-        getList(speciesList, species);
+        vector<string> statisticsDesc = ApplicationTools::getVectorParameter<string>("statistics", cmdArgs, ',', "", "", false, true);
+        //Parse all statistics:
+        vector<MafStatistics*> statistics;
+        //Get output file:
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         ApplicationTools::displayResult("Output file", outputFile);
         auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
         StlOutputStream* output = new StlOutputStream(ofs);
-        SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, species, output);
+        SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, statistics);
+        CsvStatisticsOutputIterationListener* listener = new CsvStatisticsOutputIterationListener(iterator, output);
+        iterator->addIterationListener(listener);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -541,17 +578,17 @@ int main(int args, char** argv)
       // +------------------------------+
       // | Pairwise sequence statistics |
       // +------------------------------+
-      if (cmdName == "PairwiseSequenceStatistics") {
-        string species1 = ApplicationTools::getStringParameter("species1", cmdArgs, "none");
-        string species2 = ApplicationTools::getStringParameter("species2", cmdArgs, "none");
-        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
-        ApplicationTools::displayResult("Output file", outputFile);
-        auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
-        StlOutputStream* output = new StlOutputStream(ofs);
-        PairwiseSequenceStatisticsMafIterator* iterator = new PairwiseSequenceStatisticsMafIterator(currentIterator, species1, species2, output);
-        currentIterator = iterator;
-        its.push_back(iterator);
-      }
+      //if (cmdName == "PairwiseSequenceStatistics") {
+      //  string species1 = ApplicationTools::getStringParameter("species1", cmdArgs, "none");
+      //  string species2 = ApplicationTools::getStringParameter("species2", cmdArgs, "none");
+      //  string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+      //  ApplicationTools::displayResult("Output file", outputFile);
+      //  auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
+      //  StlOutputStream* output = new StlOutputStream(ofs);
+      //  PairwiseSequenceStatisticsMafIterator* iterator = new PairwiseSequenceStatisticsMafIterator(currentIterator, species1, species2, output);
+      //  currentIterator = iterator;
+      //  its.push_back(iterator);
+      //}
 
 
       
@@ -567,7 +604,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Features to extract", featureFile + " (" + featureFormat + ")");
         ApplicationTools::displayResult("Features are for species", refSpecies);
         ApplicationTools::displayBooleanResult("Features are strand-aware", !ignoreStrand);
-        string featuresList = ApplicationTools::getStringParameter("feature.select", cmdArgs, "none");
+        //string featuresList = ApplicationTools::getStringParameter("feature.select", cmdArgs, "none");
         if (featureFormat != "GFF")
           throw Exception("Sorry, but so far, only GFF features are supported :(");
         ifstream file(featureFile.c_str(), ios::in);
@@ -575,12 +612,12 @@ int main(int args, char** argv)
         GffFeatureReader reader(file);
         reader.getAllFeatures(featuresSet);
         
-        vector<string> features;
-        if (featuresList != "all") { 
-          getList(featuresList, features);
-        } else {
+        vector<string> features = ApplicationTools::getVectorParameter<string>("feature.select", cmdArgs, ',', "", "", false, true);
+        if (features.size() == 0)
+          throw Exception("Error, please set some features to extract!");
+        if (features[0] == "all") { 
           set<string> tmp = featuresSet.getTypes();
-          features.insert(features.begin(), tmp.begin(), tmp.end());
+          features = vector<string>(tmp.begin(), tmp.end());
         }
         if (features.size() == 0)
           throw Exception("Error, no feature to extract!");
@@ -623,6 +660,35 @@ int main(int args, char** argv)
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("Output mask", mask);
         OutputMafIterator* iterator = new OutputMafIterator(currentIterator, out, mask); //NB: there is a memory leak here because the stream is never deleted... TODO
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
+      // +-------------------+
+      // | Output alignments |
+      // +-------------------+
+      if (cmdName == "OutputAlignments") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("Output alignment file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("File compression", compress);
+        bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
+        ApplicationTools::displayBooleanResult("Output mask", mask);
+        OutputAlignmentMafIterator* iterator = new OutputAlignmentMafIterator(currentIterator, out, mask); //NB: there is a memory leak here because the stream is never deleted... TODO
         currentIterator = iterator;
         its.push_back(iterator);
       }
