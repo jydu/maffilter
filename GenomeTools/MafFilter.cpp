@@ -61,6 +61,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf.all>
 #include <Bpp/Seq/SequenceWithQuality.h>
 #include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
+#include <Bpp/Seq/Feature/Gtf/GtfFeatureReader.h>
 #include <Bpp/Seq/Io/Clustal.h>
 
 using namespace bpp;
@@ -133,6 +134,8 @@ int main(int args, char** argv)
       KeyvalTools::parseProcedure(actions[a], cmdName, cmdArgs);
       ApplicationTools::displayResult("Adding filter", cmdName);
       
+      bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true, "", true, false);
+      ApplicationTools::displayBooleanResult("Verbose", verbose);
 
       // +-----------------+
       // | Sequence subset |
@@ -149,6 +152,7 @@ int main(int args, char** argv)
         //getList(speciesList, species);
         SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, rmdupl);
         iterator->setLogStream(&log);
+        iterator->verbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -169,6 +173,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Maximum distance allowed", distMax);
         BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax);
         iterator->setLogStream(&log);
+        iterator->verbose(verbose);
         string ignoreChrList = ApplicationTools::getStringParameter("ignore.chr", cmdArgs, "none");
         if (ignoreChrList != "none") {
           if (ignoreChrList[0] == '(') {
@@ -188,10 +193,6 @@ int main(int args, char** argv)
       // | Full gap filtering |
       // +--------------------+
       if (cmdName == "XFullGap") {
-        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        //vector<string> species;
-        //getList(speciesList, species);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'XFullGap'.");
@@ -207,10 +208,6 @@ int main(int args, char** argv)
       // | Alignment filtering |
       // +---------------------+
       if (cmdName == "AlnFilter") {
-        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        //vector<string> species;
-        //getList(speciesList, species);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter'.");
@@ -266,10 +263,6 @@ int main(int args, char** argv)
       // | Alignment filtering 2 |
       // +-----------------------+
       if (cmdName == "AlnFilter2") {
-        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        //vector<string> species;
-        //getList(speciesList, species);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
@@ -328,10 +321,6 @@ int main(int args, char** argv)
       // | Mask filtering |
       // +----------------+
       if (cmdName == "MaskFilter") {
-        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        //vector<string> species;
-        //getList(speciesList, species);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'MaskFilter'.");
@@ -387,10 +376,6 @@ int main(int args, char** argv)
       // | Quality filtering |
       // +-------------------+
       if (cmdName == "QualFilter") {
-        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
-        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        //vector<string> species;
-        //getList(speciesList, species);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'QualFilter'.");
@@ -447,7 +432,6 @@ int main(int args, char** argv)
       // | Feature-based filtering |
       // +-------------------------+
       if (cmdName == "FeatureFilter") {
-        bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
         string refSpecies = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
@@ -456,12 +440,27 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Features to remove", featureFile + " (" + featureFormat + ")");
         ApplicationTools::displayResult("features are for species", refSpecies);
         ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
-        if (featureFormat != "GFF")
-          throw Exception("Sorry, but so far, only GFF features are supported :(");
-        ifstream file(featureFile.c_str(), ios::in);
+        compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
+        filtering_istream featureStream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          featureStream.push(gzip_decompressor());
+        } else if (compress == "zip") {
+          featureStream.push(zlib_decompressor());
+        } else if (compress == "bzip2") {
+          featureStream.push(bzip2_decompressor());
+        } else
+          throw Exception("Bad input incompression format: " + compress);
+        featureStream.push(file_source(featureFile));
         SequenceFeatureSet featuresSet;
-        GffFeatureReader reader(file);
-        reader.getAllFeatures(featuresSet);
+        if (featureFormat == "GFF") {
+          GffFeatureReader reader(featureStream);
+          reader.getAllFeatures(featuresSet);
+        } else if (featureFormat == "GTF") {
+          GtfFeatureReader reader(featureStream);
+          reader.getAllFeatures(featuresSet);
+        } else
+          throw Exception("Unsupported feature format: " + featureFormat);
         FeatureFilterMafIterator* iterator = new FeatureFilterMafIterator(currentIterator, refSpecies, featuresSet, !trash);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -525,6 +524,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Chromosome", chr);
         ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chr);
         iterator->setLogStream(&log);
+        iterator->verbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -538,65 +538,57 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Reference species", ref);
         DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
         iterator->setLogStream(&log);
+        iterator->verbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
 
 
-      // +---------------------+
-      // | Sequence statistics |
-      // +---------------------+
-      //if (cmdName == "SequenceStatistics") {
-      //  string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-      //  vector<string> species;
-      //  getList(speciesList, species);
-      //  string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
-      //  ApplicationTools::displayResult("Output file", outputFile);
-      //  auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
-      //  StlOutputStream* output = new StlOutputStream(ofs);
-      //  SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, species, output);
-      //  currentIterator = iterator;
-      //  its.push_back(iterator);
-      //}
       if (cmdName == "SequenceStatistics") {
         vector<string> statisticsDesc = ApplicationTools::getVectorParameter<string>("statistics", cmdArgs, ',', "", "", false, true);
+        
         //Parse all statistics:
         vector<MafStatistics*> statistics;
+        for (size_t i = 0; i < statisticsDesc.size(); ++i) {
+          string statName;
+          map<string, string> statArgs;
+          KeyvalTools::parseProcedure(statisticsDesc[i], statName, statArgs);
+          MafStatistics* mafStat = 0; 
+          if (statName == "BlockSize") {
+            mafStat = new BlockSizeMafStatistics();
+          } else if (statName == "BlockLength") {
+            mafStat = new BlockLengthMafStatistics();
+          } else if (statName == "AlnScore") {
+            mafStat = new AlignmentScoreMafStatistics();
+          } else {
+            throw Exception("Unknown statistic: " + statName);
+          }
+          statistics.push_back(mafStat);
+          ApplicationTools::displayResult("Adding statistic", mafStat->getFullName() + " (" + mafStat->getShortName() + ")");
+        }
+
         //Get output file:
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         ApplicationTools::displayResult("Output file", outputFile);
         auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
         StlOutputStream* output = new StlOutputStream(ofs);
         SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, statistics);
-        CsvStatisticsOutputIterationListener* listener = new CsvStatisticsOutputIterationListener(iterator, output);
+        
+        string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "none");
+        ApplicationTools::displayResult("Reference species", ref);
+        CsvStatisticsOutputIterationListener* listener = new CsvStatisticsOutputIterationListener(iterator, ref, output);
+        
         iterator->addIterationListener(listener);
         currentIterator = iterator;
+        iterator->verbose(verbose);
         its.push_back(iterator);
       }
-
-
-      // +------------------------------+
-      // | Pairwise sequence statistics |
-      // +------------------------------+
-      //if (cmdName == "PairwiseSequenceStatistics") {
-      //  string species1 = ApplicationTools::getStringParameter("species1", cmdArgs, "none");
-      //  string species2 = ApplicationTools::getStringParameter("species2", cmdArgs, "none");
-      //  string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
-      //  ApplicationTools::displayResult("Output file", outputFile);
-      //  auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
-      //  StlOutputStream* output = new StlOutputStream(ofs);
-      //  PairwiseSequenceStatisticsMafIterator* iterator = new PairwiseSequenceStatisticsMafIterator(currentIterator, species1, species2, output);
-      //  currentIterator = iterator;
-      //  its.push_back(iterator);
-      //}
-
 
       
       // +--------------------+
       // | Feature extraction |
       // +--------------------+
       if (cmdName == "ExtractFeature") {
-        bool verbose         = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true);
         bool ignoreStrand    = ApplicationTools::getBooleanParameter("ignore_strand", cmdArgs, false);
         string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
@@ -605,12 +597,28 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Features are for species", refSpecies);
         ApplicationTools::displayBooleanResult("Features are strand-aware", !ignoreStrand);
         //string featuresList = ApplicationTools::getStringParameter("feature.select", cmdArgs, "none");
-        if (featureFormat != "GFF")
-          throw Exception("Sorry, but so far, only GFF features are supported :(");
-        ifstream file(featureFile.c_str(), ios::in);
+        compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
+        filtering_istream featureStream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          featureStream.push(gzip_decompressor());
+        } else if (compress == "zip") {
+          featureStream.push(zlib_decompressor());
+        } else if (compress == "bzip2") {
+          featureStream.push(bzip2_decompressor());
+        } else
+          throw Exception("Bad input incompression format: " + compress);
+        featureStream.push(file_source(featureFile));
+
         SequenceFeatureSet featuresSet;
-        GffFeatureReader reader(file);
-        reader.getAllFeatures(featuresSet);
+        if (featureFormat == "GFF") {
+          GffFeatureReader reader(featureStream);
+          reader.getAllFeatures(featuresSet);
+        } else if (featureFormat == "GTF") {
+          GtfFeatureReader reader(featureStream);
+          reader.getAllFeatures(featuresSet);
+        } else
+          throw Exception("Unsupported feature format: " + featureFormat);
         
         vector<string> features = ApplicationTools::getVectorParameter<string>("feature.select", cmdArgs, ',', "", "", false, true);
         if (features.size() == 0)
@@ -692,14 +700,17 @@ int main(int args, char** argv)
         currentIterator = iterator;
         its.push_back(iterator);
       }
+
     }
 
     //Now loop over the last iterator and that's it!
+    size_t blockCounter = 0;
     while (MafBlock* block = currentIterator->nextBlock())
     {
-      cout << "."; cout.flush();
+      ApplicationTools::displayUnlimitedGauge(blockCounter++, "Parsing...");
       delete block;
     }
+    ApplicationTools::message->endLine();
 
     //Flush all streams:
     for (size_t i = 0; i < ostreams.size(); ++i) {
