@@ -560,6 +560,8 @@ int main(int args, char** argv)
             mafStat = new BlockLengthMafStatistics();
           } else if (statName == "AlnScore") {
             mafStat = new AlignmentScoreMafStatistics();
+          } else if (statName == "BlockCounts") {
+            mafStat = new CharacterCountsMafStatistics(&AlphabetTools::DNA_ALPHABET);
           } else {
             throw Exception("Unknown statistic: " + statName);
           }
