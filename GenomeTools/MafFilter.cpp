@@ -562,6 +562,10 @@ int main(int args, char** argv)
             mafStat = new AlignmentScoreMafStatistics();
           } else if (statName == "BlockCounts") {
             mafStat = new CharacterCountsMafStatistics(&AlphabetTools::DNA_ALPHABET);
+          } else if (statName == "PairwiseDivergence") {
+            string sp1 = ApplicationTools::getStringParameter("species1", statArgs, "");
+            string sp2 = ApplicationTools::getStringParameter("species2", statArgs, "");
+            mafStat = new PairwiseDivergenceMafStatistics(sp1, sp2);
           } else {
             throw Exception("Unknown statistic: " + statName);
           }
@@ -643,6 +647,33 @@ int main(int args, char** argv)
         its.push_back(iterator);
 
         currentIterator = iterator;
+      }
+
+
+
+      // +----------------- +
+      // | Window splitting |
+      // +------------------+
+      if (cmdName == "WindowSplit") {
+        unsigned int preferredSize = ApplicationTools::getParameter<unsigned int>("preferred.size", cmdArgs, 0);
+        ApplicationTools::displayResult("Preferred size", preferredSize);
+        string splitOptionStr = ApplicationTools::getStringParameter("align", cmdArgs, "center");
+        short splitOption;
+        if (splitOptionStr == "ragged_left")
+          splitOption = WindowSplitMafIterator::RAGGED_LEFT;
+        else if (splitOptionStr == "ragged_right")
+          splitOption = WindowSplitMafIterator::RAGGED_RIGHT;
+        else if (splitOptionStr == "center")
+          splitOption = WindowSplitMafIterator::CENTER;
+        else if (splitOptionStr == "adjust")
+          splitOption = WindowSplitMafIterator::ADJUST;
+        else throw Exception("Unvalid alignment option for WindowSplit: " + splitOptionStr);
+        ApplicationTools::displayResult("Alignment option", splitOptionStr);
+
+        WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, splitOption);
+        iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
       }
 
 
