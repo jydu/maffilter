@@ -89,7 +89,7 @@ int main(int args, char** argv)
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 0.1.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 27/06/12 *" << endl;
+  cout << "*                                           Last Modif. 11/07/12 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -566,6 +566,9 @@ int main(int args, char** argv)
             string sp1 = ApplicationTools::getStringParameter("species1", statArgs, "");
             string sp2 = ApplicationTools::getStringParameter("species2", statArgs, "");
             mafStat = new PairwiseDivergenceMafStatistics(sp1, sp2);
+          } else if (statName == "SiteFrequencySpectrum") {
+            vector<double> bounds = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
+            mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds); 
           } else {
             throw Exception("Unknown statistic: " + statName);
           }
