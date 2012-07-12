@@ -567,8 +567,9 @@ int main(int args, char** argv)
             string sp2 = ApplicationTools::getStringParameter("species2", statArgs, "");
             mafStat = new PairwiseDivergenceMafStatistics(sp1, sp2);
           } else if (statName == "SiteFrequencySpectrum") {
-            vector<double> bounds = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
-            mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds); 
+            vector<double> bounds  = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
+            vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
+            mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds, ingroup); 
           } else {
             throw Exception("Unknown statistic: " + statName);
           }
