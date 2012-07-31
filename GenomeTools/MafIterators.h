@@ -40,8 +40,72 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Seq/Io/Maf/MafIterator.h>
 #include <Bpp/Seq/Container/SiteContainer.h>
 #include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Distance/DistanceEstimation.h>
+#include <Bpp/Phyl/Distance/PGMA.h>
 
 using namespace bpp;
+
+/**
+ * @brief Partial implementation for distance estimation iterator.
+ *
+ * This iterator calls a distance reconstruction method (to be implemented by the derivated class)
+ * and store the resulting distance matrix as an associated block property for the block,
+ * before forwarding it.
+ */
+class AbstractDistanceEstimationMafIterator:
+  public AbstractFilterMafIterator
+{
+  public:
+    AbstractDistanceEstimationMafIterator(MafIterator* iterator):
+      AbstractFilterMafIterator(iterator)
+    {}
+
+  private:
+    MafBlock* analyseCurrentBlock_() throw (Exception)
+    {
+      MafBlock* block = iterator_->nextBlock();
+      DistanceMatrix* dist = estimateDistanceMatrixForBlock(block->getAlignment());
+      block->setProperty(getPropertyName(), dist);
+      return block;
+    }
+
+  public:
+    virtual std::string getPropertyName() const = 0;
+    virtual DistanceMatrix* estimateDistanceMatrixForBlock(const SiteContainer& sites) = 0;
+
+};
+
+
+/**
+ * @brief Compute A simple distance using observed counts.
+ */
+class CountDistanceEstimationMafIterator:
+  public AbstractDistanceEstimationMafIterator
+{
+  private:
+    std::string gapOption_;
+    bool unresolvedAsGap_;
+
+  public:
+    /**
+     * @brief Build a new distance estimation maf iterator, based on the SiteContainerTools::computeSimilarityMatrix method.
+     *
+     * @see SiteContainerTools
+     * @param gapOption How to deal with gaps. Option forawarded to the computeSimilarityMatrix method.
+     * @param unresolvedAsGap Tell if unresolved characters should be considered as gaps. Option forawarded to the computeSimilarityMatrix method.
+     */
+    CountDistanceEstimationMafIterator(MafIterator* iterator, const std::string& gapOption, bool unresolvedAsGap):
+      AbstractDistanceEstimationMafIterator(iterator),
+      gapOption_(gapOption), unresolvedAsGap_(unresolvedAsGap)
+    {}
+    
+  public:
+    std::string getPropertyName() const { return "CountDistance"; }
+    DistanceMatrix* estimateDistanceMatrixForBlock(const MafBlock& block);
+
+};
+
+
 
 /**
  * @brief Partial implementation for phylogeny reconstruction iterator.
@@ -53,19 +117,66 @@ using namespace bpp;
 class AbstractPhylogenyReconstructionMafIterator:
   public AbstractFilterMafIterator
 {
+  public:
+    AbstractPhylogenyReconstructionMafIterator(MafIterator* iterator):
+      AbstractFilterMafIterator(iterator)
+    {}
+
+  virtual ~AbstractPhylogenyReconstructionMafIterator() {}
+
   private:
     MafBlock* analyseCurrentBlock_() throw (Exception)
     {
       MafBlock* block = iterator_->nextBlock();
-      Tree* tree = buildTreeForBlock(block->getAlignment());
+      Tree* tree = buildTreeForBlock(*block);
       block->setProperty(getPropertyName(), tree);
       return block;
     }
 
   public:
     virtual std::string getPropertyName() const = 0;
-    virtual Tree* buildTreeForBlock(const SiteContainer& sites) = 0;
+    virtual Tree* buildTreeForBlock(const MafBlock& block) = 0;
 
+};
+
+
+
+/**
+ * @brief Implementation for distance-based phylogeny reconstruction iterator.
+ */
+class DistanceBasedPhylogenyReconstructionMafIterator:
+  public AbstractPhylogenyReconstructionMafIterator
+{
+  private:
+    std::string distanceProperty_;
+    DistanceMethod* builder_;
+  
+  public:
+    DistanceBasedPhylogenyReconstructionMafIterator(MafIterator* iterator, DistanceMethod* method, const std::string& property):
+      AbstractPhylogenyReconstructionMafIterator(iterator),
+      distanceProperty_(property), builder_(method)
+    {}
+
+  private:
+    DistanceBasedPhylogenyReconstructionMafIterator(const DistanceBasedPhylogenyReconstructionMafIterator& it):
+      AbstractPhylogenyReconstructionMafIterator(0),
+      distanceProperty_(it.distanceProperty_),
+      builder_(it.builder_)
+    {}
+
+    DistanceBasedPhylogenyReconstructionMafIterator& operator=(const DistanceBasedPhylogenyReconstructionMafIterator& it)
+    {
+      distanceProperty_ = it.distanceProperty_;
+      builder_          = it.builder_;
+      return *this;
+    }
+
+  public:
+    void setDistanceProperty(const std::string& property) { distanceProperty_ = property; }
+    const std::string& getDistanceProperty() const { return distanceProperty_; }
+
+    std::string getPropertyName() const { return builder_->getName(); }
+    Tree* buildTreeForBlock(const MafBlock& block) throw (Exception);
 };
 
 

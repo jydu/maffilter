@@ -162,9 +162,6 @@ int main(int args, char** argv)
       // | Block merging |
       // +---------------+
       if (cmdName == "Merge") {
-        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        //vector<string> species;
-        //getList(speciesList, species);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Merge'.");

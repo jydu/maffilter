@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(mafinfo ${LIBS} ${Boost_LIBRARIES})
 ADD_EXECUTABLE(mafqdist MafQDist.cpp)
 TARGET_LINK_LIBRARIES(mafqdist ${LIBS} ${Boost_LIBRARIES})
 
-ADD_EXECUTABLE(maffilter MafFilter.cpp)
+ADD_EXECUTABLE(maffilter MafFilter.cpp MafIterators.cpp)
 TARGET_LINK_LIBRARIES(maffilter ${LIBS} ${Boost_LIBRARIES})
 
 # Install progs

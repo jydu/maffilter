@@ -39,4 +39,26 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "MafIterators.h"
 
+#include <Bpp/Seq/Container/SiteContainerTools.h>
+
+DistanceMatrix* CountDistanceEstimationMafIterator::estimateDistanceMatrixForBlock(const MafBlock& block)
+{
+  DistanceMatrix* dist = SiteContainerTools::computeSimilarityMatrix(block.getAlignment(), true, gapOption_, unresolvedAsGap_);
+  return dist;
+}
+
+Tree* DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock(const MafBlock& block) throw (Exception)
+{
+  //First get the distance matrix for this block:
+  if (!block.hasProperty(distanceProperty_))
+    throw Exception("DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock. No property available for " + distanceProperty_);
+  try {
+    const DistanceMatrix& dist = dynamic_cast<const DistanceMatrix&>(block.getProperty(distanceProperty_));
+    builder_->setDistanceMatrix(dist);
+    Tree* tree = builder_->getTree();
+    return tree;
+  } catch (Exception& e) {
+    throw Exception("DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock. A property was found for '" + distanceProperty_ + "' but does not appear to contain a distance matrix.");
+  }
+}
 
