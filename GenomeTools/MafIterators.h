@@ -64,14 +64,14 @@ class AbstractDistanceEstimationMafIterator:
     MafBlock* analyseCurrentBlock_() throw (Exception)
     {
       MafBlock* block = iterator_->nextBlock();
-      DistanceMatrix* dist = estimateDistanceMatrixForBlock(block->getAlignment());
+      DistanceMatrix* dist = estimateDistanceMatrixForBlock(*block);
       block->setProperty(getPropertyName(), dist);
       return block;
     }
 
   public:
     virtual std::string getPropertyName() const = 0;
-    virtual DistanceMatrix* estimateDistanceMatrixForBlock(const SiteContainer& sites) = 0;
+    virtual DistanceMatrix* estimateDistanceMatrixForBlock(const MafBlock& block) = 0;
 
 };
 
@@ -149,7 +149,7 @@ class DistanceBasedPhylogenyReconstructionMafIterator:
 {
   private:
     std::string distanceProperty_;
-    DistanceMethod* builder_;
+    std::auto_ptr<DistanceMethod> builder_;
   
   public:
     DistanceBasedPhylogenyReconstructionMafIterator(MafIterator* iterator, DistanceMethod* method, const std::string& property):
@@ -161,13 +161,12 @@ class DistanceBasedPhylogenyReconstructionMafIterator:
     DistanceBasedPhylogenyReconstructionMafIterator(const DistanceBasedPhylogenyReconstructionMafIterator& it):
       AbstractPhylogenyReconstructionMafIterator(0),
       distanceProperty_(it.distanceProperty_),
-      builder_(it.builder_)
+      builder_()
     {}
 
     DistanceBasedPhylogenyReconstructionMafIterator& operator=(const DistanceBasedPhylogenyReconstructionMafIterator& it)
     {
       distanceProperty_ = it.distanceProperty_;
-      builder_          = it.builder_;
       return *this;
     }
 

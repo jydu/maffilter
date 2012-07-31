@@ -55,6 +55,7 @@ Tree* DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock(const M
   try {
     const DistanceMatrix& dist = dynamic_cast<const DistanceMatrix&>(block.getProperty(distanceProperty_));
     builder_->setDistanceMatrix(dist);
+    builder_->computeTree(false);
     Tree* tree = builder_->getTree();
     return tree;
   } catch (Exception& e) {

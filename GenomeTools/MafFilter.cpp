@@ -44,6 +44,8 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <memory>
 using namespace std;
 
+#include "MafIterators.h"
+
 //From boost:
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
@@ -58,11 +60,17 @@ using namespace boost::iostreams;
 #include <Bpp/Text/StringTokenizer.h>
 
 // From bpp-seq:
-#include <Bpp/Seq/Io/Maf.all>
 #include <Bpp/Seq/SequenceWithQuality.h>
+#include <Bpp/Seq/Io/Clustal.h>
+#include <Bpp/Seq/Container/SiteContainerTools.h>
+
+// From bpp-seq-omics:
+#include <Bpp/Seq/Io/Maf.all>
 #include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
 #include <Bpp/Seq/Feature/Gtf/GtfFeatureReader.h>
-#include <Bpp/Seq/Io/Clustal.h>
+
+// From bpp-phyl:
+#include <Bpp/Phyl/Distance.all>
 
 using namespace bpp;
 
@@ -71,25 +79,12 @@ void help()
 
 }
 
-//void getList(const string& desc, vector<string>& list) throw (Exception)
-//{
-//  if (desc == "none")
-//    throw Exception("You must specify at least one element.");
-//  if (desc[0] == '(') {
-//    StringTokenizer st(desc.substr(1, desc.size() - 2), ",");
-//    while (st.hasMoreToken())
-//      list.push_back(st.nextToken());
-//  } else {
-//    list.push_back(desc);
-//  }
-//}
-
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 0.1.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 11/07/12 *" << endl;
+  cout << "*                                           Last Modif. 31/07/12 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -652,7 +647,7 @@ int main(int args, char** argv)
 
 
 
-      // +----------------- +
+      // +------------------+
       // | Window splitting |
       // +------------------+
       if (cmdName == "WindowSplit") {
@@ -672,6 +667,70 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("Alignment option", splitOptionStr);
 
         WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, splitOption);
+        iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
+      // +---------------------+
+      // | Distance estimation |
+      // +---------------------+
+      if (cmdName == "DistanceEstimation") {
+        string distMethod = ApplicationTools::getStringParameter("method", cmdArgs, "count");
+        ApplicationTools::displayResult("Method", distMethod);
+        if (distMethod == "count") {
+          string gapOption = ApplicationTools::getStringParameter("gap_option", cmdArgs, "no_gap");
+          if (gapOption == "all") {
+            gapOption = SiteContainerTools::SIMILARITY_ALL;
+          } else if (gapOption == "no_gap") {
+            gapOption = SiteContainerTools::SIMILARITY_NOGAP;
+          } else if (gapOption == "no_full_gap") {
+            gapOption = SiteContainerTools::SIMILARITY_NOFULLGAP;
+          } else if (gapOption == "no_double_gap") {
+            gapOption = SiteContainerTools::SIMILARITY_NODOUBLEGAP;
+          } else {
+            throw Exception("Unrecognized gap option, should be either 'all', 'no_full_gap', 'no_double_gap' or 'no_gap'.");
+          }
+          ApplicationTools::displayResult("Gap option", gapOption);
+          bool unresolvedAsGap = ApplicationTools::getBooleanParameter("unresolved_as_gap", cmdArgs, "no");
+          ApplicationTools::displayBooleanResult("Unresolved as gaps", unresolvedAsGap);
+
+          CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap);
+          ApplicationTools::displayResult("Block-wise distance matrices are registered as", iterator->getPropertyName());
+          iterator->setLogStream(&log);
+          currentIterator = iterator;
+          its.push_back(iterator);
+        } else {
+          throw Exception("Unknown distance method: " + distMethod);
+        }
+      }
+
+
+
+      // +--------------------------+
+      // | Phylogeny reconstruction |
+      // +--------------------------+
+      if (cmdName == "DistanceBasedPhylogeny") {
+        string distMethodName = ApplicationTools::getStringParameter("method", cmdArgs, "bionj");
+        string distProperty = ApplicationTools::getStringParameter("dist_mat", cmdArgs, "none");
+        DistanceMethod* distMethod = 0;
+        if (distMethodName == "upgma") {
+          distMethod = new PGMA(false);
+        } else if (distMethodName == "wpgma") {
+          distMethod = new PGMA(true);
+        } else if (distMethodName == "nj") {
+          distMethod = new NeighborJoining();
+        } else if (distMethodName == "bionj") {
+          distMethod = new BioNJ();
+        } else {
+          throw Exception("Unknown distance-based phylogenetic method: " + distMethodName); 
+        }
+        ApplicationTools::displayResult("Method", distMethod);
+        ApplicationTools::displayResult("Distance matrix to use", distProperty);
+
+        DistanceBasedPhylogenyReconstructionMafIterator* iterator = new DistanceBasedPhylogenyReconstructionMafIterator(currentIterator, distMethod, distProperty);
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
