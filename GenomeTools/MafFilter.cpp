@@ -698,7 +698,7 @@ int main(int args, char** argv)
           ApplicationTools::displayBooleanResult("Unresolved as gaps", unresolvedAsGap);
 
           CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap);
-          ApplicationTools::displayResult("Block-wise distance matrices are registered as", iterator->getPropertyName());
+          ApplicationTools::displayResult("Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(&log);
           currentIterator = iterator;
           its.push_back(iterator);
@@ -727,10 +727,11 @@ int main(int args, char** argv)
         } else {
           throw Exception("Unknown distance-based phylogenetic method: " + distMethodName); 
         }
-        ApplicationTools::displayResult("Method", distMethod);
+        ApplicationTools::displayResult("Method", distMethodName);
         ApplicationTools::displayResult("Distance matrix to use", distProperty);
 
         DistanceBasedPhylogenyReconstructionMafIterator* iterator = new DistanceBasedPhylogenyReconstructionMafIterator(currentIterator, distMethod, distProperty);
+        ApplicationTools::displayResult("Block-wise trees are registered as", iterator->getPropertyName());
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -760,7 +761,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("File compression", compress);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("Output mask", mask);
-        OutputMafIterator* iterator = new OutputMafIterator(currentIterator, out, mask); //NB: there is a memory leak here because the stream is never deleted... TODO
+        OutputMafIterator* iterator = new OutputMafIterator(currentIterator, out, mask);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -789,7 +790,36 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("File compression", compress);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("Output mask", mask);
-        OutputAlignmentMafIterator* iterator = new OutputAlignmentMafIterator(currentIterator, out, mask); //NB: there is a memory leak here because the stream is never deleted... TODO
+        OutputAlignmentMafIterator* iterator = new OutputAlignmentMafIterator(currentIterator, out, mask);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
+      // +--------------+
+      // | Output trees |
+      // +--------------+
+      if (cmdName == "OutputTrees") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("Output tree file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("File compression", compress);
+        string treeProperty = ApplicationTools::getStringParameter("tree", cmdArgs, "none");
+        ApplicationTools::displayResult("Tree to write", treeProperty);
+        OutputTreeMafIterator* iterator = new OutputTreeMafIterator(currentIterator, out, treeProperty);
         currentIterator = iterator;
         its.push_back(iterator);
       }

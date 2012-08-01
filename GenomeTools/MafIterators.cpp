@@ -63,3 +63,18 @@ Tree* DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock(const M
   }
 }
 
+void OutputTreeMafIterator::writeBlock(std::ostream& out, const MafBlock& block) const
+{
+  //First get the tree for this block:
+  if (!block.hasProperty(treeProperty_))
+    throw Exception("OutputTreeAlignmentMafIterator::writeBlock. No property available for " + treeProperty_);
+  try {
+    const Tree& tree = dynamic_cast<const Tree&>(block.getProperty(treeProperty_));
+    writer_.write(tree, out);
+  } catch (Exception& e) {
+    throw Exception("OutputTreeAlignmentMafIterator::writeBlock. A property was found for '" + treeProperty_ + "' but does not appear to contain a phylogenetic tree.");
+  }
+
+}
+
+

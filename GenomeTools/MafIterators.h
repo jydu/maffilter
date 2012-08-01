@@ -42,6 +42,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/Distance/DistanceEstimation.h>
 #include <Bpp/Phyl/Distance/PGMA.h>
+#include <Bpp/Phyl/Io/Newick.h>
 
 using namespace bpp;
 
@@ -64,6 +65,7 @@ class AbstractDistanceEstimationMafIterator:
     MafBlock* analyseCurrentBlock_() throw (Exception)
     {
       MafBlock* block = iterator_->nextBlock();
+      if (!block) return 0;
       DistanceMatrix* dist = estimateDistanceMatrixForBlock(*block);
       block->setProperty(getPropertyName(), dist);
       return block;
@@ -128,6 +130,7 @@ class AbstractPhylogenyReconstructionMafIterator:
     MafBlock* analyseCurrentBlock_() throw (Exception)
     {
       MafBlock* block = iterator_->nextBlock();
+      if (!block) return 0;
       Tree* tree = buildTreeForBlock(*block);
       block->setProperty(getPropertyName(), tree);
       return block;
@@ -178,6 +181,51 @@ class DistanceBasedPhylogenyReconstructionMafIterator:
     Tree* buildTreeForBlock(const MafBlock& block) throw (Exception);
 };
 
+
+/**
+ * @brief This iterator print an attached tree to a newick file.
+ */
+class OutputTreeMafIterator:
+  public AbstractFilterMafIterator
+{
+  private:
+    std::ostream* output_;
+    std::string treeProperty_;
+    Newick writer_;
+
+  public:
+    OutputTreeMafIterator(MafIterator* iterator, std::ostream* out, const std::string treeProperty) :
+      AbstractFilterMafIterator(iterator), output_(out), treeProperty_(treeProperty), writer_()
+    {}
+
+  private:
+    OutputTreeMafIterator(const OutputTreeMafIterator& iterator) :
+      AbstractFilterMafIterator(0),
+      output_(iterator.output_),
+      treeProperty_(iterator.treeProperty_),
+      writer_()
+    {}
+    
+    OutputTreeMafIterator& operator=(const OutputTreeMafIterator& iterator)
+    {
+      output_ = iterator.output_;
+      treeProperty_ = iterator.treeProperty_;
+      writer_ = iterator.writer_;
+      return *this;
+    }
+
+
+  public:
+    MafBlock* analyseCurrentBlock_() throw (Exception) {
+      currentBlock_ = iterator_->nextBlock();
+      if (output_ && currentBlock_)
+        writeBlock(*output_, *currentBlock_);
+      return currentBlock_;
+    }
+
+  private:
+    void writeBlock(std::ostream& out, const MafBlock& block) const;
+};
 
 
 
