@@ -562,6 +562,9 @@ int main(int args, char** argv)
             vector<double> bounds  = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
             vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
             mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds, ingroup); 
+          } else if (statName == "SiteStatistics") {
+            vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
+            mafStat = new SiteMafStatistics(species); 
           } else {
             throw Exception("Unknown statistic: " + statName);
           }
