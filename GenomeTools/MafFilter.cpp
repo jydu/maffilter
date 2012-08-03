@@ -139,13 +139,15 @@ int main(int args, char** argv)
         //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
         bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
         ApplicationTools::displayBooleanResult("All species should be in output blocks", strict);
+        bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("Sequences not in the list will be kept", strict);
         bool rmdupl = ApplicationTools::getBooleanParameter("rm.duplicates", cmdArgs, false);
         ApplicationTools::displayBooleanResult("Species should be present only once", rmdupl);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Subset'.");
         //getList(speciesList, species);
-        SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, rmdupl);
+        SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, keep, rmdupl);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
         currentIterator = iterator;
