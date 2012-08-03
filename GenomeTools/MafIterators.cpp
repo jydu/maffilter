@@ -77,4 +77,85 @@ void OutputTreeMafIterator::writeBlock(std::ostream& out, const MafBlock& block)
 
 }
 
+unsigned int CountClustersMafStatistics::getNumberOfClusters_(const Node* node, map<const Node*, double>& heights)
+{
+  unsigned int nClust = 0;
+  double h = heights[node];
+  if (h < threshold_) {
+    nClust++;
+  } else {
+    for (unsigned int i = 0; i < node->getNumberOfSons(); ++i) {
+      nClust += getNumberOfClusters_((*node)[i], heights);
+    }
+  }
+  return nClust;
+}
+
+void CountClustersMafStatistics::compute(const MafBlock& block)
+{
+  if (!block.hasProperty(treeProperty_))
+    throw Exception("CountClustersMafStatistics::compute. No property available for " + treeProperty_);
+  try {
+    TreeTemplate<Node> tree(dynamic_cast<const Tree&>(block.getProperty(treeProperty_)));
+    if (!tree.isRooted())
+      throw Exception("CountClustersMafStatistics::compute. Cluster count only works with a rooted tree.");
+    //Compute all tree heights:
+    map<const Node*, double> heights;
+    TreeTemplateTools::getHeights(*tree.getRootNode(), heights);
+    unsigned int nClust = getNumberOfClusters_(tree.getRootNode(), heights);
+    result_.setValue("NbClusters", nClust);
+  } catch (Exception& e) {
+    throw Exception("CountClustersMafStatistics::compute. A property was found for '" + treeProperty_ + "' but does not appear to contain a phylogenetic tree.");
+  }
+}
+
+
+MafBlock* TreeManipulationMafIterator::analyseCurrentBlock_() throw (Exception)
+{
+  currentBlock_ = iterator_->nextBlock();
+  if (currentBlock_) {
+    if (!currentBlock_->hasProperty(treePropertyRead_))
+      throw Exception("TreeManipulationMafIterator::analyseCurrentBlock_(). No property available for " + treePropertyRead_);
+    try {
+      TreeTemplate<Node>* tree = new TreeTemplate<Node>(dynamic_cast<const Tree&>(currentBlock_->getProperty(treePropertyRead_)));
+      manipulateTree_(tree);
+      currentBlock_->setProperty(treePropertyWrite_, tree);
+    } catch (Exception& e) {
+      throw Exception("TreeManipulationMafIterator::analyseCurrentBlock_(). A property was found for '" + treePropertyRead_ + "' but does not appear to contain a phylogenetic tree.");
+    }
+  }
+  return currentBlock_;
+}
+
+
+void NewOutgroupMafIterator::manipulateTree_(TreeTemplate<Node>* tree) throw (Exception)
+{
+  vector<Node*> leaves = tree->getLeaves();
+  Node* outgroup = 0;
+  bool outgroupFound = false;
+  for (size_t i = 0; i < leaves.size() && !outgroupFound; ++i) {
+    string species, chr;
+    MafSequence::splitNameIntoSpeciesAndChromosome(leaves[i]->getName(), species, chr);
+    if (species == outgroupSpecies_) {
+      outgroup = leaves[i];
+      outgroupFound = true;
+    }
+  }
+  if (!outgroupFound)
+    throw Exception("NewOutgroupTreeMafIterator::analyseCurrentBlock_(). No ougroup species was found in the attached tree.");
+  tree->newOutGroup(outgroup);
+}
+
+
+void DropSpeciesMafIterator::manipulateTree_(TreeTemplate<Node>* tree) throw (Exception)
+{
+  vector<Node*> leaves = tree->getLeaves();
+  for (size_t i = 0; i < leaves.size(); ++i) {
+    string species, chr;
+    MafSequence::splitNameIntoSpeciesAndChromosome(leaves[i]->getName(), species, chr);
+    if (species == species_) {
+      TreeTemplateTools::dropSubtree(*tree, leaves[i]);
+    }
+  }
+}
 

@@ -183,6 +183,109 @@ class DistanceBasedPhylogenyReconstructionMafIterator:
 
 
 /**
+ * @brief Count the number of sequence cluster, given a certain threshold.
+ * This requires that a phylogenetic tree was previously computed.
+ */
+class CountClustersMafStatistics:
+  public AbstractMafStatisticsSimple
+{
+  private:
+    std::string treeProperty_;
+    double threshold_;
+  
+  public:
+    CountClustersMafStatistics(const std::string& property, double threshold):
+      AbstractMafStatisticsSimple("NbClusters"),
+      treeProperty_(property), threshold_(threshold)
+    {}
+
+  public:
+    void setTreeProperty(const std::string& property) { treeProperty_ = property; }
+    const std::string& getTreeProperty() const { return treeProperty_; }
+
+    std::string getShortName() const { return "CountClusters(" + TextTools::toString(threshold_) + ")"; }
+    std::string getFullName() const { return "Number of sequence clusters with divergence <= " + TextTools::toString(threshold_) + "."; }
+    void compute(const MafBlock& block);
+
+    std::string getPropertyName() const { return "CountClusters"; }
+
+  private:
+    unsigned int getNumberOfClusters_(const Node* node, map<const Node*, double>& heights);
+};
+
+
+
+/**
+ * @brief This iterator root associated trees according to an outgroup sequence.
+ */
+class TreeManipulationMafIterator:
+  public AbstractFilterMafIterator
+{
+  private:
+    std::string treePropertyRead_;
+    std::string treePropertyWrite_;
+
+  public:
+    //Write can be the same as read.
+    TreeManipulationMafIterator(MafIterator* iterator, const std::string& treePropertyRead, const std::string& treePropertyWrite) :
+      AbstractFilterMafIterator(iterator), treePropertyRead_(treePropertyRead), treePropertyWrite_(treePropertyWrite)
+    {}
+
+  public:
+    MafBlock* analyseCurrentBlock_() throw (Exception);
+
+  protected:
+    virtual void manipulateTree_(TreeTemplate<Node>* tree) throw (Exception) = 0;
+
+};
+
+
+
+/**
+ * @brief This iterator root associated trees according to an outgroup sequence.
+ */
+class NewOutgroupMafIterator:
+  public TreeManipulationMafIterator
+{
+  private:
+    std::string outgroupSpecies_;
+
+  public:
+    //Write can be the same as read.
+    NewOutgroupMafIterator(MafIterator* iterator, const std::string& treePropertyRead, const std::string& treePropertyWrite, const std::string& outgroupSpecies) :
+      TreeManipulationMafIterator(iterator, treePropertyRead, treePropertyWrite), outgroupSpecies_(outgroupSpecies)
+    {}
+
+  private:
+    void manipulateTree_(TreeTemplate<Node>* tree) throw (Exception);
+
+};
+
+
+
+/**
+ * @brief This iterator removes leaves of a certain species in an attached tree.
+ */
+class DropSpeciesMafIterator:
+  public TreeManipulationMafIterator
+{
+  private:
+    std::string species_;
+
+  public:
+    //Write can be the same as read.
+    DropSpeciesMafIterator(MafIterator* iterator, const std::string& treePropertyRead, const std::string& treePropertyWrite, const std::string& species) :
+      TreeManipulationMafIterator(iterator, treePropertyRead, treePropertyWrite), species_(species)
+    {}
+
+  private:
+    void manipulateTree_(TreeTemplate<Node>* tree) throw (Exception);
+
+};
+
+
+
+/**
  * @brief This iterator print an attached tree to a newick file.
  */
 class OutputTreeMafIterator:

@@ -1,0 +1,26 @@
+DATA=Compara.epo_5_catarrhini_hsap-projected.chr22.subset.nogap.cleaned_aln
+input.file=$(DATA).maf.gz
+input.file.compression=gzip
+output.log=$(DATA).maffilter.log
+maf.filter=\
+    Merge(species=Hsap, dist.max=10000),\
+    WindowSplit(preferred.size=200000, align=adjust),\
+    MinBlockSize(min.size=100000),\
+    DistanceEstimation(method=count, gap_option=no_gap, unresolved_as_gap=yes),\
+    DistanceBasedPhylogeny(method=bionj, dist_mat=CountDistance),\
+    NewOutgroup(tree_input=BioNJ, tree_output=BioNJ, outgroup=Ppyg),\ //Overwrite bionj tree
+    DropSpecies(tree_input=BioNJ, tree_output=BioNJ_ingroup, species=Ppyg),\
+    OutputTrees(file=$(DATA).dnd, compression=none, tree=BioNJ),\
+    OutputTrees(file=$(DATA)_ingroup.dnd, compression=none, tree=BioNJ_ingroup),\
+    SequenceStatistics(\
+      statistics=(\
+        BlockSize(),\
+        BlockLength(),\
+        SiteStatistics(species=(Hsap,Ptro,Ggor,Ppyg)),\
+        CountClusters(tree=BioNJ_ingroup, threshold=0.001),\
+        CountClusters(tree=BioNJ_ingroup, threshold=0.01),\
+        CountClusters(tree=BioNJ_ingroup, threshold=0.1)),\
+      reference=Hsap,\
+      file=$(DATA).statistics.csv)
+
+

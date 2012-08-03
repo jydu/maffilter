@@ -565,7 +565,11 @@ int main(int args, char** argv)
           } else if (statName == "SiteStatistics") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
             mafStat = new SiteMafStatistics(species); 
-          } else {
+          } else if (statName == "CountClusters") {
+            string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
+            double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);
+            mafStat = new CountClustersMafStatistics(treeProperty, threshold);
+           } else {
             throw Exception("Unknown statistic: " + statName);
           }
           statistics.push_back(mafStat);
@@ -730,11 +734,47 @@ int main(int args, char** argv)
         } else {
           throw Exception("Unknown distance-based phylogenetic method: " + distMethodName); 
         }
-        ApplicationTools::displayResult("Method", distMethodName);
-        ApplicationTools::displayResult("Distance matrix to use", distProperty);
+        ApplicationTools::displayResult("Reading distance matrix from", distProperty);
+        ApplicationTools::displayResult("Build distance tree using", distMethodName);
 
         DistanceBasedPhylogenyReconstructionMafIterator* iterator = new DistanceBasedPhylogenyReconstructionMafIterator(currentIterator, distMethod, distProperty);
-        ApplicationTools::displayResult("Block-wise trees are registered as", iterator->getPropertyName());
+        ApplicationTools::displayResult("Writing block-wise trees to", iterator->getPropertyName());
+        iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
+      // +-------------------+
+      // | Phylogeny rooting |
+      // +-------------------+
+      if (cmdName == "NewOutgroup") {
+        string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
+        string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
+        string outgroup = ApplicationTools::getStringParameter("outgroup", cmdArgs, "none");
+        ApplicationTools::displayResult("Reading tree from", treePropertyInput);
+        ApplicationTools::displayResult("Rerooting according to species", outgroup);
+        NewOutgroupMafIterator* iterator = new NewOutgroupMafIterator(currentIterator, treePropertyInput, treePropertyOutput, outgroup);
+        ApplicationTools::displayResult("Writing tree to", treePropertyOutput);
+        iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
+      // +------------------------+
+      // | Phylogeny drop species |
+      // +------------------------+
+      if (cmdName == "DropSpecies") {
+        string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
+        string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
+        string species = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        ApplicationTools::displayResult("Reading tree from", treePropertyInput);
+        ApplicationTools::displayResult("Removing leaves from species", species);
+        DropSpeciesMafIterator* iterator = new DropSpeciesMafIterator(currentIterator, treePropertyInput, treePropertyOutput, species);
+        ApplicationTools::displayResult("Writing tree to", treePropertyOutput);
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
