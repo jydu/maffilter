@@ -493,12 +493,27 @@ int main(int args, char** argv)
 
 
 
+      // +------------------------+
+      // | Block length filtering |
+      // +------------------------+
+      if (cmdName == "MinBlockLength") {
+        unsigned int minLength = ApplicationTools::getParameter<unsigned int>("min.length", cmdArgs, 0);
+        ApplicationTools::displayResult("Minimum block length required", minLength);
+        BlockLengthMafIterator* iterator = new BlockLengthMafIterator(currentIterator, minLength);
+        iterator->setLogStream(&log);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
       // +----------------------+
       // | Block size filtering |
       // +----------------------+
       if (cmdName == "MinBlockSize") {
         unsigned int minSize = ApplicationTools::getParameter<unsigned int>("min.size", cmdArgs, 0);
         ApplicationTools::displayResult("Minimum block size required", minSize);
+        if (minSize > 5)
+          ApplicationTools::displayWarning("Attention, in previous version of maffilter BlockLength was named BlockSize... Check!");
         BlockSizeMafIterator* iterator = new BlockSizeMafIterator(currentIterator, minSize);
         iterator->setLogStream(&log);
         currentIterator = iterator;
