@@ -127,10 +127,11 @@ int main(int args, char** argv)
       string cmdName;
       map<string, string> cmdArgs;
       KeyvalTools::parseProcedure(actions[a], cmdName, cmdArgs);
+      (*ApplicationTools::message << "-------------------------------------------------------------------").endLine();
       ApplicationTools::displayResult("Adding filter", cmdName);
       
       bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true, "", true, false);
-      ApplicationTools::displayBooleanResult("Verbose", verbose);
+      ApplicationTools::displayBooleanResult("-- Verbose", verbose);
 
       // +-----------------+
       // | Sequence subset |
@@ -138,11 +139,11 @@ int main(int args, char** argv)
       if (cmdName == "Subset") {
         //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
         bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
-        ApplicationTools::displayBooleanResult("All species should be in output blocks", strict);
+        ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
         bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
-        ApplicationTools::displayBooleanResult("Sequences not in the list will be kept", strict);
+        ApplicationTools::displayBooleanResult("-- Sequences not in the list will be kept", strict);
         bool rmdupl = ApplicationTools::getBooleanParameter("rm.duplicates", cmdArgs, false);
-        ApplicationTools::displayBooleanResult("Species should be present only once", rmdupl);
+        ApplicationTools::displayBooleanResult("-- Species should be present only once", rmdupl);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Subset'.");
@@ -164,7 +165,7 @@ int main(int args, char** argv)
           throw Exception("At least one species should be provided for command 'Merge'.");
 
         unsigned int distMax = ApplicationTools::getParameter<unsigned int>("dist.max", cmdArgs, 0);
-        ApplicationTools::displayResult("Maximum distance allowed", distMax);
+        ApplicationTools::displayResult("-- Maximum distance allowed", distMax);
         BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -210,10 +211,10 @@ int main(int args, char** argv)
         unsigned int gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
-        ApplicationTools::displayResult("Window size", ws);
-        ApplicationTools::displayResult("Window step", st);
-        ApplicationTools::displayResult("Max. gaps allowed in Window", gm);
-        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        ApplicationTools::displayResult("-- Window size", ws);
+        ApplicationTools::displayResult("-- Window step", st);
+        ApplicationTools::displayResult("-- Max. gaps allowed in Window", gm);
+        ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         AlignmentFilterMafIterator* iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, !trash);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -233,7 +234,7 @@ int main(int args, char** argv)
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
-          ApplicationTools::displayResult("File compression for removed blocks", compress);
+          ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
           TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
@@ -266,11 +267,11 @@ int main(int args, char** argv)
         unsigned int pm = ApplicationTools::getParameter<unsigned int>("max.pos", cmdArgs, 0);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
-        ApplicationTools::displayResult("Window size", ws);
-        ApplicationTools::displayResult("Window step", st);
-        ApplicationTools::displayResult("Max. gaps allowed per position", gm);
-        ApplicationTools::displayResult("Max. gap positions allowed", pm);
-        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        ApplicationTools::displayResult("-- Window size", ws);
+        ApplicationTools::displayResult("-- Window step", st);
+        ApplicationTools::displayResult("-- Max. gaps allowed per position", gm);
+        ApplicationTools::displayResult("-- Max. gap positions allowed", pm);
+        ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         AlignmentFilter2MafIterator* iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, gm, pm, !trash);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -290,7 +291,7 @@ int main(int args, char** argv)
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
-          ApplicationTools::displayResult("File compression for removed blocks", compress);
+          ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
           TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
@@ -323,10 +324,10 @@ int main(int args, char** argv)
         unsigned int mm = ApplicationTools::getParameter<unsigned int>("max.masked", cmdArgs, 0);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
-        ApplicationTools::displayResult("Window size", ws);
-        ApplicationTools::displayResult("Window step", st);
-        ApplicationTools::displayResult("Max. masked sites allowed in Window", mm);
-        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        ApplicationTools::displayResult("-- Window size", ws);
+        ApplicationTools::displayResult("-- Window step", st);
+        ApplicationTools::displayResult("-- Max. masked sites allowed in Window", mm);
+        ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         MaskFilterMafIterator* iterator = new MaskFilterMafIterator(currentIterator, species, ws, st, mm, !trash);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -346,7 +347,7 @@ int main(int args, char** argv)
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
-          ApplicationTools::displayResult("File compression for removed blocks", compress);
+          ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
           TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
@@ -378,10 +379,10 @@ int main(int args, char** argv)
         double       mq = ApplicationTools::getDoubleParameter("min.qual", cmdArgs, 0);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
-        ApplicationTools::displayResult("Window size", ws);
-        ApplicationTools::displayResult("Window step", st);
-        ApplicationTools::displayResult("Min. average quality allowed in Window", mq);
-        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        ApplicationTools::displayResult("-- Window size", ws);
+        ApplicationTools::displayResult("-- Window step", st);
+        ApplicationTools::displayResult("-- Min. average quality allowed in Window", mq);
+        ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         QualityFilterMafIterator* iterator = new QualityFilterMafIterator(currentIterator, species, ws, st, mq, !trash);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -401,7 +402,7 @@ int main(int args, char** argv)
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
-          ApplicationTools::displayResult("File compression for removed blocks", compress);
+          ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
           TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
@@ -431,9 +432,9 @@ int main(int args, char** argv)
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
-        ApplicationTools::displayResult("Features to remove", featureFile + " (" + featureFormat + ")");
-        ApplicationTools::displayResult("features are for species", refSpecies);
-        ApplicationTools::displayBooleanResult("Output removed blocks", !trash);
+        ApplicationTools::displayResult("-- Features to remove", featureFile + " (" + featureFormat + ")");
+        ApplicationTools::displayResult("-- Features are for species", refSpecies);
+        ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
         if (compress == "none") {
@@ -474,7 +475,7 @@ int main(int args, char** argv)
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
-          ApplicationTools::displayResult("File compression for removed blocks", compress);
+          ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
           TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
@@ -500,7 +501,7 @@ int main(int args, char** argv)
       // +------------------------+
       if (cmdName == "MinBlockLength") {
         unsigned int minLength = ApplicationTools::getParameter<unsigned int>("min.length", cmdArgs, 0);
-        ApplicationTools::displayResult("Minimum block length required", minLength);
+        ApplicationTools::displayResult("-- Minimum block length required", minLength);
         BlockLengthMafIterator* iterator = new BlockLengthMafIterator(currentIterator, minLength);
         iterator->setLogStream(&log);
         currentIterator = iterator;
@@ -513,9 +514,9 @@ int main(int args, char** argv)
       // +----------------------+
       if (cmdName == "MinBlockSize") {
         unsigned int minSize = ApplicationTools::getParameter<unsigned int>("min.size", cmdArgs, 0);
-        ApplicationTools::displayResult("Minimum block size required", minSize);
+        ApplicationTools::displayResult("-- Minimum block size required", minSize);
         if (minSize > 5)
-          ApplicationTools::displayWarning("Attention, in previous version of maffilter BlockLength was named BlockSize... Check!");
+          ApplicationTools::displayWarning("!! Warning, in previous version of maffilter BlockLength was named BlockSize... Check!");
         BlockSizeMafIterator* iterator = new BlockSizeMafIterator(currentIterator, minSize);
         iterator->setLogStream(&log);
         currentIterator = iterator;
@@ -528,9 +529,9 @@ int main(int args, char** argv)
       // +----------------------+
       if (cmdName == "SelectChr") {
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
-        ApplicationTools::displayResult("Reference species", ref);
+        ApplicationTools::displayResult("-- Reference species", ref);
         string chr = ApplicationTools::getStringParameter("chromosome", cmdArgs, "");
-        ApplicationTools::displayResult("Chromosome", chr);
+        ApplicationTools::displayResult("-- Chromosome", chr);
         ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chr);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -544,7 +545,7 @@ int main(int args, char** argv)
       // +---------------------+
       if (cmdName == "DuplicateFilter") {
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
-        ApplicationTools::displayResult("Reference species", ref);
+        ApplicationTools::displayResult("-- Reference species", ref);
         DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
@@ -590,18 +591,18 @@ int main(int args, char** argv)
             throw Exception("Unknown statistic: " + statName);
           }
           statistics.push_back(mafStat);
-          ApplicationTools::displayResult("Adding statistic", mafStat->getFullName() + " (" + mafStat->getShortName() + ")");
+          ApplicationTools::displayResult("-- Adding statistic", mafStat->getFullName() + " (" + mafStat->getShortName() + ")");
         }
 
         //Get output file:
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
-        ApplicationTools::displayResult("Output file", outputFile);
+        ApplicationTools::displayResult("-- Output file", outputFile);
         auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
         StlOutputStream* output = new StlOutputStream(ofs);
         SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, statistics);
         
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "none");
-        ApplicationTools::displayResult("Reference species", ref);
+        ApplicationTools::displayResult("-- Reference species", ref);
         CsvStatisticsOutputIterationListener* listener = new CsvStatisticsOutputIterationListener(iterator, ref, output);
         
         iterator->addIterationListener(listener);
@@ -619,9 +620,9 @@ int main(int args, char** argv)
         string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
-        ApplicationTools::displayResult("Features to extract", featureFile + " (" + featureFormat + ")");
-        ApplicationTools::displayResult("Features are for species", refSpecies);
-        ApplicationTools::displayBooleanResult("Features are strand-aware", !ignoreStrand);
+        ApplicationTools::displayResult("-- Features to extract", featureFile + " (" + featureFormat + ")");
+        ApplicationTools::displayResult("-- Features are for species", refSpecies);
+        ApplicationTools::displayBooleanResult("-- Features are strand-aware", !ignoreStrand);
         //string featuresList = ApplicationTools::getStringParameter("feature.select", cmdArgs, "none");
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
@@ -658,7 +659,7 @@ int main(int args, char** argv)
         string lst = features[0];
         for (size_t i = 1; i < features.size(); ++i)
           lst += ", " + features[i];
-        ApplicationTools::displayResult("Features to extract", lst);
+        ApplicationTools::displayResult("-- Features to extract", lst);
         auto_ptr<SequenceFeatureSet> featuresSet2(featuresSet.getSubsetForType(features));
 
         FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, *featuresSet2, ignoreStrand);
@@ -676,7 +677,7 @@ int main(int args, char** argv)
       // +------------------+
       if (cmdName == "WindowSplit") {
         unsigned int preferredSize = ApplicationTools::getParameter<unsigned int>("preferred.size", cmdArgs, 0);
-        ApplicationTools::displayResult("Preferred size", preferredSize);
+        ApplicationTools::displayResult("-- Preferred size", preferredSize);
         string splitOptionStr = ApplicationTools::getStringParameter("align", cmdArgs, "center");
         short splitOption;
         if (splitOptionStr == "ragged_left")
@@ -688,7 +689,7 @@ int main(int args, char** argv)
         else if (splitOptionStr == "adjust")
           splitOption = WindowSplitMafIterator::ADJUST;
         else throw Exception("Unvalid alignment option for WindowSplit: " + splitOptionStr);
-        ApplicationTools::displayResult("Alignment option", splitOptionStr);
+        ApplicationTools::displayResult("-- Alignment option", splitOptionStr);
 
         WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, splitOption);
         iterator->setLogStream(&log);
@@ -703,7 +704,7 @@ int main(int args, char** argv)
       // +---------------------+
       if (cmdName == "DistanceEstimation") {
         string distMethod = ApplicationTools::getStringParameter("method", cmdArgs, "count");
-        ApplicationTools::displayResult("Method", distMethod);
+        ApplicationTools::displayResult("-- Method", distMethod);
         if (distMethod == "count") {
           string gapOption = ApplicationTools::getStringParameter("gap_option", cmdArgs, "no_gap");
           if (gapOption == "all") {
@@ -717,12 +718,12 @@ int main(int args, char** argv)
           } else {
             throw Exception("Unrecognized gap option, should be either 'all', 'no_full_gap', 'no_double_gap' or 'no_gap'.");
           }
-          ApplicationTools::displayResult("Gap option", gapOption);
+          ApplicationTools::displayResult("-- Gap option", gapOption);
           bool unresolvedAsGap = ApplicationTools::getBooleanParameter("unresolved_as_gap", cmdArgs, "no");
-          ApplicationTools::displayBooleanResult("Unresolved as gaps", unresolvedAsGap);
+          ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGap);
 
           CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap);
-          ApplicationTools::displayResult("Block-wise matrices are registered as", iterator->getPropertyName());
+          ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(&log);
           currentIterator = iterator;
           its.push_back(iterator);
@@ -751,11 +752,12 @@ int main(int args, char** argv)
         } else {
           throw Exception("Unknown distance-based phylogenetic method: " + distMethodName); 
         }
-        ApplicationTools::displayResult("Reading distance matrix from", distProperty);
-        ApplicationTools::displayResult("Build distance tree using", distMethodName);
+        distMethod->setVerbose(false);
+        ApplicationTools::displayResult("-- Reading distance matrix from", distProperty);
+        ApplicationTools::displayResult("-- Build distance tree using", distMethodName);
 
         DistanceBasedPhylogenyReconstructionMafIterator* iterator = new DistanceBasedPhylogenyReconstructionMafIterator(currentIterator, distMethod, distProperty);
-        ApplicationTools::displayResult("Writing block-wise trees to", iterator->getPropertyName());
+        ApplicationTools::displayResult("-- Writing block-wise trees to", iterator->getPropertyName());
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -770,10 +772,10 @@ int main(int args, char** argv)
         string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
         string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
         string outgroup = ApplicationTools::getStringParameter("outgroup", cmdArgs, "none");
-        ApplicationTools::displayResult("Reading tree from", treePropertyInput);
-        ApplicationTools::displayResult("Rerooting according to species", outgroup);
+        ApplicationTools::displayResult("-- Reading tree from", treePropertyInput);
+        ApplicationTools::displayResult("-- Rerooting according to species", outgroup);
         NewOutgroupMafIterator* iterator = new NewOutgroupMafIterator(currentIterator, treePropertyInput, treePropertyOutput, outgroup);
-        ApplicationTools::displayResult("Writing tree to", treePropertyOutput);
+        ApplicationTools::displayResult("-- Writing tree to", treePropertyOutput);
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -788,10 +790,10 @@ int main(int args, char** argv)
         string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
         string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
         string species = ApplicationTools::getStringParameter("species", cmdArgs, "none");
-        ApplicationTools::displayResult("Reading tree from", treePropertyInput);
-        ApplicationTools::displayResult("Removing leaves from species", species);
+        ApplicationTools::displayResult("-- Reading tree from", treePropertyInput);
+        ApplicationTools::displayResult("-- Removing leaves from species", species);
         DropSpeciesMafIterator* iterator = new DropSpeciesMafIterator(currentIterator, treePropertyInput, treePropertyOutput, species);
-        ApplicationTools::displayResult("Writing tree to", treePropertyOutput);
+        ApplicationTools::displayResult("-- Writing tree to", treePropertyOutput);
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -805,7 +807,7 @@ int main(int args, char** argv)
       if (cmdName == "Output") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-        ApplicationTools::displayResult("Output file", outputFile);
+        ApplicationTools::displayResult("-- Output file", outputFile);
         filtering_ostream* out = new filtering_ostream;
         if (compress == "none") {
         } else if (compress == "gzip") {
@@ -818,9 +820,9 @@ int main(int args, char** argv)
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
-        ApplicationTools::displayResult("File compression", compress);
+        ApplicationTools::displayResult("-- File compression", compress);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
-        ApplicationTools::displayBooleanResult("Output mask", mask);
+        ApplicationTools::displayBooleanResult("-- Output mask", mask);
         OutputMafIterator* iterator = new OutputMafIterator(currentIterator, out, mask);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -834,7 +836,7 @@ int main(int args, char** argv)
       if (cmdName == "OutputAlignments") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-        ApplicationTools::displayResult("Output alignment file", outputFile);
+        ApplicationTools::displayResult("-- Output alignment file", outputFile);
         filtering_ostream* out = new filtering_ostream;
         if (compress == "none") {
         } else if (compress == "gzip") {
@@ -847,9 +849,9 @@ int main(int args, char** argv)
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
-        ApplicationTools::displayResult("File compression", compress);
+        ApplicationTools::displayResult("-- File compression", compress);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
-        ApplicationTools::displayBooleanResult("Output mask", mask);
+        ApplicationTools::displayBooleanResult("-- Output mask", mask);
         OutputAlignmentMafIterator* iterator = new OutputAlignmentMafIterator(currentIterator, out, mask);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -863,7 +865,7 @@ int main(int args, char** argv)
       if (cmdName == "OutputTrees") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-        ApplicationTools::displayResult("Output tree file", outputFile);
+        ApplicationTools::displayResult("-- Output tree file", outputFile);
         filtering_ostream* out = new filtering_ostream;
         if (compress == "none") {
         } else if (compress == "gzip") {
@@ -876,9 +878,9 @@ int main(int args, char** argv)
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
-        ApplicationTools::displayResult("File compression", compress);
+        ApplicationTools::displayResult("-- File compression", compress);
         string treeProperty = ApplicationTools::getStringParameter("tree", cmdArgs, "none");
-        ApplicationTools::displayResult("Tree to write", treeProperty);
+        ApplicationTools::displayResult("-- Tree to write", treeProperty);
         OutputTreeMafIterator* iterator = new OutputTreeMafIterator(currentIterator, out, treeProperty);
         currentIterator = iterator;
         its.push_back(iterator);
