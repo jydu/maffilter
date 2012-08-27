@@ -563,7 +563,8 @@ int main(int args, char** argv)
           string statName;
           map<string, string> statArgs;
           KeyvalTools::parseProcedure(statisticsDesc[i], statName, statArgs);
-          MafStatistics* mafStat = 0; 
+          MafStatistics* mafStat = 0;
+          string statDesc = "";
           if (statName == "BlockSize") {
             mafStat = new BlockSizeMafStatistics();
           } else if (statName == "BlockLength") {
@@ -587,11 +588,12 @@ int main(int args, char** argv)
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);
             mafStat = new CountClustersMafStatistics(treeProperty, threshold);
+            statDesc = " / " + treeProperty;
            } else {
             throw Exception("Unknown statistic: " + statName);
           }
           statistics.push_back(mafStat);
-          ApplicationTools::displayResult("-- Adding statistic", mafStat->getFullName() + " (" + mafStat->getShortName() + ")");
+          ApplicationTools::displayResult("-- Adding statistic", mafStat->getFullName() + " <" + mafStat->getShortName() + ">" + statDesc);
         }
 
         //Get output file:
