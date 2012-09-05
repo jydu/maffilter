@@ -57,8 +57,10 @@ Tree* DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock(const M
     builder_->setDistanceMatrix(dist);
     builder_->computeTree(false);
     Tree* tree = builder_->getTree();
+    if (!tree)
+      throw Exception("DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock. Tree reconstruction failed!");
     return tree;
-  } catch (Exception& e) {
+  } catch (bad_cast& e) {
     throw Exception("DistanceBasedPhylogenyReconstructionMafIterator::buildTreeForBlock. A property was found for '" + distanceProperty_ + "' but does not appear to contain a distance matrix.");
   }
 }
@@ -104,7 +106,7 @@ void CountClustersMafStatistics::compute(const MafBlock& block)
     TreeTemplateTools::getHeights(*tree.getRootNode(), heights);
     unsigned int nClust = getNumberOfClusters_(tree.getRootNode(), heights);
     result_.setValue("NbClusters", nClust);
-  } catch (Exception& e) {
+  } catch (bad_cast& e) {
     throw Exception("CountClustersMafStatistics::compute. A property was found for '" + treeProperty_ + "' but does not appear to contain a phylogenetic tree.");
   }
 }
