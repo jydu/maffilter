@@ -73,7 +73,7 @@ void OutputTreeMafIterator::writeBlock(std::ostream& out, const MafBlock& block)
   try {
     const Tree& tree = dynamic_cast<const Tree&>(block.getProperty(treeProperty_));
     writer_.write(tree, out);
-  } catch (Exception& e) {
+  } catch (bad_cast& e) {
     throw Exception("OutputTreeAlignmentMafIterator::writeBlock. A property was found for '" + treeProperty_ + "' but does not appear to contain a phylogenetic tree.");
   }
 
@@ -122,7 +122,7 @@ MafBlock* TreeManipulationMafIterator::analyseCurrentBlock_() throw (Exception)
       TreeTemplate<Node>* tree = new TreeTemplate<Node>(dynamic_cast<const Tree&>(currentBlock_->getProperty(treePropertyRead_)));
       manipulateTree_(tree);
       currentBlock_->setProperty(treePropertyWrite_, tree);
-    } catch (Exception& e) {
+    } catch (bad_cast& e) {
       throw Exception("TreeManipulationMafIterator::analyseCurrentBlock_(). A property was found for '" + treePropertyRead_ + "' but does not appear to contain a phylogenetic tree.");
     }
   }
