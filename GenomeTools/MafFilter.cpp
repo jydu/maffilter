@@ -141,7 +141,7 @@ int main(int args, char** argv)
         bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
         bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
-        ApplicationTools::displayBooleanResult("-- Sequences not in the list will be kept", strict);
+        ApplicationTools::displayBooleanResult("-- Sequences not in the list will be kept", keep);
         bool rmdupl = ApplicationTools::getBooleanParameter("rm.duplicates", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Species should be present only once", rmdupl);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
