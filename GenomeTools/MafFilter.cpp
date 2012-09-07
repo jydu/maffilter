@@ -752,9 +752,9 @@ int main(int args, char** argv)
         } else if (distMethodName == "wpgma") {
           distMethod = new PGMA(true);
         } else if (distMethodName == "nj") {
-          distMethod = new NeighborJoining();
+          distMethod = new NeighborJoining(false, false);
         } else if (distMethodName == "bionj") {
-          distMethod = new BioNJ();
+          distMethod = new BioNJ(false, false);
         } else {
           throw Exception("Unknown distance-based phylogenetic method: " + distMethodName); 
         }
