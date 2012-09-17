@@ -61,7 +61,7 @@ using namespace boost::iostreams;
 
 // From bpp-seq:
 #include <Bpp/Seq/SequenceWithQuality.h>
-#include <Bpp/Seq/Io/Clustal.h>
+#include <Bpp/Seq/Io/BppOAlignmentWriterFormat.h>
 #include <Bpp/Seq/Container/SiteContainerTools.h>
 
 // From bpp-seq-omics:
@@ -179,6 +179,20 @@ int main(int args, char** argv)
             iterator->ignoreChromosome(ignoreChrList);
           }
         }
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+      // +---------------+
+      // | Block merging |
+      // +---------------+
+      if (cmdName == "Concatenate") {
+        unsigned int minimumSize = ApplicationTools::getParameter<unsigned int>("minimum_size", cmdArgs, 0);
+        ApplicationTools::displayResult("-- Minimum final block size", minimumSize);
+        ConcatenateMafIterator* iterator = new ConcatenateMafIterator(currentIterator, minimumSize);
+        iterator->setLogStream(&log);
+        iterator->verbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -841,24 +855,35 @@ int main(int args, char** argv)
       // +-------------------+
       if (cmdName == "OutputAlignments") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
-        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-        ApplicationTools::displayResult("-- Output alignment file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
-        if (compress == "none") {
-        } else if (compress == "gzip") {
-          out->push(gzip_compressor());
-        } else if (compress == "zip") {
-          out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
-          out->push(bzip2_compressor());
-        } else
-          throw Exception("Bad output compression format: " + compress);
-        out->push(file_sink(outputFile));
-        ostreams.push_back(out);
-        ApplicationTools::displayResult("-- File compression", compress);
+        bool multipleFiles = (outputFile.find("%i") != string::npos);
+        ApplicationTools::displayResult("-- Output alignment file" + string(multipleFiles ? "s" : ""), outputFile);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
-        OutputAlignmentMafIterator* iterator = new OutputAlignmentMafIterator(currentIterator, out, mask);
+        
+        OutputAlignmentMafIterator* iterator; 
+        BppOAlignmentWriterFormat bppoWriter;
+        string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
+        map<string, string> fargs;
+        OAlignment* oAln = bppoWriter.read(description, fargs, true);
+        if (multipleFiles) {
+          iterator = new OutputAlignmentMafIterator(currentIterator, outputFile, oAln, mask);
+        } else {
+          compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+          filtering_ostream* out = new filtering_ostream;
+          if (compress == "none") {
+          } else if (compress == "gzip") {
+            out->push(gzip_compressor());
+          } else if (compress == "zip") {
+            out->push(zlib_compressor());
+          } else if (compress == "bzip2") {
+            out->push(bzip2_compressor());
+          } else
+            throw Exception("Bad output compression format: " + compress);
+          out->push(file_sink(outputFile));
+          ostreams.push_back(out);
+          ApplicationTools::displayResult("-- File compression", compress);
+          iterator = new OutputAlignmentMafIterator(currentIterator, out, oAln, mask);
+        }
         currentIterator = iterator;
         its.push_back(iterator);
       }
