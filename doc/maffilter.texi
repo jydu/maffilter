@@ -22,11 +22,6 @@ Copyright @copyright{} 2012 Julien Y. Dutheil
 @author Julien Dutheil
 @author @email{julien.dutheil@@univ-montp2.fr}
 
-@copying
-This is the manual of the TestNH package, version 1.0.0.
-
-Copyright @copyright{} 2011 Bastien Boussau and Julien Dutheil
-@end copying
 
 @c The following two commands start the copyright page.
 @page
@@ -55,6 +50,14 @@ Introduction
 
 * Description::                 
 * Run::                         
+* General::                     
+
+Filters
+
+* Extracting::                  
+* Cleaning::                    
+* Analyzing::                   
+* Exporting::                   
 
 @end detailmenu
 @end menu
@@ -83,6 +86,7 @@ This manual intends to provide an exhaustive description of the options used in 
 @menu
 * Description::                 
 * Run::                         
+* General::                     
 @end menu
 
 @node Description, Run, Introduction, Introduction
@@ -93,11 +97,45 @@ These commands determine the output file(s) that will be written and where.
 Additional input files might be specified, such as gene annotation files (typically in GFF/GTF format).
 
 The main goal of MafFilter is to apply a series of "filters" to the original input file.
+A ``filter'' can be seen as a small program that takes as input one or several maf blocks, and outputs one or several maf block, after performing some actions on them:
+
+@verbatim
+                         +--------+
+   Alignment block(s)    |        |   Alignment block(s)
+------------------------>+ Filter +------------------------>
+                         |        |
+                         +--------+
+@end verbatim
+
+We can roughly distinguish three types of filters:
+
+@itemize @bullet
+@item
+Filters that take one block as input, and output one single block, possibly after removing some sequences, or even the full block if it did not match a certain criterion,
+@item
+Filters that take one block as input, and split them into several smaller blocks, for instance of a fixed size,
+@item
+Filters that take several block as input and output a larger one, typically after concatenating the input blocks,
+@item
+Filters that do not modify the input block and simply forward it, yet after having performed some computations, for instance calculating various statistics.
+@end itemize
+
+A run of MafFilter typically consists in a workflow of filters, applied in a serial way, the output of one filter being taken as input as the next one. In the current version fo MafFilter, only linear workflows are possible, without branching. Branching processes can however be achieved by output the alignment blockas at the branching point, and run various instances of MafFilter on the resulting files:
+
+@verbatim
+    +----------+    +----------+    +----------+
+    |          |    |          |    |          |
+--->+ Filter 1 +--->+ Filter 2 +--->+ Filter 3 +---> Etc.
+    |          |    |          |    |          |
+    +----------+    +----------+    +----------+
+@end verbatim
+
+The next section describes how to specify the series of filters to be applied, and the next chapter provides an exhaustive list of available filters.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Run,  , Description, Introduction
-@section How to run the programs
+@node Run, General, Description, Introduction
+@section How to run the program
 
 The MafFilter program follows the @samp{bppSuite} syntax.
 It is command line driven, and take as input options with the form @samp{name}=@samp{value}.
@@ -106,9 +144,87 @@ Please refer to the Bio++ Program Suite manual for more details, including the u
 
 @c ------------------------------------------------------------------------------------------------------------------
 
+@node General,  , Run, Introduction
+@section General options
+
+@table @command
+
+@item input.file=@{path@}
+The MAF file to parse
+
+@item input.file.compression=[none|zip|gzip|bzip2]
+The compression format of the input file.
+
+@item output.log=@{path@}
+The file where to write log messages.
+
+@item maf.filter=@{Filter1, Filter2, ...@}
+The main command, specifying the list of filter commands to apply, in the given order (that is, the input of filter 2 will be the output of filter 1).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
 @node Filters,  , Introduction, Top
 @chapter Filters
 
+@c ------------------------------------------------------------------------------------------------------------------
+
+@menu
+* Extracting::                  
+* Cleaning::                    
+* Analyzing::                   
+* Exporting::                   
+@end menu
+
+@node Extracting, Cleaning, Filters, Filters
+@section Extracting data
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Subset
+@subsubsection Subset: remove sequences from blocks
+
+The @command{Subset} filter allows to remove 
+      if (cmdName == "Subset") {
+        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
+        bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
+        bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Sequences not in the list will be kept", keep);
+        bool rmdupl = ApplicationTools::getBooleanParameter("rm.duplicates", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Species should be present only once", rmdupl);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'Subset'.");
+        //getList(speciesList, species);
+        SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, keep, rmdupl);
+        iterator->setLogStream(&log);
+        iterator->verbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Cleaning, Analyzing, Extracting, Filters
+@section Cleaning alignment blocks
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Analyzing, Exporting, Cleaning, Filters
+@section Statistical analysis
+
+@c ------------------------------------------------------------------------------------------------------------------
+@node Exporting,  , Analyzing, Filters
+@section Exporting blocks and data
+
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
 
 @c end of document
