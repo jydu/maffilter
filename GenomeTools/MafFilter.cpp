@@ -142,7 +142,10 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
         bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Sequences not in the list will be kept", keep);
-        bool rmdupl = ApplicationTools::getBooleanParameter("rm.duplicates", cmdArgs, false);
+        if (cmdArgs.find("rm.duplicates") != cmdArgs.end()) {
+          throw Exception("rm.duplicates argument in Subset is deprecated: use remove_duplicates instead.");
+        }
+        bool rmdupl = ApplicationTools::getBooleanParameter("remove_duplicates", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Species should be present only once", rmdupl);
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
@@ -164,12 +167,18 @@ int main(int args, char** argv)
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Merge'.");
 
-        unsigned int distMax = ApplicationTools::getParameter<unsigned int>("dist.max", cmdArgs, 0);
+        if (cmdArgs.find("dist.max") != cmdArgs.end()) {
+          throw Exception("dist.max argument in Merge is deprecated: use dist_max instead.");
+        }
+        unsigned int distMax = ApplicationTools::getParameter<unsigned int>("dist_max", cmdArgs, 0);
         ApplicationTools::displayResult("-- Maximum distance allowed", distMax);
         BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
-        string ignoreChrList = ApplicationTools::getStringParameter("ignore.chr", cmdArgs, "none");
+        if (cmdArgs.find("ignore.chr") != cmdArgs.end()) {
+          throw Exception("ignore.chr argument in Merge is deprecated: use ignore_chr instead.");
+        }
+        string ignoreChrList = ApplicationTools::getStringParameter("ignore_chr", cmdArgs, "none");
         if (ignoreChrList != "none") {
           if (ignoreChrList[0] == '(') {
             StringTokenizer st(ignoreChrList.substr(1, ignoreChrList.size() - 2), ",");
@@ -184,9 +193,9 @@ int main(int args, char** argv)
       }
 
 
-      // +---------------+
-      // | Block merging |
-      // +---------------+
+      // +---------------------+
+      // | Block concatenation |
+      // +---------------------+
       if (cmdName == "Concatenate") {
         unsigned int minimumSize = ApplicationTools::getParameter<unsigned int>("minimum_size", cmdArgs, 0);
         ApplicationTools::displayResult("-- Minimum final block size", minimumSize);
