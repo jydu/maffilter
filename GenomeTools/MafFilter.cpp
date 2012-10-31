@@ -100,6 +100,7 @@ int main(int args, char** argv)
     maffilter.startTimer();
 
     string inputFile = ApplicationTools::getAFilePath("input.file", maffilter.getParams(), true, true);
+    string inputFormat = ApplicationTools::getStringParameter("input.format", maffilter.getParams(), "Maf", "", true, false);
     string compress = ApplicationTools::getStringParameter("input.file.compression", maffilter.getParams(), "none");
 
     filtering_istream stream;
@@ -117,10 +118,17 @@ int main(int args, char** argv)
     string logFile = ApplicationTools::getAFilePath("output.log", maffilter.getParams(), true, false);
 
     StlOutputStream log(auto_ptr<ostream>(new ofstream(logFile.c_str(), ios::out)));
-    MafAlignmentParser parser(&stream, true);
+
+    MafIterator* currentIterator;
+    if (inputFormat == "Maf") {
+      MafAlignmentParser parser(&stream, true);
+      currentIterator = &parser;
+    } else if (inputFormat == "Fasta") {
+      ISequenceStream* seqStream = new Fasta();
+      currentIterator = new SequenceStreamToMafIterator(seqStream, &stream);
+    } else throw Exception("Unvalid input format: " + inputFormat);
 
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);
-    MafIterator* currentIterator = &parser;
     vector<MafIterator*> its;
     vector<filtering_ostream*> ostreams;
     for (unsigned int a = 0; a < actions.size(); a++) {

@@ -186,6 +186,13 @@ The MAF file to parse
 @item input.file.compression=[none|zip|gzip|bzip2]
 The compression format of the input file.
 
+@item input.format=@{Maf|Fasta@}
+MafFilter takes by default a MAF file. It is, however, possible to use a fasta file as input,
+which will lead MafFilter to run in "single sequence" mode.
+In this mode, each sequence of the original file is considered as a distinct block.
+This mode might be useful to extract annotations and estimate simple statistics.
+Fasta files can be compressed in the same way as MAF files.
+
 @item output.log=@{path@}
 The file where to write log messages.
 
