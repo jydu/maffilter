@@ -121,8 +121,7 @@ int main(int args, char** argv)
 
     MafIterator* currentIterator;
     if (inputFormat == "Maf") {
-      MafAlignmentParser parser(&stream, true);
-      currentIterator = &parser;
+      currentIterator = new MafAlignmentParser(&stream, true);
     } else if (inputFormat == "Fasta") {
       ISequenceStream* seqStream = new Fasta();
       currentIterator = new SequenceStreamToMafIterator(seqStream, &stream);
@@ -130,6 +129,7 @@ int main(int args, char** argv)
 
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);
     vector<MafIterator*> its;
+    its.push_back(currentIterator);
     vector<filtering_ostream*> ostreams;
     for (unsigned int a = 0; a < actions.size(); a++) {
       string cmdName;
@@ -601,7 +601,10 @@ int main(int args, char** argv)
       // | Block length filtering |
       // +------------------------+
       if (cmdName == "MinBlockLength") {
-        unsigned int minLength = ApplicationTools::getParameter<unsigned int>("min.length", cmdArgs, 0);
+        if (cmdArgs.find("min.length") != cmdArgs.end()) {
+          throw Exception("min.length argument in MinBlockLength is deprecated: use min_length instead.");
+        }
+        unsigned int minLength = ApplicationTools::getParameter<unsigned int>("min_length", cmdArgs, 0);
         ApplicationTools::displayResult("-- Minimum block length required", minLength);
         BlockLengthMafIterator* iterator = new BlockLengthMafIterator(currentIterator, minLength);
         iterator->setLogStream(&log);
@@ -614,7 +617,10 @@ int main(int args, char** argv)
       // | Block size filtering |
       // +----------------------+
       if (cmdName == "MinBlockSize") {
-        unsigned int minSize = ApplicationTools::getParameter<unsigned int>("min.size", cmdArgs, 0);
+        if (cmdArgs.find("min.size") != cmdArgs.end()) {
+          throw Exception("min.size argument in MinBlockSize is deprecated: use min_size instead.");
+        }
+        unsigned int minSize = ApplicationTools::getParameter<unsigned int>("min_size", cmdArgs, 0);
         ApplicationTools::displayResult("-- Minimum block size required", minSize);
         if (minSize > 5)
           ApplicationTools::displayWarning("!! Warning, in previous version of maffilter BlockLength was named BlockSize... Check!");
@@ -629,7 +635,10 @@ int main(int args, char** argv)
       // | Chromosome filtering |
       // +----------------------+
       if (cmdName == "SelectChr") {
-        string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        if (cmdArgs.find("reference") != cmdArgs.end()) {
+          throw Exception("reference argument in SelectChr is deprecated: use ref_species instead.");
+        }
+        string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
         string chr = ApplicationTools::getStringParameter("chromosome", cmdArgs, "");
         ApplicationTools::displayResult("-- Chromosome", chr);

@@ -64,6 +64,19 @@ Extracting data
 * Subset::                      
 * Merge::                       
 * Concatenate::                 
+* FeatureFilter::               
+* SelectChr::                   
+
+Cleaning alignment blocks
+
+* MinBlockLength::              
+* MinBlockSize::                
+* XFullGap::                    
+* AlnFilter::                   
+* AlnFilter2::                  
+* EntropyFilter::               
+* MaskFilter::                  
+* QualFilter::                  
 
 @end detailmenu
 @end menu
@@ -223,6 +236,8 @@ The next section present all available filters and their corresponding arguments
 * Subset::                      
 * Merge::                       
 * Concatenate::                 
+* FeatureFilter::               
+* SelectChr::                   
 @end menu
 
 @c ------------------------------------------------------------------------------------------------------------------
@@ -289,7 +304,7 @@ Sequences annotated with such chromosomes will not be checked for synteny and th
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Concatenate,  , Merge, Extracting
+@node Concatenate, FeatureFilter, Merge, Extracting
 @subsection Concatenating: merge consecutive blocks up to a certain size
 
 The @command{Concatenate} filter fuses consecutive blocks until the concatenated block reaches a minimal size.
@@ -302,15 +317,306 @@ The minimum size for the blocks to be reached.
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
+
+@node FeatureFilter, SelectChr, Concatenate, Extracting
+@subsection Extract features from the alignment
+
+The @command{FeatureFilter} extracts parts of the alignment corresponding to certain features.
+The features to extract are typically provided via a GFF file. 
+
+@table @command
+
+@item ref_species=@{string@}
+The name of the species for which the coordinates of the features are provided.
+
+@item feature.file=@{path@}
+The file where the features are described.
+
+@item feature.file.compression=@{none|gzip|zip|bzip2@}
+Compression format for the feature file.
+
+@item feature.format=@{GFF|GTF@}
+Format for the feature file, currently GFF (v3.0) or GTF only.
+
+@item file=@{none|@{path@}@}
+An optional file were extracted features will be stored, in the MAF format.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
+@end table
+
 @c ------------------------------------------------------------------------------------------------------------------
-@c ------------------------------------------------------------------------------------------------------------------
-@c ------------------------------------------------------------------------------------------------------------------
-@c ------------------------------------------------------------------------------------------------------------------
+
+@node SelectChr,  , FeatureFilter, Extracting
+@subsection Extract blocks for a given chromosome/contig/scaffold
+
+The @command{SelectChr} filter keeps only block from a given chromosome (or contig or scaffold...) for a given reference species.
+
+@table @command
+
+@item ref_species=@{string@}
+The species name for which chromosomes should be extracted.
+
+@item chromosome=@{string@}
+The name of the chromosome/contig/scaffold to be filtered.
+
+@end table
+
 @c ------------------------------------------------------------------------------------------------------------------
 
 @node Cleaning, Analyzing, Extracting, Filters
 @section Cleaning alignment blocks
 
+@c ------------------------------------------------------------------------------------------------------------------
+
+@menu
+* MinBlockLength::              
+* MinBlockSize::                
+* XFullGap::                    
+* AlnFilter::                   
+* AlnFilter2::                  
+* EntropyFilter::               
+* MaskFilter::                  
+* QualFilter::                  
+@end menu
+
+@node MinBlockLength, MinBlockSize, Cleaning, Cleaning
+@subsection Minumum block length
+
+The @command{MinBlockLength} filter discards blocks with less sites than a given threshold.
+
+@table @command
+
+@item min_length=@{int>0@}
+The minimum length.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node MinBlockSize, XFullGap, MinBlockLength, Cleaning
+@subsection Minumum block size
+
+The @command{MinBlockSize} filter discards blocks with less sequences than a given threshold.
+
+@table @command
+
+@item min_size=@{int>0@}
+The minimum size.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node XFullGap, AlnFilter, MinBlockSize, Cleaning
+@subsection Exclude full gap columns
+
+Remove gap-only columns from blocks. This does not modify coordinates and might be necessary after a @command{Subset} filter.
+
+@table @command
+
+@item species=(species1, species2, etc)
+A coma separated, within parentheses, list of species. Any column containing a gap in the specified species will be removed. If other species are present in the block, the corresponding character will be removed, whether it is a gap or not. The coordinates of these species will then be discarded.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node AlnFilter, AlnFilter2, XFullGap, Cleaning
+@subsection Alignment filtering
+
+Split alignment blocks by removing regions with ambiguous alignments.
+The local uncertainty in the alignment is determined through a sliding window based approach.
+For each window, the number of gap characters and the total entropy are computed. Any window
+for which both the entropy and number of gaps exceed the given thresholds will be removed from
+the alignment, and the corresponding block split accordingly.
+
+@table @command
+
+@item species=(species1, species2, etc)
+A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+
+@item window.size=@{int>0@}
+The width, in bp, of the sliding window.
+
+@item window.step=@{int>0@}
+The step by which the window is moved, in bp.
+
+@item max.gap=@{int>0@}
+The maximum number of gaps allowed in each window.
+
+@item max.ent=@{float@}
+The maximum entropy allowed in each window.
+
+@item missing_as_gap=@{yes/no@}
+Tell if unresolved characters should be counted as gaps.
+
+@item file=@{none|@{path@}@}
+An optional file were removed alignment parts will be stored, in the MAF format.
+This can be helpful for visual inspection and fine tuning of the filter parameters.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node AlnFilter2, EntropyFilter, AlnFilter, Cleaning
+@subsection Alignment filtering 2
+
+This is another algorithm for cleaning alignment blocks (see AlnFilter), using sliding windows.
+The number of gaps in each alignment column in the window is counted, and the column is masked if it contains more than a given threshold of gaps. consecutive patterns in the window are only counted ones. In the follwing 10nt window:
+@verbatim
+AATCGGGCGT
+AA---GCGGA
+AA---CGGGT
+CA---CGGGA
+@end verbatim
+positions 3, 4 and 5 will be masked if the maximum number of gaps allowed is 2 or less. The three columns will however count as only one indel event.
+The window is then discarded if it contains more than a given number of indel events.
+
+@table @command
+
+@item species=(species1, species2, etc)
+A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+
+@item window.size=@{int>0@}
+The width, in bp, of the sliding window.
+
+@item window.step=@{int>0@}
+The step by which the window is moved, in bp.
+
+@item max.gap=@{int>0@}
+The maximum number of gaps allowed in each site.
+
+@item max.pos=@{int>0@}
+The maximum number of positions with gaps (``indel events'').
+
+@item missing_as_gap=@{yes/no@}
+Tell if unresolved characters should be counted as gaps.
+
+@item file=@{none|@{path@}@}
+An optional file were removed alignment parts will be stored, in the MAF format.
+This can be helpful for visual inspection and fine tuning of the filter parameters.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node EntropyFilter, MaskFilter, AlnFilter2, Cleaning
+@subsection Entropy filtering
+
+This filter removes highly variable regions and split the blocks accordingly.
+It uses a sliding windows, and compute the entropy for each site in the window.
+The window is then discarded if it containes more than 'p' sites with an entropy higher that a user-specified threshold. The alignment block is then split into separate block accordingly.
+
+@table @command
+
+@item species=(species1, species2, etc)
+A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+
+@item window.size=@{int>0@}
+The width, in bp, of the sliding window.
+
+@item window.step=@{int>0@}
+The step by which the window is moved, in bp.
+
+@item max.ent=@{float@}
+The maximum entropy allowed at each site.
+
+@item max.pos=@{int>0@}
+The maximum number of positions with an entropy higher than the given threshold.
+
+@item missing_as_gap=@{yes/no@}
+Tell if unresolved characters should be counted as gaps.
+
+@item ignore_gaps=@{yes/no@}
+Tell if gaps should not be counted in entropy calculation. If no, then gaps are counted as a ``fifth'' state.
+
+@item file=@{none|@{path@}@}
+An optional file were removed alignment parts will be stored, in the MAF format.
+This can be helpful for visual inspection and fine tuning of the filter parameters.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node MaskFilter, QualFilter, EntropyFilter, Cleaning
+@subsection Masked sequences filtering
+
+The @command{MaskFilter} split alignment blocks by removing regions with too many masked positions (typically showing repeat-content), using sliding windows.
+A masked position is identified by a lower case letter in the original sequence.
+Windows with more than a given amount of lower case characters will be discarded, and the corresponding block split.
+
+@table @command
+
+@item species=(species1, species2, etc)
+A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+
+@item window.size=@{int>0@}
+The width, in bp, of the sliding window.
+
+@item window.step=@{int>0@}
+The step by which the window is moved, in bp.
+
+@item max.masked=@{int>0@}
+The maximum number of lower-case characters allowed in each window.
+
+@item file=@{none|@{path@}@}
+An optional file were removed alignment parts will be stored, in the MAF format.
+This can be helpful for visual inspection and fine tuning of the filter parameters.
+
+@item compresion=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node QualFilter,  , MaskFilter, Cleaning
+@subsection Quality filtering
+
+The @command{QualFilter} split alignment blocks by removing regions with too low quality score.
+Windows with an average quality below a given threshold will be discarded, and the corresponding block split.
+
+@table @command
+
+@item species=(species1, species2, etc)
+A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only. The corresponding sequences must have a quality score line in the original file.
+
+@item window.size=@{int>0@}
+The width, in bp, of the sliding window.
+
+@item window.step=@{int>0@}
+The step by which the window is moved, in bp.
+
+@item min.qual=@{double@}
+The minimum average quality allowed for each window.
+
+@item file=@{none|@{path@}@}
+An optional file were removed alignment parts will be stored, in the MAF format.
+This can be helpful for visual inspection and fine tuning of the filter parameters.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
 
 @node Analyzing, Exporting, Cleaning, Filters
