@@ -64,8 +64,9 @@ Extracting data
 * Subset::                      
 * Merge::                       
 * Concatenate::                 
-* FeatureFilter::               
+* ExtractFeature::              
 * SelectChr::                   
+* WindowSplit::                 
 
 Cleaning alignment blocks
 
@@ -77,6 +78,11 @@ Cleaning alignment blocks
 * EntropyFilter::               
 * MaskFilter::                  
 * QualFilter::                  
+* FeatureFilter::               
+
+Statistical analysis
+
+* Descriptive::                 
 
 @end detailmenu
 @end menu
@@ -236,8 +242,9 @@ The next section present all available filters and their corresponding arguments
 * Subset::                      
 * Merge::                       
 * Concatenate::                 
-* FeatureFilter::               
+* ExtractFeature::              
 * SelectChr::                   
+* WindowSplit::                 
 @end menu
 
 @c ------------------------------------------------------------------------------------------------------------------
@@ -304,7 +311,7 @@ Sequences annotated with such chromosomes will not be checked for synteny and th
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Concatenate, FeatureFilter, Merge, Extracting
+@node Concatenate, ExtractFeature, Merge, Extracting
 @subsection Concatenating: merge consecutive blocks up to a certain size
 
 The @command{Concatenate} filter fuses consecutive blocks until the concatenated block reaches a minimal size.
@@ -318,10 +325,10 @@ The minimum size for the blocks to be reached.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node FeatureFilter, SelectChr, Concatenate, Extracting
+@node ExtractFeature, SelectChr, Concatenate, Extracting
 @subsection Extract features from the alignment
 
-The @command{FeatureFilter} extracts parts of the alignment corresponding to certain features.
+The @command{ExtractFeature} extracts parts of the alignment corresponding to certain features.
 The features to extract are typically provided via a GFF file. 
 
 @table @command
@@ -344,11 +351,14 @@ An optional file were extracted features will be stored, in the MAF format.
 @item compression=@{none|gzip|zip|bzip2@}
 Compression format for output file (if file != none).
 
+@item ignore_strand=@{yes/no@}
+If yes, features will be extracted ``as is''. Otherwise, the invert-complement sequence will be returned if it is located on the negative strand.
+
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node SelectChr,  , FeatureFilter, Extracting
+@node SelectChr, WindowSplit, ExtractFeature, Extracting
 @subsection Extract blocks for a given chromosome/contig/scaffold
 
 The @command{SelectChr} filter keeps only block from a given chromosome (or contig or scaffold...) for a given reference species.
@@ -361,6 +371,51 @@ The species name for which chromosomes should be extracted.
 @item chromosome=@{string@}
 The name of the chromosome/contig/scaffold to be filtered.
 
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node WindowSplit,  , SelectChr, Extracting
+@subsection Split alignment blocks into smaller parts
+
+The @command{WindowSplit} filter subdivides blocks into smaller ones of a regular size, typically for window-based analyses.
+It is possible to generate overlapping windows.
+
+@table @command
+
+@item preferred_size=@{int>0@}
+The preferred size for the output windows.
+
+@item align=@{ragged_left|ragged_right|center|adjust@}
+Specifies how to align windows on the block:
+
+@table @command
+@item ragged_left
+@verbatim
+Block   |----------------------------|
+Windows |----|----|----|----|----|XXXX
+@end verbatim
+
+@item ragged_right
+@verbatim
+Block   |----------------------------|
+Windows XXXX|----|----|----|----|----|
+@end verbatim
+
+@item center
+@verbatim
+Block   |----------------------------|
+Windows XX|----|----|----|----|----|XX
+@end verbatim
+
+@item adjust
+@verbatim
+Block   |----------------------------|
+Windows |-----|-----|-----|-----|----|
+@end verbatim
+@end table
+In the first three case, some parts of the original block (shown with X) will be discarded.
+In the last case, the windows will have at least the specified size, but might be larger.
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
@@ -379,6 +434,7 @@ The name of the chromosome/contig/scaffold to be filtered.
 * EntropyFilter::               
 * MaskFilter::                  
 * QualFilter::                  
+* FeatureFilter::               
 @end menu
 
 @node MinBlockLength, MinBlockSize, Cleaning, Cleaning
@@ -581,7 +637,7 @@ Compression format for output file (if file != none).
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node QualFilter,  , MaskFilter, Cleaning
+@node QualFilter, FeatureFilter, MaskFilter, Cleaning
 @subsection Quality filtering
 
 The @command{QualFilter} split alignment blocks by removing regions with too low quality score.
@@ -611,6 +667,36 @@ Compression format for output file (if file != none).
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
+@node FeatureFilter,  , QualFilter, Cleaning
+@subsection Remove sequences from features from the alignment
+
+The @command{FeatureFilter} remove parts of the alignment corresponding to certain features.
+The features to extract are typically provided via a GFF file. See @command{ExtractFeature}
+in order to keep only the feature parts.
+
+@table @command
+
+@item ref_species=@{string@}
+The name of the species for which the coordinates of the features are provided.
+
+@item feature.file=@{path@}
+The file where the features are described.
+
+@item feature.file.compression=@{none|gzip|zip|bzip2@}
+Compression format for the feature file.
+
+@item feature.format=@{GFF|GTF@}
+Format for the feature file, currently GFF (v3.0) or GTF only.
+
+@item file=@{none|@{path@}@}
+An optional file were extracted features will be stored, in the MAF format.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
 
 
 @c ------------------------------------------------------------------------------------------------------------------
@@ -621,6 +707,73 @@ Compression format for output file (if file != none).
 
 @node Analyzing, Exporting, Cleaning, Filters
 @section Statistical analysis
+
+@menu
+* Descriptive::                 
+@end menu
+
+@node Descriptive,  , Analyzing, Analyzing
+@subsection Descriptive statistics
+
+The section describes how to compute simple statistics for each alignment block.
+For the sake of computer efficiency, several statistics can be computed simultaneously on each alignment block.
+The results are written in a text file, with one line per block and one column per statistics.
+In addition, the coordinates of the block will be reported according to a specified reference species.
+The choice of statistics is specified by the user. Some of them output several results, which will appear each in a column in the output file.
+
+Descriptive statistics are computed through the @command{SequenceStatistics} filter, which takes the following arguments:
+
+@table @command
+
+@item statistics=@{list of statistics functions@}
+See below for the list of possible functions and their detailed description.
+
+@item ref_species=@{string@}
+The species to use to report block coordinates in the output file. For block where the reference species is missing, NA will be output.
+
+@item file=@{path@}
+A file path for the output file.
+
+@end table
+
+The statistics to compute take the form of functions (just like filters themselves), which can potentially take arguments.
+Here is the list of currently available statistical functions:
+
+@table @command
+
+@item BlockSize
+(No argument). Simply reports the number of sequences in the block.
+
+@item BlockLength
+(No argument). Simply reports the number of sites in the block.
+
+@item SequenceLength
+Compute the length (in bp) of the sequence of one species. It returns 0 if no sequence for this species is found in the current block.
+It will send an error however if the block has more than one sequence for this species (be sure to use the @command{Subset} filter before, if needed).
+
+@table @command
+@item species=@{string@}
+The species for which lengths should be reported.
+@end table
+
+@item AlnScore
+(No argument). Reports the alignment score associated to the block, if any.
+
+@item BlockCounts
+(No argument). Report the count of each character found in the block.
+
+@item SpeciesDivergence
+Compute the divergence (percentage of mistmatch) between two species.
+If at least one of the species is missing, NaN is returned.
+It will send an error however if the block has more than one sequence for this species (be sure to use the @command{Subset} filter before, if needed).
+@table @command
+@item species1=@{string@}
+The first species for which divergence should be reported.
+@item species2=@{string@}
+The second species for which divergence should be reported.
+@end table
+
+@end table
 
 @c ------------------------------------------------------------------------------------------------------------------
 @node Exporting,  , Analyzing, Filters

@@ -653,6 +653,8 @@ int main(int args, char** argv)
       // +---------------------+
       // | Duplicate filtering |
       // +---------------------+
+      //Nb: this is kind of deprecated, should be done better by looking at partial overlap.
+      //could be useful for debugging though. We do not report it in the documentation for now.
       if (cmdName == "DuplicateFilter") {
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
@@ -682,6 +684,9 @@ int main(int args, char** argv)
             mafStat = new BlockSizeMafStatistics();
           } else if (statName == "BlockLength") {
             mafStat = new BlockLengthMafStatistics();
+          } else if (statName == "SequenceLength") {
+            string sp = ApplicationTools::getStringParameter("species", statArgs, "");
+            mafStat = new SequenceLengthMafStatistics(sp);
           } else if (statName == "AlnScore") {
             mafStat = new AlignmentScoreMafStatistics();
           } else if (statName == "BlockCounts") {
@@ -716,7 +721,10 @@ int main(int args, char** argv)
         StlOutputStream* output = new StlOutputStream(ofs);
         SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, statistics);
         
-        string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "none");
+        if (cmdArgs.find("reference") != cmdArgs.end()) {
+          throw Exception("reference argument in SequenceStatistics is deprecated: use ref_species instead.");
+        }
+        string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         ApplicationTools::displayResult("-- Reference species", ref);
         CsvStatisticsOutputIterationListener* listener = new CsvStatisticsOutputIterationListener(iterator, ref, output);
         
@@ -791,7 +799,10 @@ int main(int args, char** argv)
       // | Window splitting |
       // +------------------+
       if (cmdName == "WindowSplit") {
-        unsigned int preferredSize = ApplicationTools::getParameter<unsigned int>("preferred.size", cmdArgs, 0);
+        if (cmdArgs.find("preferred.size") != cmdArgs.end()) {
+          throw Exception("preferred.size argument in WindowSplit is deprecated: use preferred_size instead.");
+        }
+        unsigned int preferredSize = ApplicationTools::getParameter<unsigned int>("preferred_size", cmdArgs, 0);
         ApplicationTools::displayResult("-- Preferred size", preferredSize);
         string splitOptionStr = ApplicationTools::getStringParameter("align", cmdArgs, "center");
         short splitOption;
