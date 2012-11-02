@@ -762,7 +762,7 @@ The species for which lengths should be reported.
 @item BlockCounts
 (No argument). Report the count of each character found in the block.
 
-@item SpeciesDivergence
+@item PairwiseDivergence
 Compute the divergence (percentage of mistmatch) between two species.
 If at least one of the species is missing, NaN is returned.
 It will send an error however if the block has more than one sequence for this species (be sure to use the @command{Subset} filter before, if needed).
@@ -771,6 +771,71 @@ It will send an error however if the block has more than one sequence for this s
 The first species for which divergence should be reported.
 @item species2=@{string@}
 The second species for which divergence should be reported.
+@end table
+
+@item SiteStatistics
+Compute site-wise statistics, including:
+@itemize
+@item
+Number of sites without gap,
+@item
+Number of complete sites (no gap, no unresolved character),
+@item
+Number of parsimony-informative sites.
+@end itemize
+The statistics are computed for a given subset of species (typically forming a ingroup).
+
+@table @command
+@item species=@{list@}
+A list of species to be considered in the statistics calculations.
+@end table
+
+@item SiteFrequencySpectrum
+Computes the site frequency spectrum for each block.
+Only ``doubletons'' sites are considered, that is, positions in the alignment with only two states.
+The proportions of doubletons are then computed by bins.
+Lets consider the following example with 7 sequences:
+@verbatim
+ACGT
+ACTT
+AGTT
+AGTT
+TCTT
+TCTT
+TCTT
+@end verbatim
+It contains one site with 4/7 (eq 3/7), one site with 2/7 (eq 5/7), one site with 1/7 (eq 6/7) and one site 0/7 (eq 7/7).
+With seven sequences, there are actually 4 possibles frequencies: 1/7, 2/7, 3/7 and 4/7 (plus the 0/7 frequency, corresponding to a site with no-mutation).
+It is possible to compute all these frequencies individually by settingthe @command{bounds} parameter to
+@verbatim
+SiteFrequencySpectrum(bounds=(-0.5,0.5,1.5,2.5,3.5,4.5), ...)
+@end verbatim
+which will output the number of site with 0, 1, 2, 3 or 4 minor states. Sites with more than 2 states are always ocounted separately, as well as sites containing unresolved characters.
+If one want to count only constant sites for instance, one can simply type
+@verbatim
+SiteFrequencySpectrum(bounds=(-0.5,0.5), ...)
+@end verbatim
+The remaining sites will be pulled in a column called ``Ignored''.
+ 
+@table @command
+@item bounds=@{list of double@}
+The bounds delimiting the bins of the spectrum to be computed.
+
+@item ingroup=@{list@}
+A list of species forming the ingroup and on which the statistics should be calculated.
+@end table
+
+@item CountClusters
+This counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
+
+@table @command
+
+@item tree=@{string@}
+The tag name used to store the previously computed tree.
+
+@item threshold=@{double@}
+The threshold to use in order to compute clusters. A threshold of 0.001 for instance means that sequences within each cluster will be divergent by maximum 0.001, while sequences in distinct clusters will be divergent by at least 0.001.
+ 
 @end table
 
 @end table
