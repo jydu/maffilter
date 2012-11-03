@@ -84,6 +84,18 @@ Statistical analysis
 
 * Descriptive::                 
 
+Descriptive statistics
+
+* BlockSize::                   
+* BlockLength::                 
+* SequenceLength::              
+* AlnScore::                    
+* BlockCounts::                 
+* PairwiseDivergence::          
+* SiteStatistics::              
+* SiteFrequencySpectrum::       
+* CountClusters::               
+
 @end detailmenu
 @end menu
 
@@ -739,33 +751,60 @@ A file path for the output file.
 The statistics to compute take the form of functions (just like filters themselves), which can potentially take arguments.
 Here is the list of currently available statistical functions:
 
-@table @command
+@menu
+* BlockSize::                   
+* BlockLength::                 
+* SequenceLength::              
+* AlnScore::                    
+* BlockCounts::                 
+* PairwiseDivergence::          
+* SiteStatistics::              
+* SiteFrequencySpectrum::       
+* CountClusters::               
+@end menu
 
-@item BlockSize
-(No argument). Simply reports the number of sequences in the block.
+@node BlockSize, BlockLength, Descriptive, Descriptive
+@subsubsection Size of alignment blocks
+Simply reports the number of sequences in the block.
 
-@item BlockLength
-(No argument). Simply reports the number of sites in the block.
+(No argument)
 
-@item SequenceLength
+@node BlockLength, SequenceLength, BlockSize, Descriptive
+@subsubsection Length of alignment blocks
+Simply reports the number of sites in the block.
+
+(No argument)
+
+@node SequenceLength, AlnScore, BlockLength, Descriptive
+@subsubsection Length of sequence for a species
 Compute the length (in bp) of the sequence of one species. It returns 0 if no sequence for this species is found in the current block.
 It will send an error however if the block has more than one sequence for this species (be sure to use the @command{Subset} filter before, if needed).
 
+Arguments:
 @table @command
 @item species=@{string@}
 The species for which lengths should be reported.
 @end table
 
-@item AlnScore
-(No argument). Reports the alignment score associated to the block, if any.
+@node AlnScore, BlockCounts, SequenceLength, Descriptive
+@subsubsection Alignment score
+Reports the alignment score associated to the block, if any.
 
-@item BlockCounts
-(No argument). Report the count of each character found in the block.
+(No argument)
 
-@item PairwiseDivergence
+@node BlockCounts, PairwiseDivergence, AlnScore, Descriptive
+@subsubsection Character frequencies
+Reports the count of each character found in the block.
+
+(No argument)
+
+@node PairwiseDivergence, SiteStatistics, BlockCounts, Descriptive
+@subsubsection Pairwise divergence
 Compute the divergence (percentage of mistmatch) between two species.
 If at least one of the species is missing, NaN is returned.
 It will send an error however if the block has more than one sequence for this species (be sure to use the @command{Subset} filter before, if needed).
+
+Arguments:
 @table @command
 @item species1=@{string@}
 The first species for which divergence should be reported.
@@ -773,7 +812,8 @@ The first species for which divergence should be reported.
 The second species for which divergence should be reported.
 @end table
 
-@item SiteStatistics
+@node SiteStatistics, SiteFrequencySpectrum, PairwiseDivergence, Descriptive
+@subsubsection Site statistics
 Compute site-wise statistics, including:
 @itemize
 @item
@@ -785,12 +825,14 @@ Number of parsimony-informative sites.
 @end itemize
 The statistics are computed for a given subset of species (typically forming a ingroup).
 
+Arguments:
 @table @command
 @item species=@{list@}
 A list of species to be considered in the statistics calculations.
 @end table
 
-@item SiteFrequencySpectrum
+@node SiteFrequencySpectrum, CountClusters, SiteStatistics, Descriptive
+@subsubsection Site frequency spectrum
 Computes the site frequency spectrum for each block.
 Only ``doubletons'' sites are considered, that is, positions in the alignment with only two states.
 The proportions of doubletons are then computed by bins.
@@ -817,6 +859,7 @@ SiteFrequencySpectrum(bounds=(-0.5,0.5), ...)
 @end verbatim
 The remaining sites will be pulled in a column called ``Ignored''.
  
+Arguments:
 @table @command
 @item bounds=@{list of double@}
 The bounds delimiting the bins of the spectrum to be computed.
@@ -825,9 +868,11 @@ The bounds delimiting the bins of the spectrum to be computed.
 A list of species forming the ingroup and on which the statistics should be calculated.
 @end table
 
-@item CountClusters
+@node CountClusters,  , SiteFrequencySpectrum, Descriptive
+@subsubsection Number of sequence clusters.
 This counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
 
+Arguments;
 @table @command
 
 @item tree=@{string@}
@@ -838,8 +883,10 @@ The threshold to use in order to compute clusters. A threshold of 0.001 for inst
  
 @end table
 
-@end table
-
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
+@c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
 @node Exporting,  , Analyzing, Filters
 @section Exporting blocks and data
