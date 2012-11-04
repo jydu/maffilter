@@ -83,6 +83,7 @@ Cleaning alignment blocks
 Statistical analysis
 
 * Descriptive::                 
+* Phylogenetics::               
 
 Descriptive statistics
 
@@ -95,6 +96,11 @@ Descriptive statistics
 * SiteStatistics::              
 * SiteFrequencySpectrum::       
 * CountClusters::               
+
+Phylogenetics
+
+* DistanceEstimation::          
+* DistanceBasedPhylogeny::      
 
 @end detailmenu
 @end menu
@@ -179,6 +185,10 @@ Branching processes can however be achieved by outputing the alignment blocks at
                               +------------+
 @end verbatim
 
+Some filters allow to generate additional data associated to each alignment block, such as phylogenetic trees.
+Such data cannot be written to file together with the blocks, as the MAF format does not support this.
+These data are however stored in memory by MafFilter together with the block, as ``extra-data''.
+Extra-data are associated with a special tag which is used for refering to them, including for writting them in appropriate output files.
 
 The next section describes how to specify the series of filters to be applied, and the next chapter provides an exhaustive list of available filters.
 
@@ -722,9 +732,10 @@ Compression format for output file (if file != none).
 
 @menu
 * Descriptive::                 
+* Phylogenetics::               
 @end menu
 
-@node Descriptive,  , Analyzing, Analyzing
+@node Descriptive, Phylogenetics, Analyzing, Analyzing
 @subsection Descriptive statistics
 
 The section describes how to compute simple statistics for each alignment block.
@@ -884,6 +895,57 @@ The threshold to use in order to compute clusters. A threshold of 0.001 for inst
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
+
+@node Phylogenetics,  , Descriptive, Analyzing
+@subsection Phylogenetics
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@menu
+* DistanceEstimation::          
+* DistanceBasedPhylogeny::      
+@end menu
+
+@node DistanceEstimation, DistanceBasedPhylogeny, Phylogenetics, Phylogenetics
+@subsubsection Distance matrix estimation
+
+Estimates a pairwise distance matrix.
+
+Arguments:
+@table @command
+@item method=@{count@}
+Method used to estimate distance. For now, only observed counts are available, so that the distance betwwen two sequences is calculated as the proportion of mistmatches.
+
+@item gap_option=@{string@}
+Specifies how to deal with gaps:
+@table @command
+@item all
+All positions are used. Gaps are considered as a fifth character.
+@item no_full_gap
+Positions only made of gaps in the alignment block are ignored. Alternatively, a gap in the two sequences is ocnsidered as a match (gap are a ``fifth'' charcater).
+@item no_double_gap
+For each pairwise comparison, positions where a gap is found in both sequences are ignored.
+@item no_gap
+For each pairwise comparison, any gap-containing position is ignored. This is the recommended option for building phylogenies.
+@end table
+
+@item unresolved_as_gap=@{yes|no@}
+Tell is unresolved characters should be treated as gaps (usually in order to be ignored).
+
+@end table
+
+Extra-data:
+@table @command
+@item CountDistance
+The pairwise distance matrix based on counts.
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node DistanceBasedPhylogeny,  , DistanceEstimation, Phylogenetics
+@subsubsection Clustering based on distances
+
+
 @c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
