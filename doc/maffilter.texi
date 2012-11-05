@@ -101,6 +101,14 @@ Phylogenetics
 
 * DistanceEstimation::          
 * DistanceBasedPhylogeny::      
+* NewOutgroup::                 
+* DropSpecies::                 
+
+Exporting blocks and data
+
+* Output::                      
+* OutputAlignments::            
+* OutputTrees::                 
 
 @end detailmenu
 @end menu
@@ -904,6 +912,8 @@ The threshold to use in order to compute clusters. A threshold of 0.001 for inst
 @menu
 * DistanceEstimation::          
 * DistanceBasedPhylogeny::      
+* NewOutgroup::                 
+* DropSpecies::                 
 @end menu
 
 @node DistanceEstimation, DistanceBasedPhylogeny, Phylogenetics, Phylogenetics
@@ -942,10 +952,83 @@ The pairwise distance matrix based on counts.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node DistanceBasedPhylogeny,  , DistanceEstimation, Phylogenetics
-@subsubsection Clustering based on distances
+@node DistanceBasedPhylogeny, NewOutgroup, DistanceEstimation, Phylogenetics
+@subsubsection Hierarchical clustering based on distances
 
+Performs hierarchical clustering from a previously computed distance matrix.
 
+Arguments:
+@table @command
+@item method=@{string@}
+Method to use for reconstructing the tree:
+@table @command
+@item upgma
+Unweighted pair group method using arithmetic means
+@item wpgma
+Weighted pair group method using aritmetic means
+@item nj
+Neighbor-Joining (Saitou and Nei, 1987)
+@item bionj
+BioNJ method (Gascuel, 1997)
+@end table
+
+@item dist_mat=@{string@}
+The tag name of the distance matrix to use.
+@end table
+
+Extra-data:
+@table @command
+@item UPGMA|WPGMA|NJ|BioNJ
+The resulting tree.
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node NewOutgroup, DropSpecies, DistanceBasedPhylogeny, Phylogenetics
+@subsubsection Root trees
+
+The @command{NewOutgroup} filter takes an input tree and (re)root it according to a given species name.
+
+Arguments:
+@table @command
+@item tree_input=@{string@}
+The tag name of the tree to reroot.
+@item tree_output=@{string@}
+The tag name to use to store the rerooted tree. If the same as @command{tree_input}, the rerooted tree will replace the old one.
+@item outgroup=@{string@}
+The name of the species to use as outgroup. One and only one sequence for this species should be present in each block for which rerooting is to be performed.
+@end table
+
+Extra-data:
+@table @command
+@item (user-defined tag)
+A rooted tree.
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node DropSpecies,  , NewOutgroup, Phylogenetics
+@subsubsection Remove a species from a tree
+
+The @command{DropSpecies} removes a leaf from a tree.
+
+Arguments:
+@table @command
+@item tree_input=@{string@}
+The tag name of the tree to edit.
+@item tree_output=@{string@}
+The tag name to use to store the edited tree. If the same as @command{tree_input}, the edited tree will replace the old one.
+@item species=@{string@}
+The name of the species to remove. All leaves in the tree, if any, corresponding to a sequence for this species will be removed.
+@end table
+
+Extra-data:
+@table @command
+@item (user-defined tag)
+An edited tree.
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
@@ -953,8 +1036,71 @@ The pairwise distance matrix based on counts.
 @node Exporting,  , Analyzing, Filters
 @section Exporting blocks and data
 
+@menu
+* Output::                      
+* OutputAlignments::            
+* OutputTrees::                 
+@end menu
+
+@node Output, OutputAlignments, Exporting, Exporting
+@subsection Write alignment blocks to a MAF file
+
+The @command{Output} filter writes all blocks to a MAF file.
+
+@table @command
+@item file=@{none|@{path@}@}
+A file path where to write alignment blocks, in the MAF format.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item mask=@{yes|no@}
+Tell if sequences should be masked (if a mask annotation is available), or if masking information should be ignored.
+
+@end table
+
 @c ------------------------------------------------------------------------------------------------------------------
+
+@node OutputAlignments, OutputTrees, Output, Exporting
+@subsection Write alignment blocks to an external alignment file.
+
+The @command{OutputAlignments} filter writes all blocks to an external alignment file, potentially losing some information such as coordinates and scores.
+Sequence names will be formated following the Ensembl convention.
+
+@table @command
+@item file=@{none|@{path@}@}
+A file path where to write alignment blocks.
+
+@item format=@{string@}
+One of the alignment format supported by Bio++ (this includes Fasta, Mase and Clustal, see the Bio++ Program suite reference manual for a complete list of formats and options).
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item mask=@{yes|no@}
+Tell if sequences should be masked (if a mask annotation is available), or if masking information should be ignored.
+
+@end table
+
 @c ------------------------------------------------------------------------------------------------------------------
+
+@node OutputTrees,  , OutputAlignments, Exporting
+@subsection Write trees to a file.
+
+The @command{OutputTrees} filter writes trees associated to blocks to a file, in the Newick format. All trees will be stored in the same file, one per line.
+
+@table @command
+@item tree=@{string@}
+The tag used to store previously computed trees.
+
+@item file=@{none|@{path@}@}
+A file path where to write trees, in the Newick format.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@end table
+
 @c ------------------------------------------------------------------------------------------------------------------
 
 @c end of document
