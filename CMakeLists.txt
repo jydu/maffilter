@@ -1,10 +1,10 @@
-# CMake script for GenomeTools package
+# CMake script for the MafFilter package
 # Author: Julien Dutheil
 # Created: 27/04/2010
 
 # Global parameters
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(GenomeTools C CXX)
+PROJECT(MafFilter C CXX)
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
@@ -172,20 +172,20 @@ ENDIF(NROFF_EXE)
 
 
 # Subdirectories
-ADD_SUBDIRECTORY(GenomeTools)
+ADD_SUBDIRECTORY(MafFilter)
 ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(man)
 
 ENDIF(NO_DEP_CHECK)
 
 # Packager
-SET(CPACK_PACKAGE_NAME "genometools")
+SET(CPACK_PACKAGE_NAME "maffilter")
 SET(CPACK_PACKAGE_VENDOR "Julien Dutheil")
-SET(CPACK_PACKAGE_VERSION "0.1.0")
-SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "1")
+SET(CPACK_PACKAGE_VERSION "1.0.0")
+SET(CPACK_PACKAGE_VERSION_MAJOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "0")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for genomics")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Filtering of genome alignment in the Multiple Alignment Format (MAF)")
 SET(CPACK_RESOURCE_FILE_LICENSE "COPYING")
 SET(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS")
 SET(CPACK_SOURCE_GENERATOR "TGZ")
@@ -206,12 +206,10 @@ SET(CPACK_SOURCE_IGNORE_FILES
  ".*stamp"
  "\\\\.sh"
  "\\\\..*\\\\.swp"
- "GenomeTools/\\\\..*"
- "GenomeTools/mafinfo"
+ "MafFilter/\\\\..*"
  "debian/tmp"
- "debian/mafinfo"
- "debian/genometools\\\\.substvars"
- "debian/genometools\\\\.debhelper"
+ "debian/maffilter\\\\.substvars"
+ "debian/maffilter\\\\.debhelper"
  "debian/debhelper\\\\.log"
  "install_manifest.txt"
  "DartConfiguration.tcl"
