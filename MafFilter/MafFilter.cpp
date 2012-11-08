@@ -82,9 +82,9 @@ void help()
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
-  cout << "*                  MAF Filter, version 0.1.0                     *" << endl;
+  cout << "*                  MAF Filter, version 1.0.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 31/07/12 *" << endl;
+  cout << "*                                           Last Modif. 08/11/12 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -373,7 +373,7 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         if (ignoreGaps && missingAsGap)
           throw Exception("Error, incompatible options ingore_gaps=yes and missing_as_gap=yes.");
-        EntropyFilter2MafIterator* iterator = new EntropyFilter2MafIterator(currentIterator, species, ws, st, em, pm, !trash, missingAsGap, ignoreGaps);
+        EntropyFilterMafIterator* iterator = new EntropyFilterMafIterator(currentIterator, species, ws, st, em, pm, !trash, missingAsGap, ignoreGaps);
         iterator->setLogStream(&log);
         iterator->verbose(verbose);
         its.push_back(iterator);
