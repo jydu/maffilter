@@ -44,7 +44,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <memory>
 using namespace std;
 
-#include "MafIterators.h"
+#include <Bpp/Seq/Io/Maf.all>
 
 //From boost:
 #include <boost/iostreams/device/file.hpp>
