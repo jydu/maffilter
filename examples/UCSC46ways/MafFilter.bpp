@@ -1,0 +1,27 @@
+CHR=22
+DATA=chr$(CHR)
+input.file=/mnt/dd3/jdutheil/Data/Genomes/UCSC_46ways/maf/$(DATA).maf.gz
+input.file.compression=gzip
+input.format=Maf
+output.log=$(DATA).maffilter.log
+maf.filter=\
+    MinBlockLength(min_length=1000),\
+    Subset(species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2), strict=yes, remove_duplicates=yes, verbose=no),\
+    XFullGap(species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2), verbose=no),\
+    MinBlockLength(min_length=1000),\
+    WindowSplit(preferred_size=1000, align=center),\
+    SequenceStatistics(\
+      statistics=(\
+        BlockSize(),\
+        BlockLength(),\
+        SiteStatistics(species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2)),\
+        PairwiseDivergence(species1=hg19, species2=panTro2),\
+        PairwiseDivergence(species1=hg19, species2=gorGor1),\
+        PairwiseDivergence(species1=hg19, species2=ponAbe2),\
+        PairwiseDivergence(species1=hg19, species2=rheMac2)),\
+      ref_species=hg19,\
+      file=$(DATA).5ways.window1k.statistics.csv),\
+    DistanceEstimation(method=count, gap_option=no_gap, unresolved_as_gap=yes),\
+    DistanceBasedPhylogeny(method=bionj, dist_mat=CountDistance),\
+    OutputTrees(tree=BioNJ, file=$(DATA).5ways.window1k.dnd, compression=none)
+
