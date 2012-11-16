@@ -1,4 +1,4 @@
-CHR=22
+CHR=1
 DATA=chr$(CHR)
 input.file=/mnt/dd3/jdutheil/Data/Genomes/UCSC_46ways/maf/$(DATA).maf.gz
 input.file.compression=gzip
@@ -6,7 +6,8 @@ input.format=Maf
 output.log=$(DATA).maffilter.log
 maf.filter=\
     MinBlockLength(min_length=1000),\
-    Subset(species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2), strict=yes, remove_duplicates=yes, verbose=no),\
+    Subset(species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2), strict=yes, remove_duplicates=yes, verbose=no, keep=no),\
+    Merge(species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2), dist_max=10),\
     XFullGap(species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2), verbose=no),\
     MinBlockLength(min_length=1000),\
     WindowSplit(preferred_size=1000, align=center),\
@@ -21,7 +22,12 @@ maf.filter=\
         PairwiseDivergence(species1=hg19, species2=rheMac2)),\
       ref_species=hg19,\
       file=$(DATA).5ways.window1k.statistics.csv),\
-    DistanceEstimation(method=count, gap_option=no_gap, unresolved_as_gap=yes),\
-    DistanceBasedPhylogeny(method=bionj, dist_mat=CountDistance),\
-    OutputTrees(tree=BioNJ, file=$(DATA).5ways.window1k.dnd, compression=none)
+    DistanceEstimation(method=ml,\
+        model=K80(kappa=2.0), rate=Constant,\
+        parameter_estimation=pairwise,\
+        max_freq_gaps=0.3, gaps_as_unresolved=yes,\
+        verbose=no, profiler=profile.txt, message_handler=messages.txt),\
+    DistanceBasedPhylogeny(method=bionj, dist_mat=MLDistance),\
+    NewOutgroup(tree_input=BioNJ, tree_output=BioNJ_rerooted, outgroup=rheMac2),\
+    OutputTrees(tree=BioNJ_rerooted, file=$(DATA).5ways.window1k.dnd, compression=none)
 

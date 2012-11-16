@@ -64,13 +64,15 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/BppOAlignmentWriterFormat.h>
 #include <Bpp/Seq/Container/SiteContainerTools.h>
 
-// From bpp-seq-omics:
+// From bpp-seq-omics and bpp-phyl-omics:
 #include <Bpp/Seq/Io/Maf.all>
 #include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
 #include <Bpp/Seq/Feature/Gtf/GtfFeatureReader.h>
 
 // From bpp-phyl:
 #include <Bpp/Phyl/Distance.all>
+#include <Bpp/Phyl/Io/BppOSubstitutionModelFormat.h>
+#include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 
 using namespace bpp;
 
@@ -117,7 +119,7 @@ int main(int args, char** argv)
     
     string logFile = ApplicationTools::getAFilePath("output.log", maffilter.getParams(), true, false);
 
-    StlOutputStream log(auto_ptr<ostream>(new ofstream(logFile.c_str(), ios::out)));
+    StlOutputStream log(new ofstream(logFile.c_str(), ios::out));
 
     MafIterator* currentIterator;
     if (inputFormat == "Maf") {
@@ -161,7 +163,7 @@ int main(int args, char** argv)
         //getList(speciesList, species);
         SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, keep, rmdupl);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -182,7 +184,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Maximum distance allowed", distMax);
         BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         if (cmdArgs.find("ignore.chr") != cmdArgs.end()) {
           throw Exception("ignore.chr argument in Merge is deprecated: use ignore_chr instead.");
         }
@@ -209,7 +211,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Minimum final block size", minimumSize);
         ConcatenateMafIterator* iterator = new ConcatenateMafIterator(currentIterator, minimumSize);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -224,7 +226,7 @@ int main(int args, char** argv)
           throw Exception("At least one species should be provided for command 'XFullGap'.");
         FullGapFilterMafIterator* iterator = new FullGapFilterMafIterator(currentIterator, species);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -252,7 +254,7 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         AlignmentFilterMafIterator* iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, em, !trash, missingAsGap);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
 
         if (!trash) {
@@ -311,7 +313,7 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         AlignmentFilter2MafIterator* iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, gm, pm, !trash, missingAsGap);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
 
         if (!trash) {
@@ -375,7 +377,7 @@ int main(int args, char** argv)
           throw Exception("Error, incompatible options ingore_gaps=yes and missing_as_gap=yes.");
         EntropyFilterMafIterator* iterator = new EntropyFilterMafIterator(currentIterator, species, ws, st, em, pm, !trash, missingAsGap, ignoreGaps);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
 
         if (!trash) {
@@ -431,7 +433,7 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         MaskFilterMafIterator* iterator = new MaskFilterMafIterator(currentIterator, species, ws, st, mm, !trash);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
 
         if (!trash) {
@@ -486,7 +488,7 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         QualityFilterMafIterator* iterator = new QualityFilterMafIterator(currentIterator, species, ws, st, mq, !trash);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
 
         if (!trash) {
@@ -559,7 +561,7 @@ int main(int args, char** argv)
           throw Exception("Unsupported feature format: " + featureFormat);
         FeatureFilterMafIterator* iterator = new FeatureFilterMafIterator(currentIterator, refSpecies, featuresSet, !trash);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
 
         if (!trash) {
@@ -644,7 +646,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Chromosome", chr);
         ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chr);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -660,7 +662,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reference species", ref);
         DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -717,8 +719,7 @@ int main(int args, char** argv)
         //Get output file:
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         ApplicationTools::displayResult("-- Output file", outputFile);
-        auto_ptr<ostream> ofs(new ofstream(outputFile.c_str(), ios::out));
-        StlOutputStream* output = new StlOutputStream(ofs);
+        StlOutputStream* output = new StlOutputStream(new ofstream(outputFile.c_str(), ios::out));
         SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, statistics);
         
         if (cmdArgs.find("reference") != cmdArgs.end()) {
@@ -730,7 +731,7 @@ int main(int args, char** argv)
         
         iterator->addIterationListener(listener);
         currentIterator = iterator;
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
       }
 
@@ -787,7 +788,7 @@ int main(int args, char** argv)
 
         FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, *featuresSet2, ignoreStrand);
         iterator->setLogStream(&log);
-        iterator->verbose(verbose);
+        iterator->setVerbose(verbose);
         its.push_back(iterator);
 
         currentIterator = iterator;
@@ -851,6 +852,58 @@ int main(int args, char** argv)
           CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(&log);
+          currentIterator = iterator;
+          its.push_back(iterator);
+        } else if (distMethod == "ml") {
+          string modelDesc = ApplicationTools::getStringParameter("model", cmdArgs, "JC()");
+          string rdistDesc = ApplicationTools::getStringParameter("rate", cmdArgs, "Constant()");
+          string paramOpt  = ApplicationTools::getStringParameter("parameter_estimation", cmdArgs, "initial");
+          if (paramOpt == "initial") {
+            paramOpt = OptimizationTools::DISTANCEMETHOD_INIT;
+          } else if (paramOpt == "pairwise") {
+            paramOpt = OptimizationTools::DISTANCEMETHOD_PAIRWISE;
+          } else {
+            throw Exception("Unrecognized parameter option, should be either 'initial', 'pairwise'.");
+          }
+          string prPath = ApplicationTools::getAFilePath("profiler", cmdArgs, true, false);
+          string mhPath = ApplicationTools::getAFilePath("message_handler", cmdArgs, true, false);
+          double propGapsToKeep = ApplicationTools::getDoubleParameter("max_freq_gaps", cmdArgs, 0.);
+          bool gapsAsUnresolved = ApplicationTools::getBooleanParameter("gaps_as_unresolved", cmdArgs, true);
+          
+          ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
+          ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
+          
+          BppOSubstitutionModelFormat modelReader;
+          map<string, string> modelParams;
+          auto_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, modelParams, false, false, true, true));
+          map<string, string> rdistParams;
+          auto_ptr<DiscreteDistribution> rdist(PhylogeneticsApplicationTools::getRateDistributionDefaultInstance(rdistDesc, rdistParams, true, true)); 
+          auto_ptr<DistanceEstimation> distEst(new DistanceEstimation(model.release(), rdist.release()));
+          
+          OutputStream* profiler =
+            (prPath == "none") ? 0 :
+              (prPath == "std") ? ApplicationTools::message :
+              new StlOutputStream(new ofstream(prPath.c_str(), ios::out));
+          if (profiler)
+            profiler->setPrecision(20);
+          if (verbose)
+            ApplicationTools::displayResult("-- Optimization profile in", prPath);
+          distEst->getOptimizer()->setProfiler(profiler);
+
+          OutputStream* messenger =
+            (mhPath == "none") ? 0 :
+              (mhPath == "std") ? ApplicationTools::message :
+              new StlOutputStream(new ofstream(mhPath.c_str(), ios::out));
+          if (messenger)
+            messenger->setPrecision(20);
+          if (verbose)
+            ApplicationTools::displayResult("-- Optimization messages in", mhPath);
+          distEst->getOptimizer()->setMessageHandler(messenger);
+
+          MaximumLikelihoodDistanceEstimationMafIterator* iterator = new MaximumLikelihoodDistanceEstimationMafIterator(currentIterator, distEst.release(), propGapsToKeep, gapsAsUnresolved, paramOpt);
+          ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
+          iterator->setLogStream(&log);
+          iterator->setVerbose(verbose);
           currentIterator = iterator;
           its.push_back(iterator);
         } else {

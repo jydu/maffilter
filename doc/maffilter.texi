@@ -923,9 +923,12 @@ Estimates a pairwise distance matrix.
 
 Arguments:
 @table @command
-@item method=@{count@}
-Method used to estimate distance. For now, only observed counts are available, so that the distance betwwen two sequences is calculated as the proportion of mistmatches.
+@item method=@{count|ml@}
+Method used to estimate distance, either observed count or maximum likelihood estimate.
+@end table
 
+Further arguments for the observed counts:
+@table @command
 @item gap_option=@{string@}
 Specifies how to deal with gaps:
 @table @command
@@ -944,10 +947,46 @@ Tell is unresolved characters should be treated as gaps (usually in order to be 
 
 @end table
 
+Further arguments for the ML method:
+@table @command
+@item model=@{substitution model description@}
+See the Bio++ Program Suite manual for a description of substitution models available. Only nucleotide models can be used.
+@example
+model=JC
+model=K80(kappa=2)
+model=T92(kappa=2, theta=0.5)
+model=GTR
+@end example
+
+@item rate=@{rate distribution description@}
+See the Bio++ Program Suite manual for a description of available options.
+@example
+rate=Constant
+rate=Gamma(n=4, alpha=0.5)
+@end example
+
+@item profiler=@{none|std|@{path@}@}
+Where to print optimization steps (nowhere, standard output or to a given file).
+
+@item message_handler=@{none|std|@{path@}@}
+Where to log optimization (nowhere, standard output or to a given file).
+
+@item parameter_estimation=@{initial|pairwise@}
+How to estimate substitution process parameters (for instance kappa and alpha).
+Available options are either to leave them to their initial values, or to estimate them for each pair of sequences.
+
+@item max_freq_gaps=@{float@}
+The maximum proportion of gaps for a site to be included in the analysis.
+
+@item gaps_as_unresolved=@{yes/no@}
+Tell if remaining gaps should be converted to 'N' before likelihood computation. This should be 'yes' unless you specify a substitution model which explicitely allows for gaps.
+@end table
+
+
 Extra-data:
 @table @command
-@item CountDistance
-The pairwise distance matrix based on counts.
+@item CountDistance or MLDistance
+The estimated pairwise distance matrix.
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
