@@ -72,7 +72,7 @@ using namespace boost::iostreams;
 // From bpp-phyl:
 #include <Bpp/Phyl/Distance.all>
 #include <Bpp/Phyl/Io/BppOSubstitutionModelFormat.h>
-#include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
+#include <Bpp/Phyl/Io/BppORateDistributionFormat.h>
 
 using namespace bpp;
 
@@ -873,11 +873,10 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
           ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
           
-          BppOSubstitutionModelFormat modelReader;
-          map<string, string> modelParams;
-          auto_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, modelParams, false, false, true, true));
-          map<string, string> rdistParams;
-          auto_ptr<DiscreteDistribution> rdist(PhylogeneticsApplicationTools::getRateDistributionDefaultInstance(rdistDesc, rdistParams, true, true)); 
+          BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true);
+          auto_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
+          BppORateDistributionFormat rdistReader(true);
+          auto_ptr<DiscreteDistribution> rdist(rdistReader.read(rdistDesc, true)); 
           auto_ptr<DistanceEstimation> distEst(new DistanceEstimation(model.release(), rdist.release()));
           
           OutputStream* profiler =
