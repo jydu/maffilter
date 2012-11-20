@@ -206,7 +206,7 @@ The next section describes how to specify the series of filters to be applied, a
 @section How to run the program
 
 MafFilter is a program written in C++ with the Bio++ libraries. It is a command line program (that is, without graphical user interface) which uses the Bio++ Options (BppO) syntax. 
-This syntax is of type @samp{keys}=@samp{values}, which can be passed directly as arguments of the maffilter program, or more conveniently, stored in an ``options'' file, or a combination of both. See the Bio++ Program Suite (BppSuite) manual for more information.
+This syntax is of type @samp{keys}=@samp{values}, which can be passed directly as arguments of the maffilter program, or more conveniently, stored in an ``options'' file (specified with param=option_file), or a combination of both. See the Bio++ Program Suite (BppSuite) manual for more information.
 MafFilter therefore typically takes as input a MAF file and a series of commands which determine the output file(s) that will be written and where.
 Additional input files might be specified, such as gene annotation files (typically in GFF/GTF format).
 
@@ -241,6 +241,7 @@ which will lead MafFilter to run in "single sequence" mode.
 In this mode, each sequence of the original file is considered as a distinct block.
 This mode might be useful to extract annotations and estimate simple statistics.
 Fasta files can be compressed in the same way as MAF files.
+The sequence names are expected to be of the form Species:Chromosome:start:strand:length, with possible empty fields.
 
 @item output.log=@{path@}
 The file where to write log messages.

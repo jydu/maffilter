@@ -61,6 +61,7 @@ using namespace boost::iostreams;
 
 // From bpp-seq:
 #include <Bpp/Seq/SequenceWithQuality.h>
+#include <Bpp/Seq/Io/BppOSequenceStreamReaderFormat.h>
 #include <Bpp/Seq/Io/BppOAlignmentWriterFormat.h>
 #include <Bpp/Seq/Container/SiteContainerTools.h>
 
@@ -124,10 +125,11 @@ int main(int args, char** argv)
     MafIterator* currentIterator;
     if (inputFormat == "Maf") {
       currentIterator = new MafAlignmentParser(&stream, true);
-    } else if (inputFormat == "Fasta") {
-      ISequenceStream* seqStream = new Fasta();
+    } else {
+      BppOSequenceStreamReaderFormat reader(true);
+      ISequenceStream* seqStream = reader.read(inputFormat);
       currentIterator = new SequenceStreamToMafIterator(seqStream, &stream);
-    } else throw Exception("Unvalid input format: " + inputFormat);
+    }
 
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);
     vector<MafIterator*> its;
@@ -1019,10 +1021,9 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
         
         OutputAlignmentMafIterator* iterator; 
-        BppOAlignmentWriterFormat bppoWriter;
+        BppOAlignmentWriterFormat bppoWriter(true);
         string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
-        map<string, string> fargs;
-        OAlignment* oAln = bppoWriter.read(description, fargs, true);
+        OAlignment* oAln = bppoWriter.read(description);
         if (multipleFiles) {
           iterator = new OutputAlignmentMafIterator(currentIterator, outputFile, oAln, mask);
         } else {
