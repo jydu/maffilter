@@ -227,7 +227,8 @@ Please refer to the Bio++ Program Suite manual for more details, including the u
 @node General,  , Run, Introduction
 @section General options
 
-@subsubsection Synopsis:
+Synopsis:
+
 @cartouche
 @example
 input.file=mydata.maf.gz
@@ -247,7 +248,7 @@ output.log=mydata.maffilter.log
 @end example
 @end cartouche
 
-@subsubsection Detailed description of commands:
+Detailed description of commands:
 
 @table @command
 
