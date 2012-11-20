@@ -128,7 +128,9 @@ int main(int args, char** argv)
     } else {
       BppOSequenceStreamReaderFormat reader(true);
       ISequenceStream* seqStream = reader.read(inputFormat);
-      currentIterator = new SequenceStreamToMafIterator(seqStream, &stream);
+      map<string, string> cmdArgs(reader.getUnparsedArguments());
+      bool zeroBased = ApplicationTools::getBooleanParameter("zero_based", cmdArgs, true);
+      currentIterator = new SequenceStreamToMafIterator(seqStream, &stream, false, zeroBased);
     }
 
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);

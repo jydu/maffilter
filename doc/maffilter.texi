@@ -227,6 +227,28 @@ Please refer to the Bio++ Program Suite manual for more details, including the u
 @node General,  , Run, Introduction
 @section General options
 
+@subsubsection Synopsis:
+@cartouche
+@example
+input.file=mydata.maf.gz
+input.file.compression=gzip
+input.format=Maf
+output.log=mydata.maffilter.log
+...
+@end example
+
+or
+@example
+input.file=mydata.fasta
+input.file.compression=none
+input.format=Fasta(zero_based=yes)
+output.log=mydata.maffilter.log
+...
+@end example
+@end cartouche
+
+@subsubsection Detailed description of commands:
+
 @table @command
 
 @item input.file=@{path@}
@@ -242,6 +264,7 @@ In this mode, each sequence of the original file is considered as a distinct blo
 This mode might be useful to extract annotations and estimate simple statistics.
 Fasta files can be compressed in the same way as MAF files.
 The sequence names are expected to be of the form Species:Chromosome:start:strand:length, with possible empty fields.
+Coordinates are expected to be 0-based (that is, the first nucleotide is position 0). However, passing the \command{zero_based=no} argument to the format name will assume that the first nucleotide is position 1.
 
 @item output.log=@{path@}
 The file where to write log messages.

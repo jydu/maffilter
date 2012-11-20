@@ -1,6 +1,6 @@
 DATA=Umaydis
 input.file=$(DATA).fasta
-input.format=Fasta
+input.format=Fasta(zero_based=no)
 input.file.compression=none
 output.log=$(DATA).noncoding.maffilter.log
 maf.filter=                         \
