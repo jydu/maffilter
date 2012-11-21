@@ -227,7 +227,7 @@ Please refer to the Bio++ Program Suite manual for more details, including the u
 @node General,  , Run, Introduction
 @section General options
 
-Synopsis:
+@heading Synopsis:
 
 @cartouche
 @example
@@ -248,7 +248,7 @@ output.log=mydata.maffilter.log
 @end example
 @end cartouche
 
-Detailed description of commands:
+@heading Detailed description of commands:
 
 @table @command
 
@@ -308,7 +308,23 @@ The next section present all available filters and their corresponding arguments
 @subsection Subset: remove sequences from blocks by species name
 
 The @command{Subset} filter allows to filter sequences for each block by keeping only a selection of species.
-It takes the following arguments, separated by comas:
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    Subset(                                 \
+        species=(species1, species2, etc),  \
+        strict=yes,                         \
+        keep=no,                            \
+        remove_duplicates=yes),             \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 @item species=(species1, species2, etc)
@@ -345,7 +361,21 @@ they are from the same strand
 they are distant by less than a defined threshold (the start of sequence 2 - the end of sequence 1 < threshold in bp).
 @end itemize
 
-The filter takes the following arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    Merge(                                 \
+        species=(species1, species2, etc),  \
+        dist_max=0,                         \
+        ignore_chr=(Random,Unknown)),       \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments
 
 @table @command
 
