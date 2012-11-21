@@ -265,7 +265,7 @@ In this mode, each sequence of the original file is considered as a distinct blo
 This mode might be useful to extract annotations and estimate simple statistics.
 Fasta files can be compressed in the same way as MAF files.
 The sequence names are expected to be of the form Species:Chromosome:start:strand:length, with possible empty fields.
-Coordinates are expected to be 0-based (that is, the first nucleotide is position 0). However, passing the \command{zero_based=no} argument to the format name will assume that the first nucleotide is position 1.
+Coordinates are expected to be 0-based (that is, the first nucleotide is position 0). However, passing the @command{zero_based=no} argument to the format name will assume that the first nucleotide is position 1.
 
 @item output.log=@{path@}
 The file where to write log messages.
@@ -367,7 +367,7 @@ they are distant by less than a defined threshold (the start of sequence 2 - the
 @example
 maf.filter=                                 \
     [...],
-    Merge(                                 \
+    Merge(                                  \
         species=(species1, species2, etc),  \
         dist_max=0,                         \
         ignore_chr=(Random,Unknown)),       \
@@ -375,7 +375,7 @@ maf.filter=                                 \
 @end example
 @end cartouche
 
-@heading Arguments
+@heading Arguments:
 
 @table @command
 
@@ -401,6 +401,19 @@ Sequences annotated with such chromosomes will not be checked for synteny and th
 
 The @command{Concatenate} filter fuses consecutive blocks until the concatenated block reaches a minimal size.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    Concatenate(minimum_size=10000),        \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 
 @item minimum_size=@{int@}
@@ -415,6 +428,26 @@ The minimum size for the blocks to be reached.
 
 The @command{ExtractFeature} extracts parts of the alignment corresponding to certain features.
 The features to extract are typically provided via a GFF file. 
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    ExtractFeature(                         \
+        ref_species=species1,               \
+        feature.file=species1.gff3.gz,      \
+        feature.file.compression=gzip,      \
+        feature.format=GFF,                 \
+        file=species1.trash.maf.gz,         \
+        compression=gzip,                   \
+        ignore_strand=no),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 
@@ -448,6 +481,21 @@ If yes, features will be extracted ``as is''. Otherwise, the invert-complement s
 
 The @command{SelectChr} filter keeps only block from a given chromosome (or contig or scaffold...) for a given reference species.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    SelectChr(                              \
+        ref_species=species1,               \
+        chromosome=chr01),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 
 @item ref_species=@{string@}
@@ -465,6 +513,21 @@ The name of the chromosome/contig/scaffold to be filtered.
 
 The @command{WindowSplit} filter subdivides blocks into smaller ones of a regular size, typically for window-based analyses.
 It is possible to generate overlapping windows.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    WindowSplit(                            \
+        preferred_size=1000,                \
+        align=center),                      \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 
@@ -527,6 +590,19 @@ In the last case, the windows will have at least the specified size, but might b
 
 The @command{MinBlockLength} filter discards blocks with less sites than a given threshold.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    MinBlockLength(min_length=1000),        \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 
 @item min_length=@{int>0@}
@@ -541,6 +617,19 @@ The minimum length.
 
 The @command{MinBlockSize} filter discards blocks with less sequences than a given threshold.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    MinBlockSize(min_size=3),               \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 
 @item min_size=@{int>0@}
@@ -554,6 +643,20 @@ The minimum size.
 @subsection Exclude full gap columns
 
 Remove gap-only columns from blocks. This does not modify coordinates and might be necessary after a @command{Subset} filter.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    XFullGap(
+        species=(species1,species2,etc)),   \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 
@@ -572,6 +675,27 @@ The local uncertainty in the alignment is determined through a sliding window ba
 For each window, the number of gap characters and the total entropy are computed. Any window
 for which both the entropy and number of gaps exceed the given thresholds will be removed from
 the alignment, and the corresponding block split accordingly.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    AlnFilter(                              \
+        species=(species1,species2,etc),    \
+        window.size=10,                     \
+        window.step=1,                      \
+        max.gap=9,                          \
+        max.ent=0.2,                        \
+        missing_as_gap=yes,                 \
+        file=data.trash_aln.maf.gz,         \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 
@@ -618,6 +742,27 @@ CA---CGGGA
 positions 3, 4 and 5 will be masked if the maximum number of gaps allowed is 2 or less. The three columns will however count as only one indel event.
 The window is then discarded if it contains more than a given number of indel events.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    AlnFilter2(                             \
+        species=(species1,species2,etc),    \
+        window.size=10,                     \
+        window.step=1,                      \
+        max.gap=1,                          \
+        max.pos=1,                          \
+        missing_as_gap=yes,                 \
+        file=data.trash_aln.maf.gz,         \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 
 @item species=(species1, species2, etc)
@@ -655,6 +800,28 @@ Compression format for output file (if file != none).
 This filter removes highly variable regions and split the blocks accordingly.
 It uses a sliding windows, and compute the entropy for each site in the window.
 The window is then discarded if it containes more than 'p' sites with an entropy higher that a user-specified threshold. The alignment block is then split into separate block accordingly.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    EntropyFilter(                          \
+        species=(species1,species2,etc),    \
+        window.size=10,                     \
+        window.step=1,                      \
+        max.ent=0.2,                        \
+        max.pos=3,                          \
+        missing_as_gap=yes,                 \
+        ignore_gaps=yes,                    \
+        file=data.trash_ent.maf.gz,         \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 
@@ -697,6 +864,25 @@ The @command{MaskFilter} split alignment blocks by removing regions with too man
 A masked position is identified by a lower case letter in the original sequence.
 Windows with more than a given amount of lower case characters will be discarded, and the corresponding block split.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    MaskFilter(                             \
+        species=(species1,species2,etc),    \
+        window.size=10,                     \
+        window.step=1,                      \
+        max.masked=2,                       \
+        file=data.trash_msk.maf.gz,         \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 
 @item species=(species1, species2, etc)
@@ -728,6 +914,25 @@ Compression format for output file (if file != none).
 The @command{QualFilter} split alignment blocks by removing regions with too low quality score.
 Windows with an average quality below a given threshold will be discarded, and the corresponding block split.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    QualFilter(                             \
+        species=(species1,species2,etc),    \
+        window.size=10,                     \
+        window.step=1,                      \
+        min.qual=0.8,                       \
+        file=data.trash_qual.maf.gz,        \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 
 @item species=(species1, species2, etc)
@@ -758,6 +963,25 @@ Compression format for output file (if file != none).
 The @command{FeatureFilter} remove parts of the alignment corresponding to certain features.
 The features to extract are typically provided via a GFF file. See @command{ExtractFeature}
 in order to keep only the feature parts.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    FeatureFilter(                          \
+        ref_species=species1,               \
+        feature.file=species1.gff3,         \
+        feature.file.compression=none,      \
+        feature.format=GFF,                 \
+        file=data.trash_features.maf.gz,    \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 
@@ -808,6 +1032,25 @@ In addition, the coordinates of the block will be reported according to a specif
 The choice of statistics is specified by the user. Some of them output several results, which will appear each in a column in the output file.
 
 Descriptive statistics are computed through the @command{SequenceStatistics} filter, which takes the following arguments:
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            MinBlockLength(min_length=1000),\
+            AlnScore(),
+            BlockCounts()),                 \
+        ref_species=species1,               \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 
@@ -976,7 +1219,37 @@ The threshold to use in order to compute clusters. A threshold of 0.001 for inst
 
 Estimates a pairwise distance matrix.
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    DistanceEstimation(                     \
+        method=count,                       \
+        gap_option=no_double_gap,           \
+        unresolved_as_gap=no),               \
+    [...]
+@end example
+or
+@example
+maf.filter=                                 \
+    [...],
+    DistanceEstimation(                     \
+        method=ml,                          \
+        model=K80(kappa=2),                 \
+        rate=Gamma(n=4, alpha=0.5),         \
+        parameter_estimation=initial,       \
+        max_freq_gaps=0.33,                 \
+        gaps_as_unresolved=yes,             \
+        profiler=none,                      \
+        message_handler=none),              \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 @item method=@{count|ml@}
 Method used to estimate distance, either observed count or maximum likelihood estimate.
@@ -1038,7 +1311,8 @@ Tell if remaining gaps should be converted to 'N' before likelihood computation.
 @end table
 
 
-Extra-data:
+@heading Extra-data:
+
 @table @command
 @item CountDistance or MLDistance
 The estimated pairwise distance matrix.
@@ -1051,7 +1325,21 @@ The estimated pairwise distance matrix.
 
 Performs hierarchical clustering from a previously computed distance matrix.
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    DistanceBasedPhylogeny(                 \
+        method=bionj,                       \
+        dist_mat=MLDistance),               \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 @item method=@{string@}
 Method to use for reconstructing the tree:
@@ -1070,7 +1358,8 @@ BioNJ method (Gascuel, 1997)
 The tag name of the distance matrix to use.
 @end table
 
-Extra-data:
+@heading Extra-data:
+
 @table @command
 @item UPGMA|WPGMA|NJ|BioNJ
 The resulting tree.
@@ -1083,7 +1372,22 @@ The resulting tree.
 
 The @command{NewOutgroup} filter takes an input tree and (re)root it according to a given species name.
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    NewOutgroup(                            \
+        tree_input=BioNJ,                   \
+        tree_output=NioNJ_rooted,           \
+        outgroup=outgroupSpecies),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 @item tree_input=@{string@}
 The tag name of the tree to reroot.
@@ -1093,7 +1397,8 @@ The tag name to use to store the rerooted tree. If the same as @command{tree_inp
 The name of the species to use as outgroup. One and only one sequence for this species should be present in each block for which rerooting is to be performed.
 @end table
 
-Extra-data:
+@heading Extra-data:
+
 @table @command
 @item (user-defined tag)
 A rooted tree.
@@ -1106,7 +1411,22 @@ A rooted tree.
 
 The @command{DropSpecies} removes a leaf from a tree.
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    DropSpecies(                            \
+        tree_input=BioNJ,                   \
+        tree_output=BioNJ_subtree,          \
+        species=species1),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 @item tree_input=@{string@}
 The tag name of the tree to edit.
@@ -1116,7 +1436,8 @@ The tag name to use to store the edited tree. If the same as @command{tree_input
 The name of the species to remove. All leaves in the tree, if any, corresponding to a sequence for this species will be removed.
 @end table
 
-Extra-data:
+@heading Extra-data:
+
 @table @command
 @item (user-defined tag)
 An edited tree.
@@ -1141,6 +1462,22 @@ An edited tree.
 
 The @command{Output} filter writes all blocks to a MAF file.
 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    Output(                                 \
+        file=data.filtered.maf.gz,          \
+        compression=gzip,                   \
+        mask=yes),                          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
 @table @command
 @item file=@{none|@{path@}@}
 A file path where to write alignment blocks, in the MAF format.
@@ -1160,6 +1497,23 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 
 The @command{OutputAlignments} filter writes all blocks to an external alignment file, potentially losing some information such as coordinates and scores.
 Sequence names will be formated following the Ensembl convention.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    OutputAlignments(                       \
+        file=data.filtered.aln,             \
+        compression=none,                   \
+        format=Clustal,                     \
+        mask=no),                           \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 @item file=@{none|@{path@}@}
@@ -1182,6 +1536,22 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 @subsection Write trees to a file.
 
 The @command{OutputTrees} filter writes trees associated to blocks to a file, in the Newick format. All trees will be stored in the same file, one per line.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    OutputTrees(                            \
+        tree=BioNJ,                         \
+        file=data.trees.dnd,                \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 
 @table @command
 @item tree=@{string@}
