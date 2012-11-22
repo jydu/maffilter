@@ -9,6 +9,7 @@ maf.filter=                         \
       feature.file=$(DATA).gff3,    \
       feature.file.compression=none,\
       feature.format=GFF,           \
+      feature.type=mRNA,            \
       file=$(DATA).coding.maf.gz,   \
       compression=gzip,             \
       verbose=yes),                 \

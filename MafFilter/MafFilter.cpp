@@ -151,7 +151,6 @@ int main(int args, char** argv)
       // | Sequence subset |
       // +-----------------+
       if (cmdName == "Subset") {
-        //string speciesList = ApplicationTools::getStringParameter("species", cmdArgs, "none");
         bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
         bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
@@ -164,7 +163,6 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Subset'.");
-        //getList(speciesList, species);
         SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, keep, rmdupl);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
@@ -537,6 +535,9 @@ int main(int args, char** argv)
         string refSpecies = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
+        vector<string> featureType = ApplicationTools::getVectorParameter<string>("feature.type", cmdArgs, ',', "all");
+        if (featureType.size() == 0)
+          throw Exception("At least one feature should be provided for command 'FeatureFilter'.");
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Features to remove", featureFile + " (" + featureFormat + ")");
@@ -554,15 +555,23 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
+        auto_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
         if (featureFormat == "GFF") {
-          GffFeatureReader reader(featureStream);
-          reader.getAllFeatures(featuresSet);
+          ftReader.reset(new GffFeatureReader(featureStream));
         } else if (featureFormat == "GTF") {
-          GtfFeatureReader reader(featureStream);
-          reader.getAllFeatures(featuresSet);
+          ftReader.reset(new GtfFeatureReader(featureStream));
         } else
           throw Exception("Unsupported feature format: " + featureFormat);
+        if (featureType.size() == 1 && featureType[0] == "all")
+          ftReader->getAllFeatures(featuresSet);
+        else {
+          for (size_t i = 0; i < featureType.size(); ++i) {
+            ApplicationTools::displayResult("-- Extract features of type", featureType[i]);
+            ftReader->getFeaturesOfType(featureType[i], featuresSet);
+          }
+        }
+        ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
         FeatureFilterMafIterator* iterator = new FeatureFilterMafIterator(currentIterator, refSpecies, featuresSet, !trash);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
@@ -748,10 +757,15 @@ int main(int args, char** argv)
         string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
-        ApplicationTools::displayResult("-- Features to extract", featureFile + " (" + featureFormat + ")");
+        vector<string> featureType = ApplicationTools::getVectorParameter<string>("feature.type", cmdArgs, ',', "all");
+        if (featureType.size() == 0)
+          throw Exception("At least one feature should be provided for command 'FeatureFilter'.");
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
+        bool trash = outputFile == "none";
+        ApplicationTools::displayResult("-- Features to remove", featureFile + " (" + featureFormat + ")");
         ApplicationTools::displayResult("-- Features are for species", refSpecies);
         ApplicationTools::displayBooleanResult("-- Features are strand-aware", !ignoreStrand);
-        //string featuresList = ApplicationTools::getStringParameter("feature.select", cmdArgs, "none");
+        ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
         if (compress == "none") {
@@ -764,33 +778,24 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
-
+        auto_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
         if (featureFormat == "GFF") {
-          GffFeatureReader reader(featureStream);
-          reader.getAllFeatures(featuresSet);
+          ftReader.reset(new GffFeatureReader(featureStream));
         } else if (featureFormat == "GTF") {
-          GtfFeatureReader reader(featureStream);
-          reader.getAllFeatures(featuresSet);
+          ftReader.reset(new GtfFeatureReader(featureStream));
         } else
           throw Exception("Unsupported feature format: " + featureFormat);
-        
-        vector<string> features = ApplicationTools::getVectorParameter<string>("feature.select", cmdArgs, ',', "", "", false, true);
-        if (features.size() == 0)
-          throw Exception("Error, please set some features to extract!");
-        if (features[0] == "all") { 
-          set<string> tmp = featuresSet.getTypes();
-          features = vector<string>(tmp.begin(), tmp.end());
+        if (featureType.size() == 1 && featureType[0] == "all")
+          ftReader->getAllFeatures(featuresSet);
+        else {
+          for (size_t i = 0; i < featureType.size(); ++i) {
+            ApplicationTools::displayResult("-- Extract features of type", featureType[i]);
+            ftReader->getFeaturesOfType(featureType[i], featuresSet);
+          }
         }
-        if (features.size() == 0)
-          throw Exception("Error, no feature to extract!");
-        string lst = features[0];
-        for (size_t i = 1; i < features.size(); ++i)
-          lst += ", " + features[i];
-        ApplicationTools::displayResult("-- Features to extract", lst);
-        auto_ptr<SequenceFeatureSet> featuresSet2(featuresSet.getSubsetForType(features));
-
-        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, *featuresSet2, ignoreStrand);
+        ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
+        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, featuresSet, ignoreStrand);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);

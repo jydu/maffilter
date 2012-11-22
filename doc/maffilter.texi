@@ -434,12 +434,13 @@ The features to extract are typically provided via a GFF file.
 @cartouche
 @example
 maf.filter=                                 \
-    [...],
+    [...]z
     ExtractFeature(                         \
         ref_species=species1,               \
         feature.file=species1.gff3.gz,      \
         feature.file.compression=gzip,      \
         feature.format=GFF,                 \
+        feature.type=all,                   \
         file=species1.trash.maf.gz,         \
         compression=gzip,                   \
         ignore_strand=no),                  \
@@ -462,6 +463,9 @@ Compression format for the feature file.
 
 @item feature.format=@{GFF|GTF@}
 Format for the feature file, currently GFF (v3.0) or GTF only.
+
+@item feature.type=@{all|(list)@}
+Specifies which type of feature should be extracted from the feature file, if several are available.
 
 @item file=@{none|@{path@}@}
 An optional file were extracted features will be stored, in the MAF format.
@@ -975,6 +979,7 @@ maf.filter=                                 \
         feature.file=species1.gff3,         \
         feature.file.compression=none,      \
         feature.format=GFF,                 \
+        feature.type=(mRNA,tRNA),           \
         file=data.trash_features.maf.gz,    \
         compression=gzip),                  \
     [...]
@@ -996,6 +1001,9 @@ Compression format for the feature file.
 
 @item feature.format=@{GFF|GTF@}
 Format for the feature file, currently GFF (v3.0) or GTF only.
+
+@item feature.type=@{all|(list)@}
+Specifies which type of feature should be extracted from the feature file, if several are available.
 
 @item file=@{none|@{path@}@}
 An optional file were extracted features will be stored, in the MAF format.
@@ -1042,7 +1050,7 @@ maf.filter=                                 \
     SequenceStatistics(                     \
         statistics=(\                       \
             MinBlockLength(min_length=1000),\
-            AlnScore(),
+            AlnScore(),                     \
             BlockCounts()),                 \
         ref_species=species1,               \
         file=data.statistics.csv),          \
