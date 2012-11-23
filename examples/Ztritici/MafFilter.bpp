@@ -3,21 +3,21 @@ input.file=$(DATA).maf.gz
 input.file.compression=gzip
 input.format=Maf
 output.log=$(DATA).maffilter.log
-maf.filter=                                       \
-    SequenceStatistics(                           \
-      statistics=(                                \
-        BlockSize(),                              \
-        BlockLength(),                            \
-        SiteStatistics(species=(Ztritici_IPO323)),\
-      ref_species=Ztritici_IPO323,                \
-      file=$(DATA).statistics.csv),               \
-  FeatureFilter(                                  \
-      ref_species=Ztritici_IPO323,                \
+maf.filter=                                        \
+    SequenceStatistics(                            \
+      statistics=(                                 \
+        BlockSize(),                               \
+        BlockLength(),                             \
+        SiteStatistics(species=(Ztritici_IPO323))),\
+      ref_species=Ztritici_IPO323,                 \
+      file=$(DATA).statistics.csv),                \
+  FeatureFilter(                                   \
+      ref_species=Ztritici_IPO323,                 \
       feature.file=Mgraminicolav2.FrozenGeneCatalog20080910.gff.gz, \
-      feature.file.compression=gzip,\
-      feature.format=GFF,           \
-      feature.type=CDS,             \
-      file=$(DATA).noncoding.maf.gz,\
-      compression=gzip,             \
-      verbose=yes),                 \
+      feature.file.compression=gzip,               \
+      feature.format=GFF,                          \
+      feature.type=CDS,                            \
+      file=$(DATA).noncoding.maf.gz,               \
+      compression=gzip,                            \
+      verbose=yes),                                \
 
