@@ -754,6 +754,7 @@ int main(int args, char** argv)
       // +--------------------+
       if (cmdName == "ExtractFeature") {
         bool ignoreStrand    = ApplicationTools::getBooleanParameter("ignore_strand", cmdArgs, false);
+        bool completeOnly    = ApplicationTools::getBooleanParameter("complete", cmdArgs, false);
         string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
@@ -765,6 +766,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Features to remove", featureFile + " (" + featureFormat + ")");
         ApplicationTools::displayResult("-- Features are for species", refSpecies);
         ApplicationTools::displayBooleanResult("-- Features are strand-aware", !ignoreStrand);
+        ApplicationTools::displayBooleanResult("-- Extract incomplete features", !completeOnly);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
@@ -795,7 +797,7 @@ int main(int args, char** argv)
           }
         }
         ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
-        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, featuresSet, ignoreStrand);
+        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, featuresSet, completeOnly, ignoreStrand);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);

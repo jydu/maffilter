@@ -443,6 +443,7 @@ maf.filter=                                 \
         feature.type=all,                   \
         file=species1.trash.maf.gz,         \
         compression=gzip,                   \
+        complete=yes,                       \
         ignore_strand=no),                  \
     [...]
 @end example
@@ -473,7 +474,10 @@ An optional file were extracted features will be stored, in the MAF format.
 @item compression=@{none|gzip|zip|bzip2@}
 Compression format for output file (if file != none).
 
-@item ignore_strand=@{yes/no@}
+@item complete=@{yes|no@}
+Tell if only complete features should be extracted or if partial extraction is allowed.
+
+@item ignore_strand=@{yes|no@}
 If yes, features will be extracted ``as is''. Otherwise, the invert-complement sequence will be returned if it is located on the negative strand.
 
 @end table

@@ -11,13 +11,21 @@ maf.filter=                                        \
         SiteStatistics(species=(Ztritici_IPO323))),\
       ref_species=Ztritici_IPO323,                 \
       file=$(DATA).statistics.csv),                \
-  FeatureFilter(                                   \
+  ExtractFeature(                                  \
       ref_species=Ztritici_IPO323,                 \
       feature.file=Mgraminicolav2.FrozenGeneCatalog20080910.gff.gz, \
       feature.file.compression=gzip,               \
-      feature.format=GFF,                          \
+      feature.format=GTF,                          \
       feature.type=CDS,                            \
       file=$(DATA).noncoding.maf.gz,               \
       compression=gzip,                            \
-      verbose=yes),                                \
+      complete=yes,                                \
+      ignore_strand=no,                            \
+      verbose=no),                                 \
+  BlockSizeFilter(min_size=2),                     \
+  OutputAlignments(                                \
+      format=Clustal,                              \
+      file=Zt12g_CDS.aln,                          \
+      compression=none,                            \
+      mask=yes)                                    \
 
