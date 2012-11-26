@@ -4,7 +4,7 @@ input.file.compression=gzip
 input.format=Maf
 output.log=$(DATA).maffilter.log
 maf.filter=                                        \
-    SequenceStatistics(                            \
+  SequenceStatistics(                              \
       statistics=(                                 \
         BlockSize(),                               \
         BlockLength(),                             \
@@ -22,7 +22,14 @@ maf.filter=                                        \
       complete=yes,                                \
       ignore_strand=no,                            \
       verbose=no),                                 \
-  BlockSizeFilter(min_size=2),                     \
+  MinBlockSize(min_size=2),                        \
+  SequenceStatistics(                              \
+      statistics=(                                 \
+        BlockSize(),                               \
+        BlockLength(),                             \
+        SiteStatistics(species=(Ztritici_IPO323))),\
+      ref_species=Ztritici_IPO323,                 \
+      file=Zt12g_CDS.statistics.csv),              \
   OutputAlignments(                                \
       format=Clustal,                              \
       file=Zt12g_CDS.aln,                          \

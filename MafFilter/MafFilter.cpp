@@ -174,7 +174,7 @@ int main(int args, char** argv)
       // +---------------+
       // | Block merging |
       // +---------------+
-      if (cmdName == "Merge") {
+      else if (cmdName == "Merge") {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Merge'.");
@@ -208,7 +208,7 @@ int main(int args, char** argv)
       // +---------------------+
       // | Block concatenation |
       // +---------------------+
-      if (cmdName == "Concatenate") {
+      else if (cmdName == "Concatenate") {
         unsigned int minimumSize = ApplicationTools::getParameter<unsigned int>("minimum_size", cmdArgs, 0);
         ApplicationTools::displayResult("-- Minimum final block size", minimumSize);
         ConcatenateMafIterator* iterator = new ConcatenateMafIterator(currentIterator, minimumSize);
@@ -222,7 +222,7 @@ int main(int args, char** argv)
       // +--------------------+
       // | Full gap filtering |
       // +--------------------+
-      if (cmdName == "XFullGap") {
+      else if (cmdName == "XFullGap") {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'XFullGap'.");
@@ -237,7 +237,7 @@ int main(int args, char** argv)
       // +---------------------+
       // | Alignment filtering |
       // +---------------------+
-      if (cmdName == "AlnFilter") {
+      else if (cmdName == "AlnFilter") {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter'.");
@@ -296,7 +296,7 @@ int main(int args, char** argv)
       // +-----------------------+
       // | Alignment filtering 2 |
       // +-----------------------+
-      if (cmdName == "AlnFilter2") {
+      else if (cmdName == "AlnFilter2") {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
@@ -356,7 +356,7 @@ int main(int args, char** argv)
       // +-------------------+
       // | Entropy filtering |
       // +-------------------+
-      if (cmdName == "EntropyFilter") {
+      else if (cmdName == "EntropyFilter") {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
@@ -420,7 +420,7 @@ int main(int args, char** argv)
       // +----------------+
       // | Mask filtering |
       // +----------------+
-      if (cmdName == "MaskFilter") {
+      else if (cmdName == "MaskFilter") {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'MaskFilter'.");
@@ -475,7 +475,7 @@ int main(int args, char** argv)
       // +-------------------+
       // | Quality filtering |
       // +-------------------+
-      if (cmdName == "QualFilter") {
+      else if (cmdName == "QualFilter") {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'QualFilter'.");
@@ -531,7 +531,7 @@ int main(int args, char** argv)
       // +-------------------------+
       // | Feature-based filtering |
       // +-------------------------+
-      if (cmdName == "FeatureFilter") {
+      else if (cmdName == "FeatureFilter") {
         string refSpecies = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
@@ -615,7 +615,7 @@ int main(int args, char** argv)
       // +------------------------+
       // | Block length filtering |
       // +------------------------+
-      if (cmdName == "MinBlockLength") {
+      else if (cmdName == "MinBlockLength") {
         if (cmdArgs.find("min.length") != cmdArgs.end()) {
           throw Exception("min.length argument in MinBlockLength is deprecated: use min_length instead.");
         }
@@ -631,7 +631,7 @@ int main(int args, char** argv)
       // +----------------------+
       // | Block size filtering |
       // +----------------------+
-      if (cmdName == "MinBlockSize") {
+      else if (cmdName == "MinBlockSize") {
         if (cmdArgs.find("min.size") != cmdArgs.end()) {
           throw Exception("min.size argument in MinBlockSize is deprecated: use min_size instead.");
         }
@@ -649,7 +649,7 @@ int main(int args, char** argv)
       // +----------------------+
       // | Chromosome filtering |
       // +----------------------+
-      if (cmdName == "SelectChr") {
+      else if (cmdName == "SelectChr") {
         if (cmdArgs.find("reference") != cmdArgs.end()) {
           throw Exception("reference argument in SelectChr is deprecated: use ref_species instead.");
         }
@@ -670,7 +670,7 @@ int main(int args, char** argv)
       // +---------------------+
       //Nb: this is kind of deprecated, should be done better by looking at partial overlap.
       //could be useful for debugging though. We do not report it in the documentation for now.
-      if (cmdName == "DuplicateFilter") {
+      else if (cmdName == "DuplicateFilter") {
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
         DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
@@ -684,7 +684,7 @@ int main(int args, char** argv)
       // +---------------------+
       // | Sequence statistics |
       // +---------------------+
-      if (cmdName == "SequenceStatistics") {
+      else if (cmdName == "SequenceStatistics") {
         vector<string> statisticsDesc = ApplicationTools::getVectorParameter<string>("statistics", cmdArgs, ',', "", "", false, true);
         
         //Parse all statistics:
@@ -752,7 +752,7 @@ int main(int args, char** argv)
       // +--------------------+
       // | Feature extraction |
       // +--------------------+
-      if (cmdName == "ExtractFeature") {
+      else if (cmdName == "ExtractFeature") {
         bool ignoreStrand    = ApplicationTools::getBooleanParameter("ignore_strand", cmdArgs, false);
         bool completeOnly    = ApplicationTools::getBooleanParameter("complete", cmdArgs, false);
         string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
@@ -810,7 +810,7 @@ int main(int args, char** argv)
       // +------------------+
       // | Window splitting |
       // +------------------+
-      if (cmdName == "WindowSplit") {
+      else if (cmdName == "WindowSplit") {
         if (cmdArgs.find("preferred.size") != cmdArgs.end()) {
           throw Exception("preferred.size argument in WindowSplit is deprecated: use preferred_size instead.");
         }
@@ -840,7 +840,7 @@ int main(int args, char** argv)
       // +---------------------+
       // | Distance estimation |
       // +---------------------+
-      if (cmdName == "DistanceEstimation") {
+      else if (cmdName == "DistanceEstimation") {
         string distMethod = ApplicationTools::getStringParameter("method", cmdArgs, "count");
         ApplicationTools::displayResult("-- Method", distMethod);
         if (distMethod == "count") {
@@ -926,7 +926,7 @@ int main(int args, char** argv)
       // +--------------------------+
       // | Phylogeny reconstruction |
       // +--------------------------+
-      if (cmdName == "DistanceBasedPhylogeny") {
+      else if (cmdName == "DistanceBasedPhylogeny") {
         string distMethodName = ApplicationTools::getStringParameter("method", cmdArgs, "bionj");
         string distProperty = ApplicationTools::getStringParameter("dist_mat", cmdArgs, "none");
         DistanceMethod* distMethod = 0;
@@ -957,7 +957,7 @@ int main(int args, char** argv)
       // +-------------------+
       // | Phylogeny rooting |
       // +-------------------+
-      if (cmdName == "NewOutgroup") {
+      else if (cmdName == "NewOutgroup") {
         string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
         string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
         string outgroup = ApplicationTools::getStringParameter("outgroup", cmdArgs, "none");
@@ -975,7 +975,7 @@ int main(int args, char** argv)
       // +------------------------+
       // | Phylogeny drop species |
       // +------------------------+
-      if (cmdName == "DropSpecies") {
+      else if (cmdName == "DropSpecies") {
         string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
         string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
         string species = ApplicationTools::getStringParameter("species", cmdArgs, "none");
@@ -993,7 +993,7 @@ int main(int args, char** argv)
       // +--------+
       // | Output |
       // +--------+
-      if (cmdName == "Output") {
+      else if (cmdName == "Output") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
@@ -1022,7 +1022,7 @@ int main(int args, char** argv)
       // +-------------------+
       // | Output alignments |
       // +-------------------+
-      if (cmdName == "OutputAlignments") {
+      else if (cmdName == "OutputAlignments") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         bool multipleFiles = (outputFile.find("%i") != string::npos);
         ApplicationTools::displayResult("-- Output alignment file" + string(multipleFiles ? "s" : ""), outputFile);
@@ -1061,7 +1061,7 @@ int main(int args, char** argv)
       // +--------------+
       // | Output trees |
       // +--------------+
-      if (cmdName == "OutputTrees") {
+      else if (cmdName == "OutputTrees") {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output tree file", outputFile);
@@ -1084,6 +1084,9 @@ int main(int args, char** argv)
         currentIterator = iterator;
         its.push_back(iterator);
       }
+    
+      else 
+        throw Exception("Unknown filter: " + cmdName);
 
     }
 
