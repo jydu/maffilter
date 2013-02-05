@@ -85,7 +85,7 @@ Statistical analysis
 * Descriptive::                 
 * Phylogenetics::               
 
-Descriptive statistics
+Arguments:
 
 * BlockSize::                   
 * BlockLength::                 
@@ -108,6 +108,7 @@ Exporting blocks and data
 
 * Output::                      
 * OutputAlignments::            
+* VcfOutput::                   
 * OutputTrees::                 
 
 @end detailmenu
@@ -1466,6 +1467,7 @@ An edited tree.
 @menu
 * Output::                      
 * OutputAlignments::            
+* VcfOutput::                   
 * OutputTrees::                 
 @end menu
 
@@ -1504,7 +1506,7 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node OutputAlignments, OutputTrees, Output, Exporting
+@node OutputAlignments, VcfOutput, Output, Exporting
 @subsection Write alignment blocks to an external alignment file.
 
 The @command{OutputAlignments} filter writes all blocks to an external alignment file, potentially losing some information such as coordinates and scores.
@@ -1544,7 +1546,44 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node OutputTrees,  , OutputAlignments, Exporting
+@node VcfOutput, OutputTrees, OutputAlignments, Exporting
+@subsection Call SNPs from alignment blocks and export to VCF file
+
+The @command{VcfOutput} filter call SNPs from each block and output them to a VCF file.
+Only substitutions are called for now.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    VcfOutput(                              \
+        file=snp.vcf.gz,                    \
+        compression=gzip,                   \
+        reference=Ref),                     \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item file=@{none|@{path@}@}
+A file path for the output VCF file.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item reference=@{species name@}
+A species name corresponding to the sequence to use as reference.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+
+@node OutputTrees,  , VcfOutput, Exporting
 @subsection Write trees to a file.
 
 The @command{OutputTrees} filter writes trees associated to blocks to a file, in the Newick format. All trees will be stored in the same file, one per line.

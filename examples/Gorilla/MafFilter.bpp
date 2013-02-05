@@ -4,14 +4,9 @@ input.file.compression=gzip
 input.format=Maf
 output.log=$(DATA).maffilter.log
 maf.filter=\
-
-
-
-
-
     Merge(species=Hsap, dist_max=10000),\
-    WindowSplit(preferred.size=200000, align=adjust),\
-    MinBlockSize(min.size=100000),\
+    WindowSplit(preferred_size=200000, align=adjust),\
+    MinBlockLength(min_length=100000),\
     DistanceEstimation(method=count, gap_option=no_gap, unresolved_as_gap=yes),\
     DistanceBasedPhylogeny(method=bionj, dist_mat=CountDistance),\
     NewOutgroup(tree_input=BioNJ, tree_output=BioNJ, outgroup=Ppyg),\ //Overwrite bionj tree
@@ -26,7 +21,6 @@ maf.filter=\
         CountClusters(tree=BioNJ_ingroup, threshold=0.001),\
         CountClusters(tree=BioNJ_ingroup, threshold=0.01),\
         CountClusters(tree=BioNJ_ingroup, threshold=0.1)),\
-      reference=Hsap,\
+      ref_species=Hsap,\
       file=$(DATA).statistics.csv)
-
 

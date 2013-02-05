@@ -1058,6 +1058,41 @@ int main(int args, char** argv)
 
 
 
+      // +------------+
+      // | VCF output |
+      // +------------+
+      else if (cmdName == "VcfOutput") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+
+        string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        if (reference == "")
+          throw Exception("A reference sequence should be provided for command 'VcfOutput'.");
+        ApplicationTools::displayResult("-- Reference sequence", reference);
+
+        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference);
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
       // +--------------+
       // | Output trees |
       // +--------------+

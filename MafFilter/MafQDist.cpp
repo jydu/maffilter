@@ -125,9 +125,9 @@ int main(int args, char** argv)
         if (name == species) {
           const MafSequence* mafSeq      = &dynamic_cast<const MafSequence&>(block->getAlignment().getSequence(i));
           const SequenceQuality* qscores = &dynamic_cast<const SequenceQuality&>(mafSeq->getAnnotation(SequenceQuality::QUALITY_SCORE));
-          map<int, unsigned int> counts = VectorTools::countValues(qscores->getScores());
+          map<int, size_t> counts = VectorTools::countValues(qscores->getScores());
           out << blockCount;
-          for (unsigned int j = 0; j <= 10; ++j)
+          for (int j = 0; j <= 10; ++j)
             out << "\t" << counts[j];
           out << "\t" << counts[-1];
           out << "\t" << counts[-2] << endl;
