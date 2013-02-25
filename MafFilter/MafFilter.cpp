@@ -124,7 +124,7 @@ int main(int args, char** argv)
 
     MafIterator* currentIterator;
     if (inputFormat == "Maf") {
-      currentIterator = new MafAlignmentParser(&stream, true);
+      currentIterator = new MafParser(&stream, true);
     } else {
       BppOSequenceStreamReaderFormat reader(true);
       ISequenceStream* seqStream = reader.read(inputFormat);
