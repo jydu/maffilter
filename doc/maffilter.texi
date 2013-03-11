@@ -62,6 +62,7 @@ Filters
 Extracting data
 
 * Subset::                      
+* SelectOrphans::               
 * Merge::                       
 * Concatenate::                 
 * ExtractFeature::              
@@ -296,6 +297,7 @@ The next section present all available filters and their corresponding arguments
 
 @menu
 * Subset::                      
+* SelectOrphans::               
 * Merge::                       
 * Concatenate::                 
 * ExtractFeature::              
@@ -305,7 +307,7 @@ The next section present all available filters and their corresponding arguments
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Subset, Merge, Extracting, Extracting
+@node Subset, SelectOrphans, Extracting, Extracting
 @subsection Subset: remove sequences from blocks by species name
 
 The @command{Subset} filter allows to filter sequences for each block by keeping only a selection of species.
@@ -339,13 +341,51 @@ If set to yes, only block containing at least one sequence from each species in 
 If strict is set to yes, tells if additional sequences should be kept in the block, or remove so that the output blocks only contain species from the selection.
         
 @item remove_duplicates=yes/no
-Only keep blocks for which only one sequence for each species is present. Blocks with paralogous sequences in at least one species will therefore be discarded. 
+If set to yes, only keep blocks for which only one sequence for each species is present. Blocks with paralogous sequences in at least one species will therefore be discarded. 
 
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Merge, Concatenate, Subset, Extracting
+@node SelectOrphans, Merge, Subset, Extracting
+@subsection SelectOrphans: keep only block with the specified species
+
+The @command{SelectOrphans} filter allows to discard all block with species out of the specified range.
+This is typically used to extract blocks with no homolog ("orphan").
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    SelectOrphans(                          \
+        species=(species1, species2, etc),  \
+        strict=yes,                         \
+        remove_duplicates=yes),             \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item species=(species1, species2, etc)
+A coma separated, within parentheses, list of species.
+All block containing at least one species outside this list will be discarded.
+
+@item strict=yes/no
+If set to yes, only block containing at least one sequence from each species in the selection will be kept.
+        
+@item remove_duplicates=yes/no
+If set to yes, only keep blocks for which only one sequence for each species is present.
+Blocks with paralogous sequences in at least one species will therefore be discarded. 
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Merge, Concatenate, SelectOrphans, Extracting
 @subsection Merging: merge synthenic blocks
 
 The @command{Merge} filter fuses consecutive blocks based on their coordinates.

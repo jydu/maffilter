@@ -1,4 +1,4 @@
-# CMake script for GenomeTools package
+# CMake script for MafFilter package
 # Author: Julien Dutheil
 # Created: 27/04/2010
 

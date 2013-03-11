@@ -92,7 +92,7 @@ int main(int args, char** argv)
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 1.0.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 27/01/13 *" << endl;
+  cout << "*                                           Last Modif. 11/03/13 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -169,6 +169,25 @@ int main(int args, char** argv)
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Subset'.");
         SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, keep, rmdupl);
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+      // +---------------------------+
+      // | Sequence orphan selection |
+      // +---------------------------+
+      else if (cmdName == "SelectOrphans") {
+        bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
+        bool rmdupl = ApplicationTools::getBooleanParameter("remove_duplicates", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Species should be present only once", rmdupl);
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for command 'SelectOrphans'.");
+        OrphanSequenceFilterMafIterator* iterator = new OrphanSequenceFilterMafIterator(currentIterator, species, strict, rmdupl);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
