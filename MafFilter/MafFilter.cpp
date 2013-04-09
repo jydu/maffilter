@@ -1107,8 +1107,13 @@ int main(int args, char** argv)
         if (reference == "")
           throw Exception("A reference sequence should be provided for command 'VcfOutput'.");
         ApplicationTools::displayResult("-- Reference sequence", reference);
+        
+        vector<string> genotypes = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
+        for (size_t i = 0; i < genotypes.size(); ++i) {
+          ApplicationTools::displayResult("-- Adding genotype info for", genotypes[i]);
+        }
+        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes);
 
-        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
