@@ -45,6 +45,7 @@ knowledge of the CeCILL license and that you accept its terms.
 using namespace std;
 
 #include <Bpp/Seq/Io/Maf.all>
+#include "OutputAsFeaturesMafIterator.h"
 
 //From boost:
 #include <boost/iostreams/device/file.hpp>
@@ -785,13 +786,10 @@ int main(int args, char** argv)
         vector<string> featureType = ApplicationTools::getVectorParameter<string>("feature.type", cmdArgs, ',', "all");
         if (featureType.size() == 0)
           throw Exception("At least one feature should be provided for command 'FeatureFilter'.");
-        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
-        bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Features to remove", featureFile + " (" + featureFormat + ")");
         ApplicationTools::displayResult("-- Features are for species", refSpecies);
         ApplicationTools::displayBooleanResult("-- Features are strand-aware", !ignoreStrand);
         ApplicationTools::displayBooleanResult("-- Extract incomplete features", !completeOnly);
-        ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
         if (compress == "none") {
@@ -1076,6 +1074,38 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression", compress);
           iterator = new OutputAlignmentMafIterator(currentIterator, out, oAln, mask);
         }
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
+      // +--------------------+
+      // | Output as features |
+      // +--------------------+
+      else if (cmdName == "OutputAsFeatures") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output feature file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+        string species = ApplicationTools::getStringParameter("species", cmdArgs, "");
+        if (species == "")
+          throw Exception("A species name should be provided for command 'OutputAsFeatures'.");
+        ApplicationTools::displayResult("-- Species to use", species);
+
+        OutputAsFeaturesMafIterator* iterator = new OutputAsFeaturesMafIterator(currentIterator, out, species);
         currentIterator = iterator;
         its.push_back(iterator);
       }
