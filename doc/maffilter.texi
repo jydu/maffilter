@@ -1601,7 +1601,8 @@ maf.filter=                                 \
     VcfOutput(                              \
         file=snp.vcf.gz,                    \
         compression=gzip,                   \
-        reference=Ref),                     \
+        reference=Ref,                      \
+        genotypes=(sample1,sample2)),       \
     [...]
 @end example
 @end cartouche
@@ -1617,6 +1618,11 @@ Compression format for output file.
 
 @item reference=@{species name@}
 A species name corresponding to the sequence to use as reference.
+
+@item genotypes=@{list of species@}
+A list of species for which genotypes informations hsould be written. If non, void, a 'FORMAT' column will be added to the output, as well as oneextra column per species to genotype.
+If the species is not present in this particular, or if a N or Gap is present, adot ('.') will be written in the column.
+Please note that species should be unique in each block, otherwise an error will occur.
 
 @end table
 
