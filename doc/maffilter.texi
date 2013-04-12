@@ -1236,6 +1236,11 @@ The bounds delimiting the bins of the spectrum to be computed.
 
 @item ingroup=@{list@}
 A list of species forming the ingroup and on which the statistics should be calculated.
+
+@item outgroup=species
+A species name saying which sequence should be used to determine the ancestral state. If non-empty, the unfolded frequency spectrum will be computed.
+If empty, the folded frequency spectrum will be returned (1/5 and 4/5 frequences will be pulled, so that the maximum frequency will be 1/2).
+
 @end table
 
 @node CountClusters,  , SiteFrequencySpectrum, Descriptive

@@ -738,7 +738,8 @@ int main(int args, char** argv)
           } else if (statName == "SiteFrequencySpectrum") {
             vector<double> bounds  = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
             vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
-            mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds, ingroup); 
+            string outgroup        = ApplicationTools::getStringParameter("outgroup", statArgs, "", "", false, true);
+            mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds, ingroup, outgroup); 
           } else if (statName == "SiteStatistics") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
             mafStat = new SiteMafStatistics(species); 
