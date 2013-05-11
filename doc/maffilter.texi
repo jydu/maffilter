@@ -96,6 +96,7 @@ Arguments:
 * PairwiseDivergence::          
 * SiteStatistics::              
 * SiteFrequencySpectrum::       
+* PolymorphismStatistics::      
 * CountClusters::               
 
 Phylogenetics
@@ -1130,6 +1131,7 @@ Here is the list of currently available statistical functions:
 * PairwiseDivergence::          
 * SiteStatistics::              
 * SiteFrequencySpectrum::       
+* PolymorphismStatistics::      
 * CountClusters::               
 @end menu
 
@@ -1201,7 +1203,7 @@ Arguments:
 A list of species to be considered in the statistics calculations.
 @end table
 
-@node SiteFrequencySpectrum, CountClusters, SiteStatistics, Descriptive
+@node SiteFrequencySpectrum, PolymorphismStatistics, SiteStatistics, Descriptive
 @subsubsection Site frequency spectrum
 Computes the site frequency spectrum for each block.
 Only ``doubletons'' sites are considered, that is, positions in the alignment with only two states.
@@ -1243,7 +1245,48 @@ If empty, the folded frequency spectrum will be returned (1/5 and 4/5 frequences
 
 @end table
 
-@node CountClusters,  , SiteFrequencySpectrum, Descriptive
+@node PolymorphismStatistics, CountClusters, SiteFrequencySpectrum, Descriptive
+@subsubsection Polymorphism statistics
+Compute various statistics describing sequence polymorphism. Two aligned sets of ``species'' are compared, and the number of polymorphic / fixed sites are computed: 
+@table @command
+@item F
+Number of sites fixed in the two sets
+@item FF
+Number of sites fixed in the two sets, yet with a distinct state
+@item P
+Number of sites that are polymorphic in the two sets
+@item FP
+Number of sites that are fixed in set 1 but polymorhic in set 2
+@item PF
+Number of sites that are fixed in set 2 but polymorphic in set 1
+@end table
+
+Positions containing a gap or an unresolved character in one set are considered ambiguous.
+Such positions are counted separately in the following quantities:
+@table @command
+@item X
+Number of sites unresolved in the two sets
+@item FX
+Number of sites fixed in set 1 and unresolved in set 2
+@item XF
+Number of sites fixed in set 2 and unresolved in set 1
+@item PX
+Number of sites polymorphic in set 1 and unresolved in set 2
+@item XP
+Number of sites polymorphic in set 2 and unresolved in set 1
+@end table
+
+Arguments:
+@table @command
+@item species1=@{list@}
+A list of species for set 1.
+@item species2=@{list@}
+A list of species for set 2.
+@end table
+
+Note that the ``species'' terminology relates to multispecies alignments, as originally implemented in the MultiZ aligner. These statistics will however be most relevant when the aligned sequences are actually from individuals from the same population / species. The term ``species'' is here therefore to be taken in terchnical terms (a sequence id in the alignment), and not biological. 
+
+@node CountClusters,  , PolymorphismStatistics, Descriptive
 @subsubsection Number of sequence clusters.
 This counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
 

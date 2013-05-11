@@ -93,7 +93,7 @@ int main(int args, char** argv)
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 1.0.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 11/03/13 *" << endl;
+  cout << "*                                           Last Modif. 11/05/13 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -743,12 +743,19 @@ int main(int args, char** argv)
           } else if (statName == "SiteStatistics") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
             mafStat = new SiteMafStatistics(species); 
+          } else if (statName == "PolymorphismStatistics") {
+            vector<string> species1 = ApplicationTools::getVectorParameter<string>("species1", statArgs, ',', "", "", false, true);
+            vector<string> species2 = ApplicationTools::getVectorParameter<string>("species2", statArgs, ',', "", "", false, true);
+            vector< vector<string> > species;
+            species.push_back(species1);
+            species.push_back(species2);
+            mafStat = new PolymorphismMafStatistics(species); 
           } else if (statName == "CountClusters") {
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);
             mafStat = new CountClustersMafStatistics(treeProperty, threshold);
             statDesc = " / " + treeProperty;
-           } else {
+          } else {
             throw Exception("Unknown statistic: " + statName);
           }
           statistics.push_back(mafStat);
