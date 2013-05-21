@@ -138,6 +138,10 @@ int main(int args, char** argv)
       bool zeroBased = ApplicationTools::getBooleanParameter("zero_based", cmdArgs, true);
       currentIterator = new SequenceStreamToMafIterator(seqStream, &stream, false, zeroBased);
     }
+    
+    ApplicationTools::displayResult("Reading file", inputFile + " as " + inputFormat + (compress == "none" ? "" : "(" + compress + ")"));
+    ApplicationTools::displayResult("Output log file", logFile);
+
 
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);
     vector<MafIterator*> its;
