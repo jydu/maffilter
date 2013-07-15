@@ -22,14 +22,14 @@ maf.filter=                                        \
       complete=yes,                                \
       ignore_strand=no,                            \
       verbose=no),                                 \
-  MinBlockSize(min_size=2),                        \
   SequenceStatistics(                              \
       statistics=(                                 \
-        BlockSize(),                               \
-        BlockLength(),                             \
+        BlockSize,                                 \
+        BlockLength,                               \
         SiteStatistics(species=(Ztritici_IPO323))),\
       ref_species=Ztritici_IPO323,                 \
       file=Zt12g_CDS.statistics.csv),              \
+  MinBlockSize(min_size=2),                        \
   OutputAlignments(                                \
       format=Clustal,                              \
       file=Zt12g_CDS.aln,                          \

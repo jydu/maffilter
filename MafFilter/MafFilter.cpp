@@ -1198,9 +1198,14 @@ int main(int args, char** argv)
 
     //Now loop over the last iterator and that's it!
     size_t blockCounter = 0;
+    size_t alnSize = 0;
+    cout << "Parsing..." << endl;
     while (MafBlock* block = currentIterator->nextBlock())
     {
-      ApplicationTools::displayUnlimitedGauge(blockCounter++, "Parsing...");
+      alnSize += block->getNumberOfSites();
+      cout << blockCounter++ << " blocks kept, totalizing " << alnSize << "bp." << endl;
+      cout.flush();
+      //ApplicationTools::displayUnlimitedGauge(blockCounter++, "Parsing...");
       delete block;
     }
     ApplicationTools::message->endLine();

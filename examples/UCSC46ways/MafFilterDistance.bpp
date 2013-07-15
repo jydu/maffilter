@@ -11,13 +11,13 @@ maf.filter=                                                                \
             BlockLength()),                                                \
         ref_species=hg19,                                                  \
         file=$(DATA).statistics.csv),                                      \
-    MinBlockLength(min_length=1000),                                       \
+    MinBlockLength(min_length=100),                                        \
     SequenceStatistics(                                                    \
         statistics=(                                                       \
             BlockSize(),                                                   \
             BlockLength()),                                                \
         ref_species=hg19,                                                  \
-        file=$(DATA).min1k.statistics.csv),                                \
+        file=$(DATA).min100.statistics.csv),                               \
     Subset(                                                                \
         species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2),                    \
         strict=yes,                                                        \
@@ -29,16 +29,16 @@ maf.filter=                                                                \
             BlockSize(),                                                   \
             BlockLength()),                                                \
         ref_species=hg19,                                                  \
-        file=$(DATA).5ways.statistics.csv),                                \
+        file=$(DATA).5ways.statistics.csv),                                \ 
     Merge(                                                                 \
         species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2),                    \
-        dist_max=10),                                                      \
+        max_dist=20),                                                      \
     SequenceStatistics(                                                    \
         statistics=(                                                       \
             BlockSize(),                                                   \
             BlockLength()),                                                \
         ref_species=hg19,                                                  \
-        file=$(DATA).5ways.merged.statistics.csv),                         \
+        file=$(DATA).merged.statistics.csv),                               \ 
     XFullGap(                                                              \
         species=(hg19,panTro2,gorGor1,ponAbe2,rheMac2),                    \
         verbose=no),                                                       \
@@ -47,8 +47,14 @@ maf.filter=                                                                \
             BlockSize(),                                                   \
             BlockLength()),                                                \
         ref_species=hg19,                                                  \
-        file=$(DATA).5ways.merged.nogaps.statistics.csv),                  \
+        file=$(DATA).nogaps.statistics.csv),                               \
     MinBlockLength(min_length=1000),                                       \
+    SequenceStatistics(                                                    \
+        statistics=(                                                       \
+            BlockSize(),                                                   \
+            BlockLength()),                                                \
+        ref_species=hg19,                                                  \
+        file=$(DATA).min1k.statistics.csv),                                \
     WindowSplit(                                                           \
         preferred_size=1000,                                               \
         align=center),                                                     \
@@ -62,7 +68,7 @@ maf.filter=                                                                \
             PairwiseDivergence(species1=hg19, species2=ponAbe2),           \
             PairwiseDivergence(species1=hg19, species2=rheMac2)),          \
         ref_species=hg19,                                                  \
-        file=$(DATA).5ways.window1k.statistics.csv),                       \
+        file=$(DATA).window1k.statistics.csv),                             \
     DistanceEstimation(                                                    \
         method=ml,                                                         \
         model=K80(kappa=2.0),                                              \
@@ -82,6 +88,6 @@ maf.filter=                                                                \
         outgroup=rheMac2),                                                 \
     OutputTrees(                                                           \
         tree=BioNJ_rerooted,                                               \
-        file=$(DATA).5ways.window1k.dnd,                                   \
+        file=$(DATA).window1k.dnd,                                         \
         compression=none)
 
