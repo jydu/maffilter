@@ -77,7 +77,7 @@ maf.filter=                                                                \
         max_freq_gaps=0.3,                                                 \
         gaps_as_unresolved=yes,                                            \
         verbose=no,                                                        \
-        profiler=profile.txt,                                              \
+        profiler=none,                                              \
         message_handler=messages.txt),                                     \
     DistanceBasedPhylogeny(                                                \
         method=bionj,                                                      \

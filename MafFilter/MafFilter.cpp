@@ -910,8 +910,8 @@ int main(int args, char** argv)
           } else {
             throw Exception("Unrecognized parameter option, should be either 'initial', 'pairwise'.");
           }
-          string prPath = ApplicationTools::getAFilePath("profiler", cmdArgs, true, false);
-          string mhPath = ApplicationTools::getAFilePath("message_handler", cmdArgs, true, false);
+          string prPath = ApplicationTools::getAFilePath("profiler", cmdArgs, false, false);
+          string mhPath = ApplicationTools::getAFilePath("message_handler", cmdArgs, false, false);
           double propGapsToKeep = ApplicationTools::getDoubleParameter("max_freq_gaps", cmdArgs, 0.);
           bool gapsAsUnresolved = ApplicationTools::getBooleanParameter("gaps_as_unresolved", cmdArgs, true);
           

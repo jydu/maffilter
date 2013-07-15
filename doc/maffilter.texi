@@ -336,7 +336,7 @@ A coma separated, within parentheses, list of species. Only sequences correspond
 Block without sequences from the selection will be discarded.
 
 @item strict=yes/no
-If set to yes, only block containing at least one sequence from each species in the selection will be kept.
+If set to yes, only blocks containing at least one sequence from each species in the selection will be kept.
         
 @item keep=yes/no
 If strict is set to yes, tells if additional sequences should be kept in the block, or remove so that the output blocks only contain species from the selection.
@@ -482,8 +482,7 @@ maf.filter=                                 \
         feature.file=species1.gff3.gz,      \
         feature.file.compression=gzip,      \
         feature.format=GFF,                 \
-        feature.type=all,                   \
-        file=species1.trash.maf.gz,         \
+        feature.type=mRNA,                  \
         compression=gzip,                   \
         complete=yes,                       \
         ignore_strand=no),                  \
@@ -509,9 +508,6 @@ Format for the feature file, currently GFF (v3.0) or GTF only.
 
 @item feature.type=@{all|(list)@}
 Specifies which type of feature should be extracted from the feature file, if several are available.
-
-@item file=@{none|@{path@}@}
-An optional file were extracted features will be stored, in the MAF format.
 
 @item compression=@{none|gzip|zip|bzip2@}
 Compression format for output file (if file != none).
@@ -1137,22 +1133,40 @@ Here is the list of currently available statistical functions:
 
 @node BlockSize, BlockLength, Descriptive, Descriptive
 @subsubsection Size of alignment blocks
-Simply reports the number of sequences in the block.
+The @command{BlockSize} statistics reports the number of sequences in the block.
 
 (No argument)
 
 @node BlockLength, SequenceLength, BlockSize, Descriptive
 @subsubsection Length of alignment blocks
-Simply reports the number of sites in the block.
+The @command{BlockLength} statistics reports the number of sites in the block.
 
 (No argument)
 
 @node SequenceLength, AlnScore, BlockLength, Descriptive
 @subsubsection Length of sequence for a species
-Compute the length (in bp) of the sequence of one species. It returns 0 if no sequence for this species is found in the current block.
+The @command{SequenceLength} statistics computes the length (in bp) of the sequence of one species. It returns 0 if no sequence for this species is found in the current block.
 It will send an error however if the block has more than one sequence for this species (be sure to use the @command{Subset} filter before, if needed).
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            SequenceLength(                 \
+                species=species1),          \
+            [...]),                         \
+        ref_species=species1,               \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 @table @command
 @item species=@{string@}
 The species for which lengths should be reported.
@@ -1160,23 +1174,42 @@ The species for which lengths should be reported.
 
 @node AlnScore, BlockCounts, SequenceLength, Descriptive
 @subsubsection Alignment score
-Reports the alignment score associated to the block, if any.
+The @command{AlnScore} statistics reports the alignment score associated to the block, if any.
 
 (No argument)
 
 @node BlockCounts, PairwiseDivergence, AlnScore, Descriptive
 @subsubsection Character frequencies
-Reports the count of each character found in the block.
+The @command{BlockCounts} statistics reports the count of each character found in the block.
 
 (No argument)
 
 @node PairwiseDivergence, SiteStatistics, BlockCounts, Descriptive
 @subsubsection Pairwise divergence
-Compute the divergence (percentage of mistmatch) between two species.
+The @command{PairwiseDivergence} computes the divergence (percentage of mistmatch) between two species.
 If at least one of the species is missing, NaN is returned.
 It will send an error however if the block has more than one sequence for this species (be sure to use the @command{Subset} filter before, if needed).
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            PairwiseDivergence(             \
+                species1=species1,          \
+                species2=species1),         \
+            [...]),                         \
+        ref_species=species1,               \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 @table @command
 @item species1=@{string@}
 The first species for which divergence should be reported.
@@ -1186,7 +1219,7 @@ The second species for which divergence should be reported.
 
 @node SiteStatistics, SiteFrequencySpectrum, PairwiseDivergence, Descriptive
 @subsubsection Site statistics
-Compute site-wise statistics, including:
+@command{SiteStatistics} computes site-wise statistics, including:
 @itemize
 @item
 Number of sites without gap,
@@ -1197,7 +1230,25 @@ Number of parsimony-informative sites.
 @end itemize
 The statistics are computed for a given subset of species (typically forming a ingroup).
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            SiteStatistics(                 \
+                species=species1),          \
+            [...]),                         \
+        ref_species=species1,               \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 @table @command
 @item species=@{list@}
 A list of species to be considered in the statistics calculations.
@@ -1205,7 +1256,7 @@ A list of species to be considered in the statistics calculations.
 
 @node SiteFrequencySpectrum, PolymorphismStatistics, SiteStatistics, Descriptive
 @subsubsection Site frequency spectrum
-Computes the site frequency spectrum for each block.
+The @command{SiteFrequencySpectrum} computes the site frequency spectrum for each block.
 Only ``doubletons'' sites are considered, that is, positions in the alignment with only two states.
 The proportions of doubletons are then computed by bins.
 Lets consider the following example with 7 sequences:
@@ -1231,7 +1282,27 @@ SiteFrequencySpectrum(bounds=(-0.5,0.5), ...)
 @end verbatim
 The remaining sites will be pulled in a column called ``Ignored''.
  
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            SiteFrequencySpectrum(          \
+                bounds=(-0.5, 0.5, 1.5),    \
+                ingroup=(pop1, pop2, pop3), \
+                outgroup=species2,          \
+            [...]),                         \
+        ref_species=pop1,                   \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 @table @command
 @item bounds=@{list of double@}
 The bounds delimiting the bins of the spectrum to be computed.
@@ -1276,7 +1347,27 @@ Number of sites polymorphic in set 1 and unresolved in set 2
 Number of sites polymorphic in set 2 and unresolved in set 1
 @end table
 
-Arguments:
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            SiteFrequencySpectrum(          \
+                bounds=(-0.5, 0.5, 1.5),    \
+                ingroup=(pop1, pop2, pop3), \
+                outgroup=species2,          \
+            [...]),                         \
+        ref_species=pop1,                   \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 @table @command
 @item species1=@{list@}
 A list of species for set 1.
@@ -1288,9 +1379,28 @@ Note that the ``species'' terminology relates to multispecies alignments, as ori
 
 @node CountClusters,  , PolymorphismStatistics, Descriptive
 @subsubsection Number of sequence clusters.
-This counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
+@command{CountClusters} counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
 
-Arguments;
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            CountClusters(                  \
+                tree=bionj,                 \
+                threshold=0.001),           \
+            [...]),                         \
+        ref_species=species1,               \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
 @table @command
 
 @item tree=@{string@}
