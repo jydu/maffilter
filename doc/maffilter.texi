@@ -1729,7 +1729,7 @@ maf.filter=                                 \
 
 @table @command
 @item file=@{none|@{path@}@}
-A file path where to write alignment blocks.
+A file path where to write alignment blocks. If the file name contains the @%i code, one alignment file per block will be generated, where @%i will be replaced by the block index.
 
 @item format=@{string@}
 One of the alignment format supported by Bio++ (this includes Fasta, Mase and Clustal, see the Bio++ Program suite reference manual for a complete list of formats and options).
