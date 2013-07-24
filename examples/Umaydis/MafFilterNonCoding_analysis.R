@@ -72,3 +72,4 @@ m<-lm(GC~ChrSize, subset=BlockLength>=300, d)
 abline(m, lwd=2)
 
 dev.print(pdf, "Umaydis_intergenic_GC.pdf", width=10, height=6)
+dev.print(svg, "Umaydis_intergenic_GC.svg", width=10, height=6)

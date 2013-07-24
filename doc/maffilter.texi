@@ -1091,9 +1091,9 @@ maf.filter=                                 \
     [...],
     SequenceStatistics(                     \
         statistics=(\                       \
-            MinBlockLength(min_length=1000),\
-            AlnScore(),                     \
-            BlockCounts()),                 \
+            BlockLength,                    \
+            AlnScore,                       \
+            BlockCounts),                   \
         ref_species=species1,               \
         file=data.statistics.csv),          \
     [...]
