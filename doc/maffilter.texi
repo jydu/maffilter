@@ -95,6 +95,7 @@ Arguments:
 * BlockCounts::                 
 * PairwiseDivergence::          
 * SiteStatistics::              
+* FourSpeciesSitePatternCounts::  
 * SiteFrequencySpectrum::       
 * PolymorphismStatistics::      
 * CountClusters::               
@@ -1126,6 +1127,7 @@ Here is the list of currently available statistical functions:
 * BlockCounts::                 
 * PairwiseDivergence::          
 * SiteStatistics::              
+* FourSpeciesSitePatternCounts::  
 * SiteFrequencySpectrum::       
 * PolymorphismStatistics::      
 * CountClusters::               
@@ -1217,7 +1219,7 @@ The first species for which divergence should be reported.
 The second species for which divergence should be reported.
 @end table
 
-@node SiteStatistics, SiteFrequencySpectrum, PairwiseDivergence, Descriptive
+@node SiteStatistics, FourSpeciesSitePatternCounts, PairwiseDivergence, Descriptive
 @subsubsection Site statistics
 @command{SiteStatistics} computes site-wise statistics, including:
 @itemize
@@ -1254,7 +1256,41 @@ maf.filter=                                 \
 A list of species to be considered in the statistics calculations.
 @end table
 
-@node SiteFrequencySpectrum, PolymorphismStatistics, SiteStatistics, Descriptive
+@node FourSpeciesSitePatternCounts, SiteFrequencySpectrum, SiteStatistics, Descriptive
+@subsubsection Counts of parsimony informative sites for a species quartet
+The @command{FourSpeciesSitePatternCounts} computes the frequency of each type of informative sites.
+With four species, 3 types are expected: 1100, 0110 and 1010. On entry will be output for each of these types.
+The remaining sites will be pulled in a column called ``Ignored''.
+ 
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            FourSpeciesSitePatternCounts(   \
+                species1=sp1,               \
+                species2=sp2,               \
+                species3=sp3,               \
+                species4=sp4                \
+            [...]),                         \
+        ref_species=sp1,                    \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+@table @command
+@item species1=species
+First species to consider (resp. second, third and fourth).
+
+@end table
+
+@node SiteFrequencySpectrum, PolymorphismStatistics, FourSpeciesSitePatternCounts, Descriptive
 @subsubsection Site frequency spectrum
 The @command{SiteFrequencySpectrum} computes the site frequency spectrum for each block.
 Only ``doubletons'' sites are considered, that is, positions in the alignment with only two states.

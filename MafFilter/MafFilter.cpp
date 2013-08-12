@@ -744,6 +744,17 @@ int main(int args, char** argv)
             vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
             string outgroup        = ApplicationTools::getStringParameter("outgroup", statArgs, "", "", false, true);
             mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds, ingroup, outgroup); 
+          } else if (statName == "FourSpeciesSitePatternCounts") {
+            string species1 = ApplicationTools::getStringParameter("species1", statArgs, "sp1", "", false, true);
+            string species2 = ApplicationTools::getStringParameter("species2", statArgs, "sp2", "", false, true);
+            string species3 = ApplicationTools::getStringParameter("species3", statArgs, "sp3", "", false, true);
+            string species4 = ApplicationTools::getStringParameter("species4", statArgs, "sp4", "", false, true);
+            vector<string> species;
+            species.push_back(species1);
+            species.push_back(species2);
+            species.push_back(species3);
+            species.push_back(species4);
+            mafStat = new FourSpeciesPatternCountsMafStatistics(&AlphabetTools::DNA_ALPHABET, species); 
           } else if (statName == "SiteStatistics") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
             mafStat = new SiteMafStatistics(species); 
