@@ -765,6 +765,9 @@ int main(int args, char** argv)
             species.push_back(species1);
             species.push_back(species2);
             mafStat = new PolymorphismMafStatistics(species); 
+          } else if (statName == "DiversityStatistics") {
+            vector<string> species = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
+            mafStat = new SequenceDiversityMafStatistics(species); 
           } else if (statName == "CountClusters") {
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);

@@ -108,7 +108,7 @@ IMPROVED_FIND_LIBRARY(LIBS bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-core Bpp/Clonable.h)
 
 #Find boost libraries
-SET(Boost_USE_STATIC_LIBS   ${BUILD_STATIC})
+SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE( Boost 1.34.0 COMPONENTS iostreams )
 

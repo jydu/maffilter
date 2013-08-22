@@ -98,6 +98,7 @@ Arguments:
 * FourSpeciesSitePatternCounts::  
 * SiteFrequencySpectrum::       
 * PolymorphismStatistics::      
+* DiversityStatistics::         
 * CountClusters::               
 
 Phylogenetics
@@ -1130,6 +1131,7 @@ Here is the list of currently available statistical functions:
 * FourSpeciesSitePatternCounts::  
 * SiteFrequencySpectrum::       
 * PolymorphismStatistics::      
+* DiversityStatistics::         
 * CountClusters::               
 @end menu
 
@@ -1352,7 +1354,7 @@ If empty, the folded frequency spectrum will be returned (1/5 and 4/5 frequences
 
 @end table
 
-@node PolymorphismStatistics, CountClusters, SiteFrequencySpectrum, Descriptive
+@node PolymorphismStatistics, DiversityStatistics, SiteFrequencySpectrum, Descriptive
 @subsubsection Polymorphism statistics
 Compute various statistics describing sequence polymorphism. Two aligned sets of ``species'' are compared, and the number of polymorphic / fixed sites are computed: 
 @table @command
@@ -1413,7 +1415,42 @@ A list of species for set 2.
 
 Note that the ``species'' terminology relates to multispecies alignments, as originally implemented in the MultiZ aligner. These statistics will however be most relevant when the aligned sequences are actually from individuals from the same population / species. The term ``species'' is here therefore to be taken in terchnical terms (a sequence id in the alignment), and not biological. 
 
-@node CountClusters,  , PolymorphismStatistics, Descriptive
+@node DiversityStatistics, CountClusters, PolymorphismStatistics, Descriptive
+@subsubsection Sequence diversity statistics
+@command{DiversityStatistics} computes sequence diversity statistics, including:
+@itemize
+@item
+Number of seggregating sites,
+@item
+Watterson's theta.
+@end itemize
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                   \
+    [...],                                   
+    SequenceStatistics(                       \
+        statistics=(\                         \
+            [...],                                                    
+            DiversityStatistics(              \
+                ingroup=(samp1, samp2, samp3),\
+            [...]),                           \
+        ref_species=samp1,                    \
+        file=data.statistics.csv),            \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+@table @command
+@item ingroup=@{list@}
+A list of sequences to be considered in the statistics calculations.
+@end table
+
+
+@node CountClusters,  , DiversityStatistics, Descriptive
 @subsubsection Number of sequence clusters.
 @command{CountClusters} counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
 
