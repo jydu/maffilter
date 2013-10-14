@@ -1217,7 +1217,7 @@ int main(int args, char** argv)
     while (MafBlock* block = currentIterator->nextBlock())
     {
       alnSize += block->getNumberOfSites();
-      cout << '\r' << blockCounter++ << " blocks kept, totalizing " << alnSize << "bp.";
+      cout << '\r' << ++blockCounter << " blocks kept, totalizing " << alnSize << "bp.";
       cout.flush();
       //ApplicationTools::displayUnlimitedGauge(blockCounter++, "Parsing...");
       delete block;
