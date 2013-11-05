@@ -222,8 +222,14 @@ DATA=example.file //A user-defined variable, representing the input maf file, wi
 input.file=$(DATA).maf.gz  //Input maf file, gzipped
 input.file.compression=gzip
 output.log=$(DATA).maffilter.log //Output log file
-maf.filter= //A coma separated list of filters, here empty (the program only read the input file and exits).
+maf.filter= //A coma separated list of filters, here empty (the programs only read the input file and exits).
 @end verbatim
+The list of filters can be split on multiple lines for convenience, providing each line is escaped by a '\' at the end to indicate that the next line is a continuation of the current one:
+@verbatim
+maf.filter=Filter1,\
+           Filter2,\
+           Filter3
+@verbatim
 
 Please refer to the Bio++ Program Suite manual for more details, including the use of variables, priority of option values, etc.
 

@@ -85,6 +85,8 @@ void help()
   (*ApplicationTools::message << "      ... param=option_file").endLine();
   (*ApplicationTools::message).endLine();
   (*ApplicationTools::message << "  Refer to the MafFilter Manual for a list of available options.").endLine();
+  (*ApplicationTools::message << "  Online version: http://biopp.univ-montp2.fr/manual/html/maffilter/").endLine();
+  (*ApplicationTools::message << "  Or type 'info maffilter' in a terminal.").endLine();
   (*ApplicationTools::message << "__________________________________________________________________________").endLine();
 }
 
