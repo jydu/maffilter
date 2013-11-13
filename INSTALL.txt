@@ -1,5 +1,9 @@
 This software needs cmake >= 2.6 to build.
 
+The dependencies include:
+- Bio++ libraries: bpp-core, seq, phyls, seq-omics and phyl-omics
+- The boost-iostreams library.
+
 After installing cmake, run it with the following command:
 cmake -DCMAKE_INSTALL_PREFIX=[where to install, for instance /usr/local or $HOME/.local] .
 

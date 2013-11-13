@@ -211,10 +211,19 @@ The next section describes how to specify the series of filters to be applied, a
 @section How to run the program
 
 MafFilter is a program written in C++ with the Bio++ libraries. It is a command line program (that is, without graphical user interface) which uses the Bio++ Options (BppO) syntax. 
-This syntax is of type @samp{keys}=@samp{values}, which can be passed directly as arguments of the maffilter program, or more conveniently, stored in an ``options'' file (specified with param=option_file), or a combination of both. See the Bio++ Program Suite (BppSuite) manual for more information.
-MafFilter therefore typically takes as input a MAF file and a series of commands which determine the output file(s) that will be written and where.
-Additional input files might be specified, such as gene annotation files (typically in GFF/GTF format).
+This syntax is of type @samp{keys}=@samp{values}, which can be passed directly as arguments of the maffilter program
+@verbatim
+maffilter option1=value1 option2=value2 ... optionN=valueN
+@end verbatim
+or more conveniently, stored in an ``options'' file (specified with param=option_file), or a combination of both:
+@verbatim
+maffilter param=option_file
+maffilter param=option_file option1=value1 option2=value2
+@end verbatim
+See the Bio++ Program Suite (BppSuite) manual for more information.
 
+MafFilter typically takes as input a MAF file and a series of commands which determine the output file(s) that will be written and where.
+Additional input files might be specified, such as gene annotation files (typically in GFF/GTF format).
 Here is the structure of a minimal option file:
 
 @verbatim
@@ -229,7 +238,7 @@ The list of filters can be split on multiple lines for convenience, providing ea
 maf.filter=Filter1,\
            Filter2,\
            Filter3
-@verbatim
+@end verbatim
 
 Please refer to the Bio++ Program Suite manual for more details, including the use of variables, priority of option values, etc.
 
