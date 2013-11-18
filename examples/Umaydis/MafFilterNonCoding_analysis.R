@@ -155,3 +155,15 @@ simRnd2(20000, 0.5, 6.54, 0.96, 0.5)
 simRnd2(20000, 0.5, 6.54, 0.96, 1)
 
 
+# Profiling
+library(chron)
+prof<-read.table("syrupy_20131115102802.ps.log", header=TRUE, stringsAsFactors=FALSE)
+prof$TIME<-chron(times=prof$TIME)
+prof$TIME<-prof$TIME-prof$TIME[1]
+layout(matrix(1:2, nrow=2))
+plot(CPU~TIME, prof, type="l", main="Processor usage (%)", ylim=c(0,100))
+plot(RSS~TIME, prof, type="l", main="Memory usage (kB)")
+max(prof$RSS)
+dev.print(pdf, file="Profiling.pdf", width=8, height=12)
+dev.print(svg, file="Profiling.svg", width=8, height=12)
+
