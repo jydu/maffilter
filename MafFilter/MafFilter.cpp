@@ -75,6 +75,7 @@ using namespace boost::iostreams;
 #include <Bpp/Phyl/Distance.all>
 #include <Bpp/Phyl/Io/BppOSubstitutionModelFormat.h>
 #include <Bpp/Phyl/Io/BppORateDistributionFormat.h>
+#include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 
 using namespace bpp;
 
@@ -775,6 +776,28 @@ int main(int args, char** argv)
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);
             mafStat = new CountClustersMafStatistics(treeProperty, threshold);
             statDesc = " / " + treeProperty;
+          } else if (statName == "ModelFit") {
+            SubstitutionModel* model = PhylogeneticsApplicationTools::getSubstitutionModel(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, false);
+            ApplicationTools::displayResult("-- Substitution model", model->getName());
+            DiscreteDistribution* rDist = PhylogeneticsApplicationTools::getRateDistribution(statArgs, "", true, false);
+            ApplicationTools::displayResult("-- Rate distribution", rDist->getName());
+            string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
+            vector<string> parametersOutput = ApplicationTools::getVectorParameter<string>("parameters_output", statArgs, ',', "");
+            vector<string> fixedParametersNames = ApplicationTools::getVectorParameter<string>("fixed_parameters", statArgs, ',', "");
+            ParameterList fixedParameters;
+            if (fixedParametersNames.size() > 0) {
+              ParameterList parameters = model->getParameters();
+              parameters.addParameters(rDist->getParameters());
+              fixedParameters = parameters.subList(fixedParametersNames);
+            }
+            bool reestimateBrLen = ApplicationTools::getBooleanParameter("reestimate_brlen", statArgs, true);
+            ApplicationTools::displayBooleanResult("-- Reestimate branch lengths", reestimateBrLen);
+            double propGapsToKeep = ApplicationTools::getDoubleParameter("max_freq_gaps", statArgs, 0.);
+            ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
+            bool gapsAsUnresolved = ApplicationTools::getBooleanParameter("gaps_as_unresolved", statArgs, true);
+            ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
+            mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, treeProperty, parametersOutput,
+                fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved);
           } else {
             throw Exception("Unknown statistic: " + statName);
           }

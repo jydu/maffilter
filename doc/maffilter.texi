@@ -100,6 +100,7 @@ Arguments:
 * PolymorphismStatistics::      
 * DiversityStatistics::         
 * CountClusters::               
+* ModelFit::                    
 
 Phylogenetics
 
@@ -1148,6 +1149,7 @@ Here is the list of currently available statistical functions:
 * PolymorphismStatistics::      
 * DiversityStatistics::         
 * CountClusters::               
+* ModelFit::                    
 @end menu
 
 @node BlockSize, BlockLength, Descriptive, Descriptive
@@ -1465,7 +1467,7 @@ A list of sequences to be considered in the statistics calculations.
 @end table
 
 
-@node CountClusters,  , DiversityStatistics, Descriptive
+@node CountClusters, ModelFit, DiversityStatistics, Descriptive
 @subsubsection Number of sequence clusters.
 @command{CountClusters} counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
 
@@ -1497,6 +1499,79 @@ The tag name used to store the previously computed tree.
 @item threshold=@{double@}
 The threshold to use in order to compute clusters. A threshold of 0.001 for instance means that sequences within each cluster will be divergent by maximum 0.001, while sequences in distinct clusters will be divergent by at least 0.001.
  
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node ModelFit,  , CountClusters, Descriptive
+@subsubsection Fit a substitution model and estimate parameters
+
+@command{ModelFit} fits a substitution model to the input block, given a phylogenetic tree.
+All nucleotide homogeneous models can be used, with or without rate across sites variation.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            ModelFit(                       \
+                model=HKY85(                \
+                     kappa=1,               \
+                     theta=0.5,             \
+                     theta1=0.5,            \
+                     theta2=0.5),           \
+                rate_distribution=Gamma(    \
+                     n=4,                   \
+                     alpha=0.5),            \
+                tree=BioNJ,                 \
+                parameters_output=(         \
+                     HKY85.theta,           \
+                     HKY85.theta1,          \
+                     HKY85.theta2,          \
+                     HKY85.kappa),          \
+                fixed_parameters=(),        \
+                reestimate_brlen=yes,       \
+                max_freq_gaps=0.3,          \
+                gaps_as_unresolved=yes)),   \
+            [...]),                         \
+        ref_species=species1,               \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item model=@{string@}
+Substitution model to use. See the Bio++ Program Suite manual for an extensive description of available models.
+All nucleotide models can be used.
+
+@item rate_distribution=@{string@}
+The distribution for rates across sites. See the Bio++ Program Suite manual for all available distributions.
+
+@item tree=@{string@}
+The property name under which trees are stored for each block.
+
+@item parameters_output=@{list@}
+A list of parameter names to output as statistics.
+
+@item fixed_parameters=@{list@}
+A list of parameters which should not be optimized, but fixed to their initila values.
+
+@item reestimate_brlen=@{boolean@}
+Tell if the branches of the tree should be reestimated for each block together with other model parameters.
+
+@item max_freq_gaps=@{float@}
+The maximum proportion of gaps for a site to be included in the analysis.
+
+@item gaps_as_unresolved=@{yes/no@}
+Tell if remaining gaps should be converted to 'N' before likelihood computation. This should be 'yes' unless you specify a substitution model which explicitely allows for gaps.
+
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
