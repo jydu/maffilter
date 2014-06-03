@@ -114,6 +114,7 @@ Exporting blocks and data
 * Output::                      
 * OutputAlignments::            
 * VcfOutput::                   
+* OutputCoordinates::           
 * OutputTrees::                 
 
 @end detailmenu
@@ -1829,6 +1830,7 @@ An edited tree.
 * Output::                      
 * OutputAlignments::            
 * VcfOutput::                   
+* OutputCoordinates::           
 * OutputTrees::                 
 @end menu
 
@@ -1907,7 +1909,7 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node VcfOutput, OutputTrees, OutputAlignments, Exporting
+@node VcfOutput, OutputCoordinates, OutputAlignments, Exporting
 @subsection Call SNPs from alignment blocks and export to VCF file
 
 The @command{VcfOutput} filter call SNPs from each block and output them to a VCF file.
@@ -1941,7 +1943,7 @@ Compression format for output file.
 A species name corresponding to the sequence to use as reference.
 
 @item genotypes=@{list of species@}
-A list of species for which genotypes informations hsould be written. If non, void, a 'FORMAT' column will be added to the output, as well as oneextra column per species to genotype.
+A list of species for which genotypes informations should be written. If not, void, a 'FORMAT' column will be added to the output, as well as oneextra column per species to genotype.
 If the species is not present in this particular, or if a N or Gap is present, adot ('.') will be written in the column.
 Please note that species should be unique in each block, otherwise an error will occur.
 
@@ -1949,8 +1951,44 @@ Please note that species should be unique in each block, otherwise an error will
 
 @c ------------------------------------------------------------------------------------------------------------------
 
+@node OutputCoordinates, OutputTrees, VcfOutput, Exporting
+@subsection Output coordinates of a set of species for each block.
 
-@node OutputTrees,  , VcfOutput, Exporting
+The @command{OutputCoordinates} takes as input a list of species and output the coordinates of each of the corresponding sequences in each block.
+This filter only works if no more than one sequence per species are present, otherwise an error is casted. If some species are missing in some blocks, NA are produced in the output file.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    OutputCoordinates(                      \
+        file=coordinates.txt.gz,            \
+        compression=gzip,                   \
+        species=(species1,species2))        \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item file=@{none|@{path@}@}
+A file path for the output text file.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item species=@{list of species@}
+A list of species for which coodinates should be written.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+
+@node OutputTrees,  , OutputCoordinates, Exporting
 @subsection Write trees to a file.
 
 The @command{OutputTrees} filter writes trees associated to blocks to a file, in the Newick format. All trees will be stored in the same file, one per line.
