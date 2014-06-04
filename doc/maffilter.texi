@@ -1555,6 +1555,9 @@ All nucleotide models can be used.
 @item rate_distribution=@{string@}
 The distribution for rates across sites. See the Bio++ Program Suite manual for all available distributions.
 
+@item root_freqs=@{None|Full|GC@}
+Allow root frequencies to be different (non-stationary model). Root frequencies can be fully parametrized, or parametrized with GC content.
+
 @item tree=@{string@}
 The property name under which trees are stored for each block.
 

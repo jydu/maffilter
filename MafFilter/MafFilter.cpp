@@ -779,6 +779,13 @@ int main(int args, char** argv)
           } else if (statName == "ModelFit") {
             SubstitutionModel* model = PhylogeneticsApplicationTools::getSubstitutionModel(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, false);
             ApplicationTools::displayResult("-- Substitution model", model->getName());
+            string freqDescription = ApplicationTools::getStringParameter("root_freq", statArgs, "None");
+            FrequenciesSet* rootFreqs = 0;
+            if (freqDescription != "None") {
+              rootFreqs = PhylogeneticsApplicationTools::getFrequenciesSet(
+                  &AlphabetTools::DNA_ALPHABET, 0, freqDescription, 0, vector<double>(), 0);
+              ApplicationTools::displayResult("-- Root frequencies", rootFreqs->getName());
+            }
             DiscreteDistribution* rDist = PhylogeneticsApplicationTools::getRateDistribution(statArgs, "", true, false);
             ApplicationTools::displayResult("-- Rate distribution", rDist->getName());
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
@@ -796,7 +803,7 @@ int main(int args, char** argv)
             ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
             bool gapsAsUnresolved = ApplicationTools::getBooleanParameter("gaps_as_unresolved", statArgs, true);
             ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
-            mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, treeProperty, parametersOutput,
+            mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs), treeProperty, parametersOutput,
                 fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved);
           } else {
             throw Exception("Unknown statistic: " + statName);
