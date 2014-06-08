@@ -75,6 +75,7 @@ using namespace boost::iostreams;
 #include <Bpp/Phyl/Distance.all>
 #include <Bpp/Phyl/Io/BppOSubstitutionModelFormat.h>
 #include <Bpp/Phyl/Io/BppORateDistributionFormat.h>
+#include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 
 using namespace bpp;
 
@@ -775,6 +776,35 @@ int main(int args, char** argv)
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);
             mafStat = new CountClustersMafStatistics(treeProperty, threshold);
             statDesc = " / " + treeProperty;
+          } else if (statName == "ModelFit") {
+            SubstitutionModel* model = PhylogeneticsApplicationTools::getSubstitutionModel(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, false);
+            ApplicationTools::displayResult("-- Substitution model", model->getName());
+            string freqDescription = ApplicationTools::getStringParameter("root_freq", statArgs, "None");
+            FrequenciesSet* rootFreqs = 0;
+            if (freqDescription != "None") {
+              rootFreqs = PhylogeneticsApplicationTools::getFrequenciesSet(
+                  &AlphabetTools::DNA_ALPHABET, 0, freqDescription, 0, vector<double>(), 0);
+              ApplicationTools::displayResult("-- Root frequencies", rootFreqs->getName());
+            }
+            DiscreteDistribution* rDist = PhylogeneticsApplicationTools::getRateDistribution(statArgs, "", true, false);
+            ApplicationTools::displayResult("-- Rate distribution", rDist->getName());
+            string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
+            vector<string> parametersOutput = ApplicationTools::getVectorParameter<string>("parameters_output", statArgs, ',', "");
+            vector<string> fixedParametersNames = ApplicationTools::getVectorParameter<string>("fixed_parameters", statArgs, ',', "");
+            ParameterList fixedParameters;
+            if (fixedParametersNames.size() > 0) {
+              ParameterList parameters = model->getParameters();
+              parameters.addParameters(rDist->getParameters());
+              fixedParameters = parameters.subList(fixedParametersNames);
+            }
+            bool reestimateBrLen = ApplicationTools::getBooleanParameter("reestimate_brlen", statArgs, true);
+            ApplicationTools::displayBooleanResult("-- Reestimate branch lengths", reestimateBrLen);
+            double propGapsToKeep = ApplicationTools::getDoubleParameter("max_freq_gaps", statArgs, 0.);
+            ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
+            bool gapsAsUnresolved = ApplicationTools::getBooleanParameter("gaps_as_unresolved", statArgs, true);
+            ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
+            mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs), treeProperty, parametersOutput,
+                fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved);
           } else {
             throw Exception("Unknown statistic: " + statName);
           }
@@ -1163,7 +1193,7 @@ int main(int args, char** argv)
 
         string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         if (reference == "")
-          throw Exception("A reference sequence should be provided for command 'VcfOutput'.");
+          throw Exception("A reference sequence should be provided for filter 'VcfOutput'.");
         ApplicationTools::displayResult("-- Reference sequence", reference);
         
         vector<string> genotypes = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
@@ -1177,6 +1207,46 @@ int main(int args, char** argv)
         currentIterator = iterator;
         its.push_back(iterator);
       }
+
+
+
+      // +--------------------+
+      // | Coordinates output |
+      // +--------------------+
+      else if (cmdName == "OutputCoordinates") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        if (species.size() == 0)
+          throw Exception("At least one species should be provided for filter 'OutputCoordinates'.");
+        ApplicationTools::displayResult("-- Output coordinates for", TextTools::toString(species.size()) + " species");
+        
+        for (size_t i = 0; i < species.size(); ++i) {
+          ApplicationTools::displayResult("-- Output coordinates for species", species[i]);
+        }
+        CoordinatesOutputMafIterator* iterator = new CoordinatesOutputMafIterator(currentIterator, out, species);
+
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
 
 
 

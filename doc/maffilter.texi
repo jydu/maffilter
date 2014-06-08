@@ -100,6 +100,7 @@ Arguments:
 * PolymorphismStatistics::      
 * DiversityStatistics::         
 * CountClusters::               
+* ModelFit::                    
 
 Phylogenetics
 
@@ -113,6 +114,7 @@ Exporting blocks and data
 * Output::                      
 * OutputAlignments::            
 * VcfOutput::                   
+* OutputCoordinates::           
 * OutputTrees::                 
 
 @end detailmenu
@@ -1148,6 +1150,7 @@ Here is the list of currently available statistical functions:
 * PolymorphismStatistics::      
 * DiversityStatistics::         
 * CountClusters::               
+* ModelFit::                    
 @end menu
 
 @node BlockSize, BlockLength, Descriptive, Descriptive
@@ -1465,7 +1468,7 @@ A list of sequences to be considered in the statistics calculations.
 @end table
 
 
-@node CountClusters,  , DiversityStatistics, Descriptive
+@node CountClusters, ModelFit, DiversityStatistics, Descriptive
 @subsubsection Number of sequence clusters.
 @command{CountClusters} counts the number of sequence clusters. This requires that a clustering tree was previously computed (see below).
 
@@ -1497,6 +1500,82 @@ The tag name used to store the previously computed tree.
 @item threshold=@{double@}
 The threshold to use in order to compute clusters. A threshold of 0.001 for instance means that sequences within each cluster will be divergent by maximum 0.001, while sequences in distinct clusters will be divergent by at least 0.001.
  
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node ModelFit,  , CountClusters, Descriptive
+@subsubsection Fit a substitution model and estimate parameters
+
+@command{ModelFit} fits a substitution model to the input block, given a phylogenetic tree.
+All nucleotide homogeneous models can be used, with or without rate across sites variation.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            ModelFit(                       \
+                model=HKY85(                \
+                     kappa=1,               \
+                     theta=0.5,             \
+                     theta1=0.5,            \
+                     theta2=0.5),           \
+                rate_distribution=Gamma(    \
+                     n=4,                   \
+                     alpha=0.5),            \
+                tree=BioNJ,                 \
+                parameters_output=(         \
+                     HKY85.theta,           \
+                     HKY85.theta1,          \
+                     HKY85.theta2,          \
+                     HKY85.kappa),          \
+                fixed_parameters=(),        \
+                reestimate_brlen=yes,       \
+                max_freq_gaps=0.3,          \
+                gaps_as_unresolved=yes)),   \
+            [...]),                         \
+        ref_species=species1,               \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item model=@{string@}
+Substitution model to use. See the Bio++ Program Suite manual for an extensive description of available models.
+All nucleotide models can be used.
+
+@item rate_distribution=@{string@}
+The distribution for rates across sites. See the Bio++ Program Suite manual for all available distributions.
+
+@item root_freqs=@{None|Full|GC@}
+Allow root frequencies to be different (non-stationary model). Root frequencies can be fully parametrized, or parametrized with GC content.
+
+@item tree=@{string@}
+The property name under which trees are stored for each block.
+
+@item parameters_output=@{list@}
+A list of parameter names to output as statistics.
+
+@item fixed_parameters=@{list@}
+A list of parameters which should not be optimized, but fixed to their initila values.
+
+@item reestimate_brlen=@{boolean@}
+Tell if the branches of the tree should be reestimated for each block together with other model parameters.
+
+@item max_freq_gaps=@{float@}
+The maximum proportion of gaps for a site to be included in the analysis.
+
+@item gaps_as_unresolved=@{yes/no@}
+Tell if remaining gaps should be converted to 'N' before likelihood computation. This should be 'yes' unless you specify a substitution model which explicitely allows for gaps.
+
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
@@ -1754,6 +1833,7 @@ An edited tree.
 * Output::                      
 * OutputAlignments::            
 * VcfOutput::                   
+* OutputCoordinates::           
 * OutputTrees::                 
 @end menu
 
@@ -1832,7 +1912,7 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node VcfOutput, OutputTrees, OutputAlignments, Exporting
+@node VcfOutput, OutputCoordinates, OutputAlignments, Exporting
 @subsection Call SNPs from alignment blocks and export to VCF file
 
 The @command{VcfOutput} filter call SNPs from each block and output them to a VCF file.
@@ -1866,7 +1946,7 @@ Compression format for output file.
 A species name corresponding to the sequence to use as reference.
 
 @item genotypes=@{list of species@}
-A list of species for which genotypes informations hsould be written. If non, void, a 'FORMAT' column will be added to the output, as well as oneextra column per species to genotype.
+A list of species for which genotypes informations should be written. If not, void, a 'FORMAT' column will be added to the output, as well as oneextra column per species to genotype.
 If the species is not present in this particular, or if a N or Gap is present, adot ('.') will be written in the column.
 Please note that species should be unique in each block, otherwise an error will occur.
 
@@ -1874,8 +1954,44 @@ Please note that species should be unique in each block, otherwise an error will
 
 @c ------------------------------------------------------------------------------------------------------------------
 
+@node OutputCoordinates, OutputTrees, VcfOutput, Exporting
+@subsection Output coordinates of a set of species for each block.
 
-@node OutputTrees,  , VcfOutput, Exporting
+The @command{OutputCoordinates} takes as input a list of species and output the coordinates of each of the corresponding sequences in each block.
+This filter only works if no more than one sequence per species are present, otherwise an error is casted. If some species are missing in some blocks, NA are produced in the output file.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    OutputCoordinates(                      \
+        file=coordinates.txt.gz,            \
+        compression=gzip,                   \
+        species=(species1,species2))        \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item file=@{none|@{path@}@}
+A file path for the output text file.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item species=@{list of species@}
+A list of species for which coodinates should be written.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+
+@node OutputTrees,  , OutputCoordinates, Exporting
 @subsection Write trees to a file.
 
 The @command{OutputTrees} filter writes trees associated to blocks to a file, in the Newick format. All trees will be stored in the same file, one per line.
