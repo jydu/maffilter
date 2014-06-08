@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename maffilter.info
-@settitle MafFilter Manual 1.0.0
+@settitle MafFilter Manual 1.0.1
 @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
@@ -12,7 +12,7 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.0.0.
+This is the manual of MafFilter, version 1.0.1.
 
 Copyright @copyright{} 2013 Julien Y. Dutheil
 @end copying
@@ -20,7 +20,7 @@ Copyright @copyright{} 2013 Julien Y. Dutheil
 @titlepage
 @title MafFilter Manual
 @author Julien Dutheil
-@author @email{julien.dutheil@@univ-montp2.fr}
+@author @email{julien.dutheil@@mpi-marburg.mpg.de}
 
 
 @c The following two commands start the copyright page.
