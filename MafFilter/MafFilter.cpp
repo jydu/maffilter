@@ -135,7 +135,7 @@ int main(int args, char** argv)
     if (inputFormat == "Maf") {
       currentIterator = new MafParser(&stream, true);
     } else {
-      BppOSequenceStreamReaderFormat reader(true);
+      BppOSequenceStreamReaderFormat reader;
       ISequenceStream* seqStream = reader.read(inputFormat);
       map<string, string> cmdArgs(reader.getUnparsedArguments());
       bool zeroBased = ApplicationTools::getBooleanParameter("zero_based", cmdArgs, true);
@@ -964,7 +964,7 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
           ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
           
-          BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true);
+          BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true, 1);
           auto_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
           BppORateDistributionFormat rdistReader(true);
           auto_ptr<DiscreteDistribution> rdist(rdistReader.read(rdistDesc, true)); 
@@ -1110,7 +1110,7 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
         
         OutputAlignmentMafIterator* iterator; 
-        BppOAlignmentWriterFormat bppoWriter(true);
+        BppOAlignmentWriterFormat bppoWriter;
         string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
         OAlignment* oAln = bppoWriter.read(description);
         if (multipleFiles) {
