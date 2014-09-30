@@ -235,6 +235,20 @@ INCLUDE(CPack)
 
 #This adds the 'dist' target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+# 'clean' is not (yet) a first class target. However, we need to clean the directories before building the sources:
+IF("${CMAKE_GENERATOR}" MATCHES "Make")
+  ADD_CUSTOM_TARGET(make_clean
+    COMMAND ${CMAKE_MAKE_PROGRAM} clean
+    WORKING_DIRECTORY ${CMAKE_CURRENT_DIR}
+  )
+  ADD_DEPENDENCIES(dist make_clean)
+
+  ADD_CUSTOM_TARGET(make_clean_man
+    COMMAND rm -f *.${DOC_COMPRESS_EXT}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
+  )
+  ADD_DEPENDENCIES(dist make_clean_man)
+ENDIF()
 
 IF(NOT NO_DEP_CHECK)
 IF (UNIX)
