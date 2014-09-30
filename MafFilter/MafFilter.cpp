@@ -94,9 +94,9 @@ void help()
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
-  cout << "*                  MAF Filter, version 1.0.1                     *" << endl;
+  cout << "*                  MAF Filter, version 1.1.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 13/11/13 *" << endl;
+  cout << "*                                           Last Modif. 26/09/14 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -1110,7 +1110,7 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
         
         OutputAlignmentMafIterator* iterator; 
-        BppOAlignmentWriterFormat bppoWriter;
+        BppOAlignmentWriterFormat bppoWriter(1);
         string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
         OAlignment* oAln = bppoWriter.read(description);
         if (multipleFiles) {
