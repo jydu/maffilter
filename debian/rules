@@ -81,7 +81,7 @@ clean:
 	#rm -rf test/CMakeFiles
 	rm -rf man/CMakeFiles
 	rm -rf doc/CMakeFiles
-	rm -rf doc/bppsuite.info
+	rm -rf doc/maffilter.info
 	rm -rf _CPack_Packages
 	#rm -rf Testing
 	#rm -f DartConfiguration.tcl
@@ -109,7 +109,7 @@ install-arch:
 
 	# Add here commands to install the arch part of the package into 
 	# debian/tmp.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/bppsuite man doc install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/maffilter man doc install
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
