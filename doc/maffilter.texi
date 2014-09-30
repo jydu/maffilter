@@ -12,15 +12,15 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.0.1.
+This is the manual of MafFilter, version 1.1.0.
 
-Copyright @copyright{} 2013 Julien Y. Dutheil
+Copyright @copyright{} 2014 Julien Y. Dutheil
 @end copying
 
 @titlepage
 @title MafFilter Manual
 @author Julien Dutheil
-@author @email{julien.dutheil@@mpi-marburg.mpg.de}
+@author @email{julien.dutheil@@univ-montp2.fr}
 
 
 @c The following two commands start the copyright page.

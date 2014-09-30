@@ -5,6 +5,7 @@
 # Global parameters
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(maffilter C CXX)
+
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
@@ -28,6 +29,19 @@ IF(NOT NO_DEP_CHECK)
       "Disable dependencies check for building distribution only."
       FORCE)
 ENDIF(NOT NO_DEP_CHECK)
+
+IF(NOT DOC_COMPRESS)
+  SET(DOC_COMPRESS gzip CACHE STRING
+      "Set program for compressing documentation."
+      FORCE)
+ENDIF(NOT DOC_COMPRESS)
+
+IF(NOT DOC_COMPRESS_EXT)
+  SET(DOC_COMPRESS_EXT gz CACHE STRING
+      "Set extension of compressed documentation."
+      FORCE)
+ENDIF(NOT DOC_COMPRESS_EXT)
+
 
 IF(NO_DEP_CHECK)
   MESSAGE("-- Dependencies checking disabled. Only distribution can be built.")
@@ -55,9 +69,59 @@ IF(NOT DEFINED MAN)
 ENDIF(NOT DEFINED MAN)
 
 #find executables for documentation
-FIND_PROGRAM(MAKEINFO_EXE NAMES makeinfo)
+IF(MAN)
+  FIND_PROGRAM(NROFF_EXE NAMES nroff)
+  IF(NROFF_EXE)
+    MESSAGE("-- Found nroff here: ${NROFF_EXE}")
+    MESSAGE("   Adding targets: man")
+
+    ADD_CUSTOM_TARGET(man
+      ALL
+      COMMAND cp maffilter.1.txt maffilter.1
+      COMMAND ${DOC_COMPRESS} -f maffilter.1
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
+      )
+    SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "man/maffilter.1.${DOC_COMPRESS_EXT}")
+  ELSE()
+    MESSAGE(FATAL_ERROR "Program nroff required but not found.")
+  ENDIF()
+ENDIF(MAN)
+
+IF(INFO)
+  FIND_PROGRAM(MAKEINFO_EXE NAMES makeinfo)
+  IF(MAKEINFO_EXE)
+    MESSAGE("-- Found makeinfo here: ${MAKEINFO_EXE}")
+    MESSAGE("   Adding targets: info, html")
+ 
+    SET(ADD_INFO_TO "ALL")
+    MESSAGE("   Adding target info to target all")
+    
+    ADD_CUSTOM_TARGET(info
+      ${ADD_INFO_TO}
+      COMMAND ${MAKEINFO_EXE} maffilter.texi
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+      )
+
+    ADD_CUSTOM_TARGET(html
+      COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely maffilter.texi
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+      )
+  ELSE(MAKEINFO_EXE)
+    MESSAGE(FATAL_ERROR p"Program makeinfo required but not found.")
+  ENDIF(MAKEINFO_EXE)
+ENDIF(INFO)
+
 FIND_PROGRAM(PDFTEX_EXE NAMES pdftex)
-FIND_PROGRAM(NROFF_EXE NAMES nroff)
+IF(PDFTEX_EXE)
+  MESSAGE("-- Found pdftex here: ${PDFTEX_EXE}")
+  MESSAGE("   Adding target: pdf")
+
+  ADD_CUSTOM_TARGET(pdf
+    COMMAND ${PDFTEX_EXE} maffilter.texi
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+    )
+  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "doc/maffilter.pdf;doc/maffilter.aux;doc/maffilter.cp;doc/maffilter.fn;doc/maffilter.info;doc/maffilter.ky;doc/maffilter.log;doc/maffilter.pg;doc/maffilter.toc;doc/maffilter.tp;doc/maffilter.vr")
+ENDIF(PDFTEX_EXE)
 
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
@@ -134,52 +198,6 @@ IF(BZIP2_FOUND)
   MESSAGE("-- BZip2 found: ${BZIP2_INCLUDE_DIR}")
 ENDIF()
 
-IF(MAKEINFO_EXE)
-  MESSAGE("-- Found makeinfo here: ${MAKEINFO_EXE}")
-  MESSAGE("   Adding targets: info, html")
-
-  IF(INFO)
-    SET(ADD_INFO_TO "ALL")
-    MESSAGE("   Adding target info to target all")
-  ENDIF(INFO)
-
-  ADD_CUSTOM_TARGET(info
-    ${ADD_INFO_TO}
-    COMMAND ${MAKEINFO_EXE} maffilter.texi
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-    )
-
-  ADD_CUSTOM_TARGET(html
-    COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Oldstyle maffilter.texi
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-    )
-ENDIF(MAKEINFO_EXE)
-
-IF(PDFTEX_EXE)
-  MESSAGE("-- Found pdftex here: ${PDFTEX_EXE}")
-  MESSAGE("   Adding target: pdf")
-
-  ADD_CUSTOM_TARGET(pdf
-    COMMAND ${PDFTEX_EXE} maffilter.texi
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-    )
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "doc/maffilter.pdf;doc/maffilter.aux;doc/maffilter.cp;doc/maffilter.fn;doc/maffilter.info;doc/maffilter.ky;doc/maffilter.log;doc/maffilter.pg;doc/maffilter.toc;doc/maffilter.tp;doc/maffilter.vr")
-ENDIF(PDFTEX_EXE)
-
-IF(NROFF_EXE)
-  MESSAGE("-- Found nroff here: ${NROFF_EXE}")
-  MESSAGE("   Adding targets: man")
-
-  ADD_CUSTOM_TARGET(man
-    ALL
-    COMMAND cp maffilter.1.txt maffilter.1
-    COMMAND gzip -f maffilter.1
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
-    )
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "man/maffilter.1.gz;man/mapnh.1.gz;man/partnh.1.gz;man/randnh.1.gz")
-ENDIF(NROFF_EXE)
-
-
 # Subdirectories
 ADD_SUBDIRECTORY(MafFilter)
 ADD_SUBDIRECTORY(doc)
@@ -195,9 +213,9 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "1")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Filtering of genome alignment in the Multiple Alignment Format (MAF)")
-SET(CPACK_RESOURCE_FILE_LICENSE "COPYING.txt")
-SET(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS.txt")
-SET(CPACK_RESOURCE_FILE_AUTHORS "INSTALL.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.txt")
+SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS.txt")
+SET(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL.txt")
 SET(CPACK_SOURCE_GENERATOR "TGZ")
 SET(CPACK_SOURCE_IGNORE_FILES
  "CMakeFiles"
@@ -217,7 +235,9 @@ SET(CPACK_SOURCE_IGNORE_FILES
  "\\\\.sh"
  "\\\\..*\\\\.swp"
  "MafFilter/\\\\..*"
+ "man/.*\\\\.1.${DOC_COMPRESS_EXT}"
  "debian/tmp"
+ "debian/maffilter/"
  "debian/maffilter\\\\.substvars"
  "debian/maffilter\\\\.debhelper"
  "debian/debhelper\\\\.log"

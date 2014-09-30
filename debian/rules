@@ -64,7 +64,7 @@ clean:
 	# Add here commands to clean up after the build process.
 	[ ! -f Makefile ] || $(MAKE) clean;
 	[ ! -f Makefile ] || rm Makefile;
-	[ ! -f bppSuite/Makefile ] || rm bppSuite/Makefile;
+	[ ! -f MafFilter/Makefile ] || rm MafFilter/Makefile;
 	[ ! -f doc/Makefile ] || rm doc/Makefile;
 	[ ! -f man/Makefile ] || rm man/Makefile;
 	rm -f man/*.gz;
@@ -72,12 +72,12 @@ clean:
 	rm -f build-stamp
 	rm -f CMakeCache.txt
 	rm -f *.cmake
-	rm -f bppSuite/*.cmake
+	rm -f MafFilter/*.cmake
 	#rm -f test/*.cmake
 	rm -f man/*.cmake
 	rm -f doc/*.cmake
 	rm -rf CMakeFiles
-	rm -rf bppSuite/CMakeFiles
+	rm -rf MafFilter/CMakeFiles
 	#rm -rf test/CMakeFiles
 	rm -rf man/CMakeFiles
 	rm -rf doc/CMakeFiles
