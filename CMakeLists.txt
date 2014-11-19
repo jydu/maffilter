@@ -55,7 +55,7 @@ IF(NOT BUILD_STATIC)
 ENDIF()
 IF(BUILD_STATIC)
   MESSAGE("-- Static linkage requested.")
-  SET(CMAKE_CXX_FLAGS "-static -static-libgcc ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-static -static-libgcc -static-libstdc++ ${CMAKE_CXX_FLAGS}")
 ENDIF()
 
 #build info?
@@ -183,20 +183,28 @@ IF(Boost_FOUND)
 ENDIF()
 
 # Find the zlib installation
-FIND_PACKAGE(ZLIB REQUIRED)
-IF(ZLIB_FOUND)
-  INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-  SET(LIBS ${LIBS} ${ZLIB_LIBRARIES})
-  MESSAGE("-- Zlib found: ${ZLIB_INCLUDE_DIR}")
-ENDIF()
+IMPROVED_FIND_LIBRARY(LIBS z zlib.h)
+#This does not work with static linkage!!!
+#FIND_PACKAGE(ZLIB REQUIRED)
+#IF(ZLIB_FOUND)
+#  INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+#  SET(LIBS ${LIBS} ${ZLIB_LIBRARIES})
+#  MESSAGE("-- Zlib found here:")
+#  MESSAGE("   includes: ${ZLIB_INCLUDE_DIR}")
+#  MESSAGE("   libraries: ${ZLIB_LIBRARIES}")
+#ENDIF()
 
 # Find the bz2 installation
-FIND_PACKAGE(BZip2 REQUIRED)
-IF(BZIP2_FOUND)
-  INCLUDE_DIRECTORIES(${BZIP2_INCLUDE_DIR})
-  SET(LIBS ${LIBS} ${BZIP2_LIBRARIES})
-  MESSAGE("-- BZip2 found: ${BZIP2_INCLUDE_DIR}")
-ENDIF()
+IMPROVED_FIND_LIBRARY(LIBS bz2 bzlib.h)
+#This does not work with static linkage!!!
+#FIND_PACKAGE(BZip2 REQUIRED)
+#IF(BZIP2_FOUND)
+#  INCLUDE_DIRECTORIES(${BZIP2_INCLUDE_DIR})
+#  SET(LIBS ${LIBS} ${BZIP2_LIBRARIES})
+#  MESSAGE("-- BZip2 found here:")
+#  MESSAGE("   includes: ${BZIP2_INCLUDE_DIR}")
+#  MESSAGE("   libraries: ${BZIP2_LIBRARIES}")
+#ENDIF()
 
 # Subdirectories
 ADD_SUBDIRECTORY(MafFilter)
