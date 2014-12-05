@@ -18,7 +18,7 @@ maffilter applies a series of post-processing filter to an input MAF file.
 
 .SH OPTIONS
 
-You should refer to 'info maffilter' or to the online manual of testnh for a complete list of available options.
+You should refer to 'info maffilter' or to the online manual of maffilter for a complete list of available options.
 
 .TP 5
 

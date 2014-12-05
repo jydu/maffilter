@@ -4,7 +4,7 @@
 
 # Global parameters
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(maffilter C CXX)
+PROJECT(maffilter CXX)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
@@ -254,7 +254,7 @@ SET(CPACK_DEBSOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VER
 INCLUDE(CPack)
 
 #This adds the 'dist' target
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 # 'clean' is not (yet) a first class target. However, we need to clean the directories before building the sources:
 IF("${CMAKE_GENERATOR}" MATCHES "Make")
   ADD_CUSTOM_TARGET(make_clean
