@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename maffilter.info
-@settitle MafFilter Manual 1.0.1
+@settitle MafFilter Manual 1.1.0
 @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
@@ -40,82 +40,83 @@ Copyright @copyright{} 2014 Julien Y. Dutheil
 @end ifnottex
 
 @menu
-* Introduction::                
-* Filters::                     
+* Introduction::
+* Filters::
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Introduction
 
-* Description::                 
-* Run::                         
-* General::                     
+* Description::
+* Run::
+* General::
 
 Filters
 
-* Extracting::                  
-* Cleaning::                    
-* Analyzing::                   
-* Exporting::                   
+* Extracting::
+* Cleaning::
+* Analyzing::
+* Exporting::
 
 Extracting data
 
-* Subset::                      
-* SelectOrphans::               
-* Merge::                       
-* Concatenate::                 
-* ExtractFeature::              
-* SelectChr::                   
-* WindowSplit::                 
+* Subset::
+* SelectOrphans::
+* Merge::
+* Concatenate::
+* ExtractFeature::
+* SelectChr::
+* WindowSplit::
 
 Cleaning alignment blocks
 
-* MinBlockLength::              
-* MinBlockSize::                
-* XFullGap::                    
-* AlnFilter::                   
-* AlnFilter2::                  
-* EntropyFilter::               
-* MaskFilter::                  
-* QualFilter::                  
-* FeatureFilter::               
+* MinBlockLength::
+* MinBlockSize::
+* XFullGap::
+* AlnFilter::
+* AlnFilter2::
+* EntropyFilter::
+* MaskFilter::
+* QualFilter::
+* FeatureFilter::
 
 Statistical analysis
 
-* Descriptive::                 
-* Phylogenetics::               
+* Descriptive::
+* Phylogenetics::
 
 Arguments:
 
-* BlockSize::                   
-* BlockLength::                 
-* SequenceLength::              
-* AlnScore::                    
-* BlockCounts::                 
-* PairwiseDivergence::          
-* SiteStatistics::              
-* FourSpeciesSitePatternCounts::  
-* SiteFrequencySpectrum::       
-* PolymorphismStatistics::      
-* DiversityStatistics::         
-* CountClusters::               
-* ModelFit::                    
+* BlockSize::
+* BlockLength::
+* SequenceLength::
+* AlnScore::
+* BlockCounts::
+* PairwiseDivergence::
+* SiteStatistics::
+* FourSpeciesSitePatternCounts::
+* SiteFrequencySpectrum::
+* PolymorphismStatistics::
+* DiversityStatistics::
+* CountClusters::
+* ModelFit::
 
 Phylogenetics
 
-* DistanceEstimation::          
-* DistanceBasedPhylogeny::      
-* NewOutgroup::                 
-* DropSpecies::                 
+* DistanceEstimation::
+* DistanceBasedPhylogeny::
+* NewOutgroup::
+* DropSpecies::
 
 Exporting blocks and data
 
-* Output::                      
-* OutputAlignments::            
-* VcfOutput::                   
-* OutputCoordinates::           
-* OutputTrees::                 
+* Output::
+* OutputAlignments::
+* VcfOutput::
+* MsmcOutput::
+* OutputCoordinates::
+* OutputTrees::
 
 @end detailmenu
 @end menu
@@ -140,9 +141,9 @@ This manual intends to provide an exhaustive description of the options used in 
 
          
 @menu
-* Description::                 
-* Run::                         
-* General::                     
+* Description::
+* Run::
+* General::
 @end menu
 
 @node Description, Run, Introduction, Introduction
@@ -306,23 +307,23 @@ The next section present all available filters and their corresponding arguments
 @c ------------------------------------------------------------------------------------------------------------------
 
 @menu
-* Extracting::                  
-* Cleaning::                    
-* Analyzing::                   
-* Exporting::                   
+* Extracting::
+* Cleaning::
+* Analyzing::
+* Exporting::
 @end menu
 
 @node Extracting, Cleaning, Filters, Filters
 @section Extracting data
 
 @menu
-* Subset::                      
-* SelectOrphans::               
-* Merge::                       
-* Concatenate::                 
-* ExtractFeature::              
-* SelectChr::                   
-* WindowSplit::                 
+* Subset::
+* SelectOrphans::
+* Merge::
+* Concatenate::
+* ExtractFeature::
+* SelectChr::
+* WindowSplit::
 @end menu
 
 @c ------------------------------------------------------------------------------------------------------------------
@@ -639,15 +640,15 @@ In the last case, the windows will have at least the specified size, but might b
 @c ------------------------------------------------------------------------------------------------------------------
 
 @menu
-* MinBlockLength::              
-* MinBlockSize::                
-* XFullGap::                    
-* AlnFilter::                   
-* AlnFilter2::                  
-* EntropyFilter::               
-* MaskFilter::                  
-* QualFilter::                  
-* FeatureFilter::               
+* MinBlockLength::
+* MinBlockSize::
+* XFullGap::
+* AlnFilter::
+* AlnFilter2::
+* EntropyFilter::
+* MaskFilter::
+* QualFilter::
+* FeatureFilter::
 @end menu
 
 @node MinBlockLength, MinBlockSize, Cleaning, Cleaning
@@ -1087,8 +1088,8 @@ Compression format for output file (if file != none).
 @section Statistical analysis
 
 @menu
-* Descriptive::                 
-* Phylogenetics::               
+* Descriptive::
+* Phylogenetics::
 @end menu
 
 @node Descriptive, Phylogenetics, Analyzing, Analyzing
@@ -1138,19 +1139,19 @@ The statistics to compute take the form of functions (just like filters themselv
 Here is the list of currently available statistical functions:
 
 @menu
-* BlockSize::                   
-* BlockLength::                 
-* SequenceLength::              
-* AlnScore::                    
-* BlockCounts::                 
-* PairwiseDivergence::          
-* SiteStatistics::              
-* FourSpeciesSitePatternCounts::  
-* SiteFrequencySpectrum::       
-* PolymorphismStatistics::      
-* DiversityStatistics::         
-* CountClusters::               
-* ModelFit::                    
+* BlockSize::
+* BlockLength::
+* SequenceLength::
+* AlnScore::
+* BlockCounts::
+* PairwiseDivergence::
+* SiteStatistics::
+* FourSpeciesSitePatternCounts::
+* SiteFrequencySpectrum::
+* PolymorphismStatistics::
+* DiversityStatistics::
+* CountClusters::
+* ModelFit::
 @end menu
 
 @node BlockSize, BlockLength, Descriptive, Descriptive
@@ -1586,10 +1587,10 @@ Tell if remaining gaps should be converted to 'N' before likelihood computation.
 @c ------------------------------------------------------------------------------------------------------------------
 
 @menu
-* DistanceEstimation::          
-* DistanceBasedPhylogeny::      
-* NewOutgroup::                 
-* DropSpecies::                 
+* DistanceEstimation::
+* DistanceBasedPhylogeny::
+* NewOutgroup::
+* DropSpecies::
 @end menu
 
 @node DistanceEstimation, DistanceBasedPhylogeny, Phylogenetics, Phylogenetics
@@ -1830,11 +1831,12 @@ An edited tree.
 @section Exporting blocks and data
 
 @menu
-* Output::                      
-* OutputAlignments::            
-* VcfOutput::                   
-* OutputCoordinates::           
-* OutputTrees::                 
+* Output::
+* OutputAlignments::
+* VcfOutput::
+* MsmcOutput::
+* OutputCoordinates::
+* OutputTrees::
 @end menu
 
 @node Output, OutputAlignments, Exporting, Exporting
@@ -1912,7 +1914,7 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node VcfOutput, OutputCoordinates, OutputAlignments, Exporting
+@node VcfOutput, MsmcOutput, OutputAlignments, Exporting
 @subsection Call SNPs from alignment blocks and export to VCF file
 
 The @command{VcfOutput} filter call SNPs from each block and output them to a VCF file.
@@ -1947,14 +1949,57 @@ A species name corresponding to the sequence to use as reference.
 
 @item genotypes=@{list of species@}
 A list of species for which genotypes informations should be written. If not, void, a 'FORMAT' column will be added to the output, as well as oneextra column per species to genotype.
-If the species is not present in this particular, or if a N or Gap is present, adot ('.') will be written in the column.
+If the species is not present in this particular, or if a N or Gap is present, a dot ('.') will be written in the column.
 Please note that species should be unique in each block, otherwise an error will occur.
 
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node OutputCoordinates, OutputTrees, VcfOutput, Exporting
+@node MsmcOutput, OutputCoordinates, VcfOutput, Exporting
+@subsection Export segregating sites to MSMC format
+
+The @command{MsmcOutput} filter calls all segregating sites and export them to the MSMC format,
+to be used with the MSMC program @uref{https://github.com/stschiff/msmc} (Multiple Sequentially Markovian Coalescent).
+Sites with gap or unresolved characters are not called.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    MsmcOutput(                             \
+        file=snp.msmc,                      \
+        compression=none,                   \
+        reference=Ref,                      \
+        genotypes=(sample1,sample2)),       \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item file=@{none|@{path@}@}
+A file path for the output MSMC file.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item reference=@{species name@}
+A species name corresponding to the sequence to use as reference.
+
+@item genotypes=@{list of species@}
+A list of species for which seggregating sites should be called. It might not contain the reference species, which is then only used for coordinates output.
+Blocks with do not contain all species will not be called, as well as block not contianing the reference species. Note that the alignment has to be projected
+againt the reference species, otherwise an error will be reported.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node OutputCoordinates, OutputTrees, MsmcOutput, Exporting
 @subsection Output coordinates of a set of species for each block.
 
 The @command{OutputCoordinates} takes as input a list of species and output the coordinates of each of the corresponding sequences in each block.
