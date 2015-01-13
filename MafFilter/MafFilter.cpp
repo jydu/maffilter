@@ -1246,7 +1246,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reference sequence", reference);
         
         vector<string> species = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
-        if (species.size() <= 2)
+        if (species.size() < 2)
           throw Exception("MsmcOutput: at least two genomes are necessary to call SNPs.");
         MsmcOutputMafIterator* iterator = new MsmcOutputMafIterator(currentIterator, out, species, reference);
 
