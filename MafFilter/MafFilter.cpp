@@ -939,8 +939,10 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- Gap option", gapOption);
           bool unresolvedAsGap = ApplicationTools::getBooleanParameter("unresolved_as_gap", cmdArgs, "no");
           ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGap);
+          bool extendedSeqNames = ApplicationTools::getBooleanParameter("extended_names", cmdArgs, true);
+          ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
 
-          CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap);
+          CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap, extendedSeqNames);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(&log);
           currentIterator = iterator;
@@ -963,6 +965,9 @@ int main(int args, char** argv)
           
           ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
           ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
+          
+          bool extendedSeqNames = ApplicationTools::getBooleanParameter("extended_names", cmdArgs, true);
+          ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
           
           BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true, 1);
           auto_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
@@ -990,7 +995,8 @@ int main(int args, char** argv)
             ApplicationTools::displayResult("-- Optimization messages in", mhPath);
           distEst->getOptimizer()->setMessageHandler(messenger);
 
-          MaximumLikelihoodDistanceEstimationMafIterator* iterator = new MaximumLikelihoodDistanceEstimationMafIterator(currentIterator, distEst.release(), propGapsToKeep, gapsAsUnresolved, paramOpt);
+          MaximumLikelihoodDistanceEstimationMafIterator* iterator = new MaximumLikelihoodDistanceEstimationMafIterator(currentIterator,
+              distEst.release(), propGapsToKeep, gapsAsUnresolved, paramOpt, extendedSeqNames);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(&log);
           iterator->setVerbose(verbose);
@@ -1108,13 +1114,16 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Output alignment file" + string(multipleFiles ? "s" : ""), outputFile);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
+        string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "", "", true, 1);
+        if (reference != "")
+          ApplicationTools::displayResult("-- Reference species", reference);
         
         OutputAlignmentMafIterator* iterator; 
         BppOAlignmentWriterFormat bppoWriter(1);
         string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
         OAlignment* oAln = bppoWriter.read(description);
         if (multipleFiles) {
-          iterator = new OutputAlignmentMafIterator(currentIterator, outputFile, oAln, mask);
+          iterator = new OutputAlignmentMafIterator(currentIterator, outputFile, oAln, mask, reference);
         } else {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           filtering_ostream* out = new filtering_ostream;
@@ -1130,7 +1139,7 @@ int main(int args, char** argv)
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression", compress);
-          iterator = new OutputAlignmentMafIterator(currentIterator, out, oAln, mask);
+          iterator = new OutputAlignmentMafIterator(currentIterator, out, oAln, mask, reference);
         }
         currentIterator = iterator;
         its.push_back(iterator);
@@ -1311,7 +1320,10 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- File compression", compress);
         string treeProperty = ApplicationTools::getStringParameter("tree", cmdArgs, "none");
         ApplicationTools::displayResult("-- Tree to write", treeProperty);
-        OutputTreeMafIterator* iterator = new OutputTreeMafIterator(currentIterator, out, treeProperty);
+        bool stripNames = ApplicationTools::getBooleanParameter("strip_names", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Strip names", stripNames);
+
+        OutputTreeMafIterator* iterator = new OutputTreeMafIterator(currentIterator, out, treeProperty, !stripNames);
         currentIterator = iterator;
         its.push_back(iterator);
       }

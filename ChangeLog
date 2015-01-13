@@ -1,3 +1,10 @@
+13/01/15 Julien Dutheil
+* More options for OutputAlignments (output file names).
+
+09/01/15 Julien Dutheil
+* Add formatting options (sequence names) for trees and distance matrices.
+* ML parameter estimation outputs parameter names in terminal.
+
 26/09/14 -*- Version 1.1.0 -*-
 
 05/04/14 Julien Dutheil

@@ -1607,7 +1607,8 @@ maf.filter=                                 \
     DistanceEstimation(                     \
         method=count,                       \
         gap_option=no_double_gap,           \
-        unresolved_as_gap=no),               \
+        unresolved_as_gap=no,               \
+        extended_names=yes),                \
     [...]
 @end example
 or
@@ -1622,7 +1623,8 @@ maf.filter=                                 \
         max_freq_gaps=0.33,                 \
         gaps_as_unresolved=yes,             \
         profiler=none,                      \
-        message_handler=none),              \
+        message_handler=none,               \
+        extended_names=yes),                \
     [...]
 @end example
 @end cartouche
@@ -1652,6 +1654,8 @@ For each pairwise comparison, any gap-containing position is ignored. This is th
 @item unresolved_as_gap=@{yes|no@}
 Tell is unresolved characters should be treated as gaps (usually in order to be ignored).
 
+@item extended_names=@{boolean@}
+Tell if sequence coordinates should be included in the sequence names stored in the output matrix.
 @end table
 
 Further arguments for the ML method:
@@ -1900,6 +1904,7 @@ maf.filter=                                 \
 @table @command
 @item file=@{none|@{path@}@}
 A file path where to write alignment blocks. If the file name contains the %i code, one alignment file per block will be generated, where %i will be replaced by the block index.
+In addition to the %i special code, additional variables can be used (in combination with %i, in order to avoid putative identical file names): chromosome number (%c), begin (%b) and end (%e) of reference sequence.
 
 @item format=@{string@}
 One of the alignment format supported by Bio++ (this includes Fasta, Mase and Clustal, see the Bio++ Program suite reference manual for a complete list of formats and options).
@@ -1909,6 +1914,9 @@ Compression format for output file.
 
 @item mask=@{yes|no@}
 Tell if sequences should be masked (if a mask annotation is available), or if masking information should be ignored.
+
+@item reference=@{string@}
+The name of reference sequence, which will only be used when %c, %b or %e codes are used in file names. In case a block does not contain a sequence for the reference species, "ChrNA", "StartNA" and "StopNA" tags will be used.
 
 @end table
 
@@ -2066,6 +2074,11 @@ A file path where to write trees, in the Newick format.
 
 @item compression=@{none|gzip|zip|bzip2@}
 Compression format for output file.
+
+@item strip_names=@{boolean@}
+Tell if leaf names should be stripped. If so, all text after the first dot will be deleted.
+This is useful to get rid of the sequence coordinates.
+The option will have no effect in case the names do not contain coordinates.
 
 @end table
 
