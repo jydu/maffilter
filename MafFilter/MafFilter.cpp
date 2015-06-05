@@ -1114,7 +1114,11 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Output alignment file" + string(multipleFiles ? "s" : ""), outputFile);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
-        string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "", "", true, 1);
+        bool coords = ApplicationTools::getBooleanParameter("coordinates", cmdArgs, true);
+        ApplicationTools::displayBooleanResult("-- Output coordinates", coords);
+        bool header = ApplicationTools::getBooleanParameter("ldhat_header", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Output header line", header);
+         string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "", "", true, 1);
         if (reference != "")
           ApplicationTools::displayResult("-- Reference species", reference);
         
@@ -1123,7 +1127,7 @@ int main(int args, char** argv)
         string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
         OAlignment* oAln = bppoWriter.read(description);
         if (multipleFiles) {
-          iterator = new OutputAlignmentMafIterator(currentIterator, outputFile, oAln, mask, reference);
+          iterator = new OutputAlignmentMafIterator(currentIterator, outputFile, oAln, mask, coords, header, reference);
         } else {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           filtering_ostream* out = new filtering_ostream;
@@ -1139,7 +1143,7 @@ int main(int args, char** argv)
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression", compress);
-          iterator = new OutputAlignmentMafIterator(currentIterator, out, oAln, mask, reference);
+          iterator = new OutputAlignmentMafIterator(currentIterator, out, oAln, mask, coords, header, reference);
         }
         currentIterator = iterator;
         its.push_back(iterator);

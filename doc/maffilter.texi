@@ -1882,7 +1882,7 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 @subsection Write alignment blocks to an external alignment file.
 
 The @command{OutputAlignments} filter writes all blocks to an external alignment file, potentially losing some information such as coordinates and scores.
-Sequence names will be formated following the Ensembl convention.
+Sequence names will be formated following the Ensembl convention when coordinates are available.
 
 @heading Synopsis:
 
@@ -1894,7 +1894,8 @@ maf.filter=                                 \
         file=data.filtered.aln,             \
         compression=none,                   \
         format=Clustal,                     \
-        mask=no),                           \
+        mask=no,                            \
+        coordinates=yes),                   \
     [...]
 @end example
 @end cartouche
@@ -1914,6 +1915,13 @@ Compression format for output file.
 
 @item mask=@{yes|no@}
 Tell if sequences should be masked (if a mask annotation is available), or if masking information should be ignored.
+
+@item coordinates=@{yes|no@}
+Tell if coordinates of sequences should be written in the header of each sequence (followinf Ensembl syntax).
+If set to no, or if sequences have no coordinates, only the species name will be used as a sequence name.
+
+@item ldhat_header=@{yes|no@}
+Tell if a header line should be added for each file, in order to be used with the LDhat convert program. This line contains the nimber of sequences, the sequence lengths, and the number 1 (for haploid).
 
 @item reference=@{string@}
 The name of reference sequence, which will only be used when %c, %b or %e codes are used in file names. In case a block does not contain a sequence for the reference species, "ChrNA", "StartNA" and "StopNA" tags will be used.
