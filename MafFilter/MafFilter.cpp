@@ -1288,10 +1288,13 @@ int main(int args, char** argv)
           throw Exception("At least one species should be provided for filter 'OutputCoordinates'.");
         ApplicationTools::displayResult("-- Output coordinates for", TextTools::toString(species.size()) + " species");
         
+        bool includeSrcSize = ApplicationTools::getBooleanParameter("output_src_size", cmdArgs, true);
+        ApplicationTools::displayBooleanResult("-- Output src size", includeSrcSize);
+        
         for (size_t i = 0; i < species.size(); ++i) {
           ApplicationTools::displayResult("-- Output coordinates for species", species[i]);
         }
-        CoordinatesOutputMafIterator* iterator = new CoordinatesOutputMafIterator(currentIterator, out, species);
+        CoordinatesOutputMafIterator* iterator = new CoordinatesOutputMafIterator(currentIterator, out, species, includeSrcSize);
 
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);

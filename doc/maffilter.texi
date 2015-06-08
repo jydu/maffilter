@@ -2030,7 +2030,8 @@ maf.filter=                                 \
     OutputCoordinates(                      \
         file=coordinates.txt.gz,            \
         compression=gzip,                   \
-        species=(species1,species2))        \
+        species=(species1,species2),        \
+        output_src_size=yes)                \
     [...]
 @end example
 @end cartouche
@@ -2046,6 +2047,9 @@ Compression format for output file.
 
 @item species=@{list of species@}
 A list of species for which coodinates should be written.
+
+@item output_src_size=@{boolean}
+Tell if the size of source sequences should be output.
 
 @end table
 
