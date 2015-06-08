@@ -2048,7 +2048,7 @@ Compression format for output file.
 @item species=@{list of species@}
 A list of species for which coodinates should be written.
 
-@item output_src_size=@{boolean}
+@item output_src_size=@{boolean@}
 Tell if the size of source sequences should be output.
 
 @end table
