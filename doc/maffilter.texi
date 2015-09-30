@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename maffilter.info
 @settitle MafFilter Manual 1.1.0
-@documentencoding UTF-8
+@c @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
 @direntry

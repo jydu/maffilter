@@ -46,6 +46,7 @@ using namespace std;
 
 #include <Bpp/Seq/Io/Maf.all>
 #include "OutputAsFeaturesMafIterator.h"
+#include "SystemCallMafIterator.h"
 
 //From boost:
 #include <boost/iostreams/device/file.hpp>
@@ -64,6 +65,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/SequenceWithQuality.h>
 #include <Bpp/Seq/Io/BppOSequenceStreamReaderFormat.h>
 #include <Bpp/Seq/Io/BppOAlignmentWriterFormat.h>
+#include <Bpp/Seq/Io/BppOAlignmentReaderFormat.h>
 #include <Bpp/Seq/Container/SiteContainerTools.h>
 
 // From bpp-seq-omics and bpp-phyl-omics:
@@ -96,7 +98,7 @@ int main(int args, char** argv)
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 1.1.2                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 18/12/14 *" << endl;
+  cout << "*                                           Last Modif. 29/09/15 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -1335,6 +1337,39 @@ int main(int args, char** argv)
         its.push_back(iterator);
       }
     
+
+
+
+      // +--------------------------+
+      // | External program wrapper |
+      // +--------------------------+
+      else if (cmdName == "SystemCall") {
+        string name = ApplicationTools::getStringParameter("name", cmdArgs, "external");
+
+        string programInputFile = ApplicationTools::getAFilePath("input.file", cmdArgs, true, false);
+        string programInputFormat = ApplicationTools::getStringParameter("input.format", cmdArgs, "Fasta");
+        BppOAlignmentWriterFormat bppoWriter(1);
+        OAlignment* alnWriter(bppoWriter.read(programInputFormat));
+
+        string programOutputFile = ApplicationTools::getAFilePath("output.file", cmdArgs, true, false);
+        string programOutputFormat = ApplicationTools::getStringParameter("output.format", cmdArgs, "Fasta");
+        BppOAlignmentReaderFormat bppoReader(1);
+        IAlignment* alnReader(bppoReader.read(programOutputFormat));
+
+        string command = ApplicationTools::getStringParameter("call", cmdArgs, "echo \"TODO: implement wrapper!\"");
+        
+        ApplicationTools::displayResult("-- External call", name);
+        ApplicationTools::displayResult("   Command", command);
+
+        SystemCallMafIterator* iterator = new SystemCallMafIterator(currentIterator, alnWriter, programInputFile, alnReader, programOutputFile, command);
+
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
       else 
         throw Exception("Unknown filter: " + cmdName);
 
