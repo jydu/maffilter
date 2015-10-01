@@ -588,7 +588,8 @@ maf.filter=                                 \
     [...],
     WindowSplit(                            \
         preferred_size=1000,                \
-        align=center),                      \
+        align=center,                       \
+        keep_small_blocks=no),              \
     [...]
 @end example
 @end cartouche
@@ -603,7 +604,12 @@ The preferred size for the output windows.
 @item align=@{ragged_left|ragged_right|center|adjust@}
 Specifies how to align windows on the block:
 
+@item keep_small_blocks = @{boolean@}
+Tell if blocks with an original size smaller that the window size should be kept (and untouched).
+This option only works if the align option is set to adjust. The combination of "align=adjust" and "keep_small_blocks=yes" allows to ensure that blocks do not exceed a given size, without losing any data.
+
 @table @command
+
 @item ragged_left
 @verbatim
 Block   |----------------------------|

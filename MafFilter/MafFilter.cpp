@@ -910,8 +910,11 @@ int main(int args, char** argv)
           splitOption = WindowSplitMafIterator::ADJUST;
         else throw Exception("Unvalid alignment option for WindowSplit: " + splitOptionStr);
         ApplicationTools::displayResult("-- Alignment option", splitOptionStr);
+        bool keepSmallBlocks = ApplicationTools::getBooleanParameter("keep_small_blocks", cmdArgs, false);
+        if (splitOptionStr == "adjust")
+          ApplicationTools::displayBooleanResult("-- Keep small blocks", keepSmallBlocks);
 
-        WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, splitOption);
+        WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, splitOption, keepSmallBlocks);
         iterator->setLogStream(&log);
         currentIterator = iterator;
         its.push_back(iterator);
