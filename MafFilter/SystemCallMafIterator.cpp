@@ -44,6 +44,8 @@ using namespace std;
 
 MafBlock* SystemCallMafIterator::analyseCurrentBlock_() throw (Exception) {
   currentBlock_ = iterator_->nextBlock();
+  if (! currentBlock_)
+    return 0;
   auto_ptr<AlignedSequenceContainer> aln(currentBlock_->getAlignment().clone());
   
   //We translate sequence names to avoid compatibility issues
@@ -57,16 +59,23 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() throw (Exception) {
   alnWriter_->writeAlignment(inputFile_, *aln, true);
 
   //Call the external program:
-  system(call_.c_str());
+  int rc = system(call_.c_str());
+  if (rc) throw Exception("SystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
 
   //Then read and assign the realigned sequences:
-  auto_ptr<SiteContainer> result(alnReader_->readAlignment(inputFile_, &AlphabetTools::DNA_ALPHABET));
+  auto_ptr<SiteContainer> result(alnReader_->readAlignment(outputFile_, &AlphabetTools::DNA_ALPHABET));
+  vector<MafSequence*> tmp;
   for (size_t i = 0; i < currentBlock_->getNumberOfSequences(); ++i) {
-    auto_ptr<MafSequence> mseq(currentBlock_->getSequence(i).clone());
+    MafSequence* mseq = currentBlock_->getSequence(i).cloneMeta();
     //NB: we discard any putative score associated to this sequence.
     string name = "seq" + TextTools::toString(i);
     mseq->setContent(dynamic_cast<const BasicSequence&>(result->getSequence(name)).toString()); //NB shall we use getContent here?
-    currentBlock_->getAlignment().setSequence(i, *mseq);
+    tmp.push_back(mseq);
+  }
+  currentBlock_->getAlignment().clear();
+  for (size_t i = 0; i < tmp.size(); ++i) {
+    currentBlock_->getAlignment().addSequence(*tmp[i], false);
+    delete tmp[i];
   }
 
   //Done:

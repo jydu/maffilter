@@ -1448,6 +1448,8 @@ Note that the ``species'' terminology relates to multispecies alignments, as ori
 Number of seggregating sites,
 @item
 Watterson's theta.
+@item
+Tajima's pi (average pairwise dissimilarity).
 @end itemize
 
 @heading Synopsis:
