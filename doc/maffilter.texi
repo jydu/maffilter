@@ -1462,7 +1462,7 @@ maf.filter=                                   \
         statistics=(\                         \
             [...],                                                    
             DiversityStatistics(              \
-                ingroup=(samp1, samp2, samp3),\
+                ingroup=(samp1,samp2,samp3)), \
             [...]),                           \
         ref_species=samp1,                    \
         file=data.statistics.csv),            \
