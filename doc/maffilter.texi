@@ -1450,6 +1450,8 @@ Number of seggregating sites,
 Watterson's theta.
 @item
 Tajima's pi (average pairwise dissimilarity).
+@item
+Tajima's D.
 @end itemize
 
 @heading Synopsis:
