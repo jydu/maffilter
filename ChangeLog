@@ -1,6 +1,12 @@
 18/12/15 Julien Dutheil
 * SequenceStatistics can now write in compressed file.
 
+10/12/15 Julien Dutheil
+* Added PLINK export filter.
+
+22/11/15 Julien Dutheil
+* Fixed bug in FeatureFilter in case two features are exactly consecutive.
+
 20/10/15 Julien Dutheil
 * Added Tajima's pi to diversity statistics.
 

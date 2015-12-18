@@ -1283,6 +1283,56 @@ int main(int args, char** argv)
 
 
 
+      // +--------------+
+      // | PLINK output |
+      // +--------------+
+      else if (cmdName == "PlinkOutput") {
+        string outputPedFile = ApplicationTools::getAFilePath("ped_file", cmdArgs, true, false);
+        string outputMapFile = ApplicationTools::getAFilePath("map_file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output Ped file", outputPedFile);
+        ApplicationTools::displayResult("-- Output Map file", outputMapFile);
+        filtering_ostream* outPed = new filtering_ostream;
+        filtering_ostream* outMap = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          outPed->push(gzip_compressor());
+          outMap->push(gzip_compressor());
+        } else if (compress == "zip") {
+          outPed->push(zlib_compressor());
+          outMap->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          outPed->push(bzip2_compressor());
+          outMap->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        outPed->push(file_sink(outputPedFile));
+        outMap->push(file_sink(outputMapFile));
+        ostreams.push_back(outPed);
+        ostreams.push_back(outMap);
+        ApplicationTools::displayResult("-- File compression", compress);
+
+        string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        if (reference == "")
+          throw Exception("A reference sequence should be provided for filter 'PlinkOutput'.");
+        ApplicationTools::displayResult("-- Reference sequence", reference);
+        
+        bool map3 = ApplicationTools::getBooleanParameter("map3", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Ouput map3 file", map3);
+
+        vector<string> species = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
+        if (species.size() < 2)
+          throw Exception("PlinkOutput: at least two genomes are necessary to call SNPs.");
+        PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3);
+
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
       // +--------------------+
       // | Coordinates output |
       // +--------------------+

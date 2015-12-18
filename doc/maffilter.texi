@@ -115,6 +115,7 @@ Exporting blocks and data
 * OutputAlignments::
 * VcfOutput::
 * MsmcOutput::
+* PlinkOutput::
 * OutputCoordinates::
 * OutputTrees::
 
@@ -1853,6 +1854,7 @@ An edited tree.
 * OutputAlignments::
 * VcfOutput::
 * MsmcOutput::
+* PlinkOutput::
 * OutputCoordinates::
 * OutputTrees::
 @end menu
@@ -1986,7 +1988,7 @@ Please note that species should be unique in each block, otherwise an error will
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node MsmcOutput, OutputCoordinates, VcfOutput, Exporting
+@node MsmcOutput, PlinkOutput, VcfOutput, Exporting
 @subsection Export segregating sites to MSMC format
 
 The @command{MsmcOutput} filter calls all segregating sites and export them to the MSMC format,
@@ -2029,7 +2031,59 @@ againt the reference species, otherwise an error will be reported.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node OutputCoordinates, OutputTrees, MsmcOutput, Exporting
+@node PlinkOutput, OutputCoordinates, MsmcOutput, Exporting
+@subsection Export segregating sites to MSMC format
+
+The @command{PlinkOutput} filter calls all biallelic segregating sites and export them to the PLINK format,
+creating on Ped file and one Map file.
+Sites with gap or unresolved characters are not called.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    PlinkOutput(                            \
+        ped_file=snp.ped,                   \
+        map_file=snp.map,                   \
+        compression=none,                   \
+        reference=Ref,                      \
+        genotypes=(sample1,sample2),        \
+        map3=no)                            \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item ped_file=@{none|@{path@}@}
+A file path for the output Ped file.
+
+@item map_file=@{none|@{path@}@}
+A file path for the output Map file.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item reference=@{species name@}
+A species name corresponding to the sequence to use as reference.
+
+@item genotypes=@{list of species@}
+A list of species for which seggregating sites should be called. It might not contain the reference species, which is then only used for coordinates output.
+Blocks with do not contain all species will not be called, as well as block not contianing the reference species. Note that the alignment has to be projected
+againt the reference species, otherwise an error will be reported.
+
+@item map3=@{boolean@}
+Tell if genetic distance column should be ommitted in the Map file. The resulting file should be sued together with the --map3 option in PLINK.
+If set to no, then a 0 genetic distance is written.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node OutputCoordinates, OutputTrees, PlinkOutput, Exporting
 @subsection Output coordinates of a set of species for each block.
 
 The @command{OutputCoordinates} takes as input a list of species and output the coordinates of each of the corresponding sequences in each block.
