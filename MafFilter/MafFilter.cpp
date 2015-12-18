@@ -816,8 +816,24 @@ int main(int args, char** argv)
 
         //Get output file:
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
-        StlOutputStream* output = new StlOutputStream(new ofstream(outputFile.c_str(), ios::out));
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        //ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+        //StlOutputStream* output = new StlOutputStream(new ofstream(outputFile.c_str(), ios::out));
+        StlOutputStream* output = new StlOutputStream(out);
+
         SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, statistics);
         
         if (cmdArgs.find("reference") != cmdArgs.end()) {

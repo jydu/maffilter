@@ -1121,7 +1121,8 @@ maf.filter=                                 \
             AlnScore,                       \
             BlockCounts),                   \
         ref_species=species1,               \
-        file=data.statistics.csv),          \
+        file=data.statistics.csv,           \
+        compression=none),                  \
     [...]
 @end example
 @end cartouche
@@ -1138,6 +1139,9 @@ The species to use to report block coordinates in the output file. For block whe
 
 @item file=@{path@}
 A file path for the output file.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
 
 @end table
 
