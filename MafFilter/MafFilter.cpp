@@ -829,6 +829,7 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
+        ostreams.push_back(out);
         //ostreams.push_back(out);
         ApplicationTools::displayResult("-- File compression", compress);
         //StlOutputStream* output = new StlOutputStream(new ofstream(outputFile.c_str(), ios::out));
