@@ -72,6 +72,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf.all>
 #include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
 #include <Bpp/Seq/Feature/Gtf/GtfFeatureReader.h>
+#include <Bpp/Seq/Feature/Bed/BedGraphFeatureReader.h>
 
 // From bpp-phyl:
 #include <Bpp/Phyl/Distance.all>
@@ -595,7 +596,9 @@ int main(int args, char** argv)
           ftReader.reset(new GffFeatureReader(featureStream));
         } else if (featureFormat == "GTF") {
           ftReader.reset(new GtfFeatureReader(featureStream));
-        } else
+        } else if (featureFormat == "BedGraph") {
+          ftReader.reset(new BedGraphFeatureReader(featureStream));
+         } else
           throw Exception("Unsupported feature format: " + featureFormat);
         if (featureType.size() == 1 && featureType[0] == "all")
           ftReader->getAllFeatures(featuresSet);
@@ -885,7 +888,9 @@ int main(int args, char** argv)
           ftReader.reset(new GffFeatureReader(featureStream));
         } else if (featureFormat == "GTF") {
           ftReader.reset(new GtfFeatureReader(featureStream));
-        } else
+        } else if (featureFormat == "BedGraph") {
+          ftReader.reset(new BedGraphFeatureReader(featureStream));
+         } else
           throw Exception("Unsupported feature format: " + featureFormat);
         if (featureType.size() == 1 && featureType[0] == "all")
           ftReader->getAllFeatures(featuresSet);
@@ -1374,6 +1379,72 @@ int main(int args, char** argv)
         its.push_back(iterator);
       }
 
+
+
+
+      // +------------------------+
+      // | Coordinates conversion |
+      // +------------------------+
+      else if (cmdName == "LiftOver") {
+        //Input
+        string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
+        string targetSpecies = ApplicationTools::getStringParameter("target_species", cmdArgs, "none");
+        string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
+        string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
+        ApplicationTools::displayResult("-- Features to lift over", featureFile + " (" + featureFormat + ")");
+        ApplicationTools::displayResult("-- from species", refSpecies);
+        ApplicationTools::displayResult("-- to species", targetSpecies);
+        compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
+        filtering_istream featureStream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          featureStream.push(gzip_decompressor());
+        } else if (compress == "zip") {
+          featureStream.push(zlib_decompressor());
+        } else if (compress == "bzip2") {
+          featureStream.push(bzip2_decompressor());
+        } else
+          throw Exception("Bad input incompression format: " + compress);
+        featureStream.push(file_source(featureFile));
+        auto_ptr<FeatureReader> ftReader;
+        SequenceFeatureSet featuresSet;
+        if (featureFormat == "GFF") {
+          ftReader.reset(new GffFeatureReader(featureStream));
+        } else if (featureFormat == "GTF") {
+          ftReader.reset(new GtfFeatureReader(featureStream));
+        } else if (featureFormat == "BedGraph") {
+          ftReader.reset(new BedGraphFeatureReader(featureStream));
+        } else
+          throw Exception("Unsupported feature format: " + featureFormat);
+        ftReader->getAllFeatures(featuresSet);
+        ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
+        
+        //Output
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+        
+        //Iterator initialization:
+        CoordinateTranslator* iterator = new CoordinateTranslator(currentIterator, refSpecies, targetSpecies, featuresSet, *out);
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        its.push_back(iterator);
+
+        currentIterator = iterator;
+      }
 
 
 
