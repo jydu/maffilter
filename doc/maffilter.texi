@@ -67,6 +67,7 @@ Extracting data
 * Concatenate::
 * ExtractFeature::
 * SelectChr::
+* LiftOver::
 * WindowSplit::
 
 Cleaning alignment blocks
@@ -324,6 +325,7 @@ The next section present all available filters and their corresponding arguments
 * Concatenate::
 * ExtractFeature::
 * SelectChr::
+* LiftOver::
 * WindowSplit::
 @end menu
 
@@ -497,7 +499,7 @@ The features to extract are typically provided via a GFF file.
 @cartouche
 @example
 maf.filter=                                 \
-    [...]z
+    [...]
     ExtractFeature(                         \
         ref_species=species1,               \
         feature.file=species1.gff3.gz,      \
@@ -524,8 +526,8 @@ The file where the features are described.
 @item feature.file.compression=@{none|gzip|zip|bzip2@}
 Compression format for the feature file.
 
-@item feature.format=@{GFF|GTF@}
-Format for the feature file, currently GFF (v3.0) or GTF only.
+@item feature.format=@{GFF|GTF|BedGraph@}
+Format for the feature file, currently GFF (v3.0), GTF or BedGraph.
 
 @item feature.type=@{all|(list)@}
 Specifies which type of feature should be extracted from the feature file, if several are available.
@@ -543,7 +545,7 @@ If yes, features will be extracted ``as is''. Otherwise, the invert-complement s
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node SelectChr, WindowSplit, ExtractFeature, Extracting
+@node SelectChr, LiftOver, ExtractFeature, Extracting
 @subsection Extract blocks for a given chromosome/contig/scaffold
 
 The @command{SelectChr} filter keeps only block from a given chromosome (or contig or scaffold...) for a given reference species.
@@ -575,7 +577,57 @@ The name of the chromosome/contig/scaffold to be filtered.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node WindowSplit,  , SelectChr, Extracting
+@node LiftOver, WindowSplit, SelectChr, Extracting
+@subsection Convert coordinates from one genome to another
+
+The @command{LiftOver} mimmics the behavior of the famous UCSC liftover utility.
+Features are read from any supported format, and a convertion table is generated for all features included in the alignment.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...]
+    LiftOver(                               \
+        ref_species=species1,               \
+        target_species=species2,            \
+        feature.file=species1.gff3.gz,      \
+        feature.file.compression=gzip,      \
+        feature.format=GFF,                 \
+        file=sp1_to_sp2.tln,                \
+        compression=none),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+
+@item ref_species=@{string@}
+The name of the species for which the coordinates of the features are provided.
+
+@item target_species=@{string@}
+The name of the species to which the coordinates of the features should be converted.
+
+@item feature.file=@{path@}
+The file where the features are described.
+
+@item feature.file.compression=@{none|gzip|zip|bzip2@}
+Compression format for the feature file.
+
+@item feature.format=@{GFF|GTF|BedGraph@}
+Format for the feature file, currently GFF (v3.0), GTF or BedGraph.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node WindowSplit,  , LiftOver, Extracting
 @subsection Split alignment blocks into smaller parts
 
 The @command{WindowSplit} filter subdivides blocks into smaller ones of a regular size, typically for window-based analyses.
@@ -1068,8 +1120,8 @@ The file where the features are described.
 @item feature.file.compression=@{none|gzip|zip|bzip2@}
 Compression format for the feature file.
 
-@item feature.format=@{GFF|GTF@}
-Format for the feature file, currently GFF (v3.0) or GTF only.
+@item feature.format=@{GFF|GTF|BedGraph@}
+Format for the feature file, currently GFF (v3.0), GTF or BedGraph.
 
 @item feature.type=@{all|(list)@}
 Specifies which type of feature should be extracted from the feature file, if several are available.
