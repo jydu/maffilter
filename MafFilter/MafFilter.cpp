@@ -808,8 +808,18 @@ int main(int args, char** argv)
             ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
             bool gapsAsUnresolved = ApplicationTools::getBooleanParameter("gaps_as_unresolved", statArgs, true);
             ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
-            mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs), treeProperty, parametersOutput,
-                fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved);
+            bool useClock = ApplicationTools::getBooleanParameter("global_clock", statArgs, false);
+            ApplicationTools::displayBooleanResult("-- Use a global molecular clock", useClock);
+            bool reparametrize = ApplicationTools::getBooleanParameter("reparametrize", statArgs, false);
+            ApplicationTools::displayBooleanResult("-- Reparametrization", reparametrize);
+            if (treeProperty == "none") {
+              Tree* tree = PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false); 
+              mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs), tree, parametersOutput,
+                fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
+            } else {
+              mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs), treeProperty, parametersOutput,
+                  fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
+            }
           } else {
             throw Exception("Unknown statistic: " + statName);
           }

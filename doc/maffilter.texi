@@ -1626,8 +1626,14 @@ The distribution for rates across sites. See the Bio++ Program Suite manual for 
 @item root_freqs=@{None|Full|GC@}
 Allow root frequencies to be different (non-stationary model). Root frequencies can be fully parametrized, or parametrized with GC content.
 
-@item tree=@{string@}
-The property name under which trees are stored for each block.
+@item tree=@{string|none@}
+The property name under which trees are stored for each block. If set to ``none'', then an input file should be given.
+
+@item tree.file=@{path@}[tree=none]
+Path for tree file, in case no property is set.
+
+@item tree.format=@{Newick|Nhx@}[tree=none]
+Format for tree file, in case no property is set.
 
 @item parameters_output=@{list@}
 A list of parameter names to output as statistics.
@@ -1643,6 +1649,12 @@ The maximum proportion of gaps for a site to be included in the analysis.
 
 @item gaps_as_unresolved=@{yes/no@}
 Tell if remaining gaps should be converted to 'N' before likelihood computation. This should be 'yes' unless you specify a substitution model which explicitely allows for gaps.
+
+@item global_clock=@{yes/no@}
+Assume a global clock for branch lengths.
+
+@item reparametrize=@{yes/no@}
+Transform parameters to remove constraints (can improve optimization, but is usually slower).
 
 @end table
 

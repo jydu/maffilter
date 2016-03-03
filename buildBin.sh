@@ -1,6 +1,6 @@
 #! /bin/sh
 arch=`uname -m`
-version=1.1.3-1
+version=1.1.4-1
 
 strip MafFilter/maffilter
 tar cvzf maffilter-${arch}-bin-static-${version}.tar.gz MafFilter/maffilter
