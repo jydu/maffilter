@@ -1,3 +1,7 @@
+26/04/16 Julien Dutheil
+* Added distance matrix output.
+* Added RemoveEmptySequences filter.
+
 18/12/15 Julien Dutheil
 * SequenceStatistics can now write in compressed file.
 

@@ -718,6 +718,20 @@ int main(int args, char** argv)
       }
 
 
+      // +---------------------------+
+      // | Empty sequences filtering |
+      // +---------------------------+
+      else if (cmdName == "RemoveEmptySequences") {
+        bool unresolvedAsGaps = ApplicationTools::getBooleanParameter("unresolved_as_gaps", cmdArgs, "");
+        ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGaps);
+        RemoveEmptySequencesMafIterator* iterator = new RemoveEmptySequencesMafIterator(currentIterator, unresolvedAsGaps);
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
       // +---------------------+
       // | Sequence statistics |
       // +---------------------+
