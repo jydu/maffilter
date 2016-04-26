@@ -799,6 +799,33 @@ A coma separated, within parentheses, list of species. Any column containing a g
 
 @c ------------------------------------------------------------------------------------------------------------------
 
+@node RemoveEmptySequences, ExtractFeature, Merge, Extracting
+@subsection Remove empty sequences
+
+The @command{RemoveEmptySequences} filter remove sequences containing only gap (or unresolved characters) in each block.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    RemoveEmptySequences(unresolved_as_gaps=yes),        \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+
+@item unresolved_as_gaps=@{boolean@}
+Tell if unresolved characters count as "empty" as well.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
 @node AlnFilter, AlnFilter2, XFullGap, Cleaning
 @subsection Alignment filtering
 
