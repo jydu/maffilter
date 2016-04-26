@@ -12,23 +12,7 @@ IF(NOT CMAKE_BUILD_TYPE)
       FORCE)
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS "-Wall -Weffc++ -Wshadow")
-IF(NOT NO_VIRTUAL_COV)
-  SET(NO_VIRTUAL_COV FALSE CACHE BOOL
-      "Disable covariant return type with virtual inheritance, for compilers that do not support it."
-      FORCE)
-ENDIF()
-
-IF(NO_VIRTUAL_COV)
-  MESSAGE("-- Covariant return with virtual inheritance disabled.")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_VIRTUAL_COV=1")
-ENDIF()
-
-IF(NOT NO_DEP_CHECK)
-  SET(NO_DEP_CHECK FALSE CACHE BOOL
-      "Disable dependencies check for building distribution only."
-      FORCE)
-ENDIF(NOT NO_DEP_CHECK)
+SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Weffc++ -Wshadow")
 
 IF(NOT DOC_COMPRESS)
   SET(DOC_COMPRESS gzip CACHE STRING
@@ -42,10 +26,6 @@ IF(NOT DOC_COMPRESS_EXT)
       FORCE)
 ENDIF(NOT DOC_COMPRESS_EXT)
 
-
-IF(NO_DEP_CHECK)
-  MESSAGE("-- Dependencies checking disabled. Only distribution can be built.")
-ELSE(NO_DEP_CHECK)
 
 #static linkage?
 IF(NOT BUILD_STATIC)
@@ -211,8 +191,6 @@ ADD_SUBDIRECTORY(MafFilter)
 ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(man)
 
-ENDIF(NO_DEP_CHECK)
-
 # Packager
 SET(CPACK_PACKAGE_NAME "maffilter")
 SET(CPACK_PACKAGE_VENDOR "Julien Dutheil")
@@ -244,11 +222,6 @@ SET(CPACK_SOURCE_IGNORE_FILES
  "\\\\..*\\\\.swp"
  "MafFilter/\\\\..*"
  "man/.*\\\\.1.${DOC_COMPRESS_EXT}"
- "debian/tmp"
- "debian/maffilter/"
- "debian/maffilter\\\\.substvars"
- "debian/maffilter\\\\.debhelper"
- "debian/debhelper\\\\.log"
  "install_manifest.txt"
  "DartConfiguration.tcl"
  ${CPACK_SOURCE_IGNORE_FILES}
@@ -278,14 +251,7 @@ IF("${CMAKE_GENERATOR}" MATCHES "Make")
   ADD_DEPENDENCIES(dist make_clean_man)
 ENDIF()
 
-IF(NOT NO_DEP_CHECK)
 IF (UNIX)
-#This creates deb packages:
-ADD_CUSTOM_TARGET(origdist COMMAND cp ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz ../${CPACK_DEBSOURCE_PACKAGE_FILE_NAME}.tar.gz)
-ADD_DEPENDENCIES(origdist dist)
-ADD_CUSTOM_TARGET(deb dpkg-buildpackage -uc -us -i${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
-ADD_DEPENDENCIES(deb origdist)
-ADD_DEPENDENCIES(deb info man)
 
 #This creates rpm packages:
 ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
@@ -293,4 +259,3 @@ ADD_DEPENDENCIES(rpm dist info man)
 
 ENDIF(UNIX)
 
-ENDIF(NOT NO_DEP_CHECK)

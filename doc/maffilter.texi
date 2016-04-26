@@ -58,6 +58,7 @@ Filters
 * Cleaning::
 * Analyzing::
 * Exporting::
+* Miscelaneous::
 
 Extracting data
 
@@ -119,6 +120,11 @@ Exporting blocks and data
 * PlinkOutput::
 * OutputCoordinates::
 * OutputTrees::
+* OutputDistanceMatrices::
+
+Miscelaneous filters
+
+* SystemCall::
 
 @end detailmenu
 @end menu
@@ -313,6 +319,7 @@ The next section present all available filters and their corresponding arguments
 * Cleaning::
 * Analyzing::
 * Exporting::
+* Miscelaneous::
 @end menu
 
 @node Extracting, Cleaning, Filters, Filters
@@ -1910,7 +1917,7 @@ An edited tree.
 @c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
 @c ------------------------------------------------------------------------------------------------------------------
-@node Exporting,  , Analyzing, Filters
+@node Exporting, Miscelaneous, Analyzing, Filters
 @section Exporting blocks and data
 
 @menu
@@ -1921,6 +1928,7 @@ An edited tree.
 * PlinkOutput::
 * OutputCoordinates::
 * OutputTrees::
+* OutputDistanceMatrices::
 @end menu
 
 @node Output, OutputAlignments, Exporting, Exporting
@@ -2096,7 +2104,7 @@ againt the reference species, otherwise an error will be reported.
 @c ------------------------------------------------------------------------------------------------------------------
 
 @node PlinkOutput, OutputCoordinates, MsmcOutput, Exporting
-@subsection Export segregating sites to MSMC format
+@subsection Export segregating sites to PLINK format
 
 The @command{PlinkOutput} filter calls all biallelic segregating sites and export them to the PLINK format,
 creating on Ped file and one Map file.
@@ -2187,8 +2195,7 @@ Tell if the size of source sequences should be output.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-
-@node OutputTrees,  , OutputCoordinates, Exporting
+@node OutputTrees, OutputDistanceMatrices, OutputCoordinates, Exporting
 @subsection Write trees to a file.
 
 The @command{OutputTrees} filter writes trees associated to blocks to a file, in the Newick format. All trees will be stored in the same file, one per line.
@@ -2225,6 +2232,107 @@ This is useful to get rid of the sequence coordinates.
 The option will have no effect in case the names do not contain coordinates.
 
 @end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node OutputDistanceMatrices,  , OutputTrees, Exporting
+@subsection Write distance matrices to a file.
+
+The @command{OutputDistanceMatrices} filter writes distance matrices associated to blocks to a file, in the Phylip format.
+All matrices will be stored in the same file, one after the other.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    OutputDistanceMatrices(                 \
+        distance=MLdistance,                \
+        file=data.distmat.ph,               \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item distance=@{string@}
+The tag used to store previously computed distance matrices.
+
+@item file=@{none|@{path@}@}
+A file path where to write distance matrices, in the Phylip format.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item strip_names=@{boolean@}
+Tell if sequence names should be stripped. If so, all text after the first dot will be deleted.
+This is useful to get rid of the sequence coordinates.
+The option will have no effect in case the names do not contain coordinates.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Miscelaneous,  , Exporting, Filters
+@section Miscelaneous filters
+
+@menu
+* SystemCall::
+@end menu
+
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node SystemCall,  , Miscelaneous, Miscelaneous
+@subsection Call an external program on each block.
+
+The @command{SystemCall} filter runs an external program on each block.
+For each block, the alignment is written to a temporary file, whose name and format can be specified.
+This input file is then read by the external program. The called program is expected to generate results in the form of an alignment with the same sequence names, so that it can be read by maffilter.
+In most case, the external program will be a wrapper script.
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    SystemCall(                             \
+        name=myextprog,                     \
+        input.file=tmp.fa,                  \
+        input.format=Fasta,                 \
+        call=myscript.sh,                   \
+        output.file=output.fa,              \
+        output.format=Fasta),               \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item name=@{string@}
+A label to use, might be useful in case several tools are called.
+
+@item input.file=@{none|@{path@}@}
+A file path where to write the block alignment, to be used as input by the external program.
+
+@item input.format=@{string@}
+Alignment format for input file.
+
+@item output.file=@{none|@{path@}@}
+A file path where to read the processed block alignment, output by the external program.
+
+@item output.format=@{string@}
+Alignment format for output file.
+
+@item call=@{string@}
+The system call to run external program.
+
+@end table
+
 
 @c ------------------------------------------------------------------------------------------------------------------
 

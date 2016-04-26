@@ -58,9 +58,9 @@ class SystemCallMafIterator:
   public AbstractFilterMafIterator
 {
   private:
-    std::auto_ptr<OAlignment> alnWriter_;
+    std::unique_ptr<OAlignment> alnWriter_;
     std::string inputFile_;
-    std::auto_ptr<IAlignment> alnReader_;
+    std::unique_ptr<IAlignment> alnReader_;
     std::string outputFile_;
     std::string call_;
 
@@ -83,9 +83,9 @@ class SystemCallMafIterator:
   private:
     SystemCallMafIterator(const SystemCallMafIterator& iterator) :
       AbstractFilterMafIterator(0),
-      alnWriter_(0),
+      alnWriter_(),
       inputFile_(iterator.inputFile_),
-      alnReader_(0),
+      alnReader_(),
       outputFile_(iterator.outputFile_),
       call_(iterator.call_)
     {}

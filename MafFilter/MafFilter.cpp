@@ -590,7 +590,7 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
-        auto_ptr<FeatureReader> ftReader;
+        unique_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
         if (featureFormat == "GFF") {
           ftReader.reset(new GffFeatureReader(featureStream));
@@ -892,7 +892,7 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
-        auto_ptr<FeatureReader> ftReader;
+        unique_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
         if (featureFormat == "GFF") {
           ftReader.reset(new GffFeatureReader(featureStream));
@@ -1007,10 +1007,10 @@ int main(int args, char** argv)
           ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
           
           BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true, 1);
-          auto_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
+          unique_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
           BppORateDistributionFormat rdistReader(true);
-          auto_ptr<DiscreteDistribution> rdist(rdistReader.read(rdistDesc, true)); 
-          auto_ptr<DistanceEstimation> distEst(new DistanceEstimation(model.release(), rdist.release()));
+          unique_ptr<DiscreteDistribution> rdist(rdistReader.read(rdistDesc, true)); 
+          unique_ptr<DistanceEstimation> distEst(new DistanceEstimation(model.release(), rdist.release()));
           
           OutputStream* profiler =
             (prPath == "none") ? 0 :
@@ -1416,7 +1416,7 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
-        auto_ptr<FeatureReader> ftReader;
+        unique_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
         if (featureFormat == "GFF") {
           ftReader.reset(new GffFeatureReader(featureStream));
@@ -1484,6 +1484,39 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Strip names", stripNames);
 
         OutputTreeMafIterator* iterator = new OutputTreeMafIterator(currentIterator, out, treeProperty, !stripNames);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+    
+
+
+
+      // +--------------------------+
+      // | Output Distance matrices |
+      // +--------------------------+
+      else if (cmdName == "OutputDistanceMatrices") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output matrix file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+        string distProperty = ApplicationTools::getStringParameter("distance", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Matrix to write", distProperty);
+        bool stripNames = ApplicationTools::getBooleanParameter("strip_names", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Strip names", stripNames);
+
+        OutputDistanceMatrixMafIterator* iterator = new OutputDistanceMatrixMafIterator(currentIterator, out, distProperty, !stripNames);
         currentIterator = iterator;
         its.push_back(iterator);
       }

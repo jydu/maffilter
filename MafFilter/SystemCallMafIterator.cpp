@@ -46,7 +46,7 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() throw (Exception) {
   currentBlock_ = iterator_->nextBlock();
   if (! currentBlock_)
     return 0;
-  auto_ptr<AlignedSequenceContainer> aln(currentBlock_->getAlignment().clone());
+  unique_ptr<AlignedSequenceContainer> aln(currentBlock_->getAlignment().clone());
   
   //We translate sequence names to avoid compatibility issues
   vector<string> names(aln->getNumberOfSequences());
@@ -63,7 +63,7 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() throw (Exception) {
   if (rc) throw Exception("SystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
 
   //Then read and assign the realigned sequences:
-  auto_ptr<SiteContainer> result(alnReader_->readAlignment(outputFile_, &AlphabetTools::DNA_ALPHABET));
+  unique_ptr<SiteContainer> result(alnReader_->readAlignment(outputFile_, &AlphabetTools::DNA_ALPHABET));
   vector<MafSequence*> tmp;
   for (size_t i = 0; i < currentBlock_->getNumberOfSequences(); ++i) {
     MafSequence* mseq = currentBlock_->getSequence(i).cloneMeta();
