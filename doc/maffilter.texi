@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename maffilter.info
-@settitle MafFilter Manual 1.1.0
+@settitle MafFilter Manual 1.2.0
 @c @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
@@ -12,9 +12,9 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.1.0.
+This is the manual of MafFilter, version 1.2.0.
 
-Copyright @copyright{} 2014 Julien Y. Dutheil
+Copyright @copyright{} 2016 Julien Y. Dutheil
 @end copying
 
 @titlepage
@@ -68,7 +68,6 @@ Extracting data
 * Concatenate::
 * ExtractFeature::
 * SelectChr::
-* LiftOver::
 * WindowSplit::
 
 Cleaning alignment blocks
@@ -76,6 +75,7 @@ Cleaning alignment blocks
 * MinBlockLength::
 * MinBlockSize::
 * XFullGap::
+* RemoveEmptySequences::
 * AlnFilter::
 * AlnFilter2::
 * EntropyFilter::
@@ -124,6 +124,7 @@ Exporting blocks and data
 
 Miscelaneous filters
 
+* LiftOver::
 * SystemCall::
 
 @end detailmenu
@@ -332,7 +333,6 @@ The next section present all available filters and their corresponding arguments
 * Concatenate::
 * ExtractFeature::
 * SelectChr::
-* LiftOver::
 * WindowSplit::
 @end menu
 
@@ -552,7 +552,7 @@ If yes, features will be extracted ``as is''. Otherwise, the invert-complement s
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node SelectChr, LiftOver, ExtractFeature, Extracting
+@node SelectChr, WindowSplit, ExtractFeature, Extracting
 @subsection Extract blocks for a given chromosome/contig/scaffold
 
 The @command{SelectChr} filter keeps only block from a given chromosome (or contig or scaffold...) for a given reference species.
@@ -584,57 +584,7 @@ The name of the chromosome/contig/scaffold to be filtered.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node LiftOver, WindowSplit, SelectChr, Extracting
-@subsection Convert coordinates from one genome to another
-
-The @command{LiftOver} mimmics the behavior of the famous UCSC liftover utility.
-Features are read from any supported format, and a convertion table is generated for all features included in the alignment.
-
-@heading Synopsis:
-
-@cartouche
-@example
-maf.filter=                                 \
-    [...]
-    LiftOver(                               \
-        ref_species=species1,               \
-        target_species=species2,            \
-        feature.file=species1.gff3.gz,      \
-        feature.file.compression=gzip,      \
-        feature.format=GFF,                 \
-        file=sp1_to_sp2.tln,                \
-        compression=none),                  \
-    [...]
-@end example
-@end cartouche
-
-@heading Arguments:
-
-@table @command
-
-@item ref_species=@{string@}
-The name of the species for which the coordinates of the features are provided.
-
-@item target_species=@{string@}
-The name of the species to which the coordinates of the features should be converted.
-
-@item feature.file=@{path@}
-The file where the features are described.
-
-@item feature.file.compression=@{none|gzip|zip|bzip2@}
-Compression format for the feature file.
-
-@item feature.format=@{GFF|GTF|BedGraph@}
-Format for the feature file, currently GFF (v3.0), GTF or BedGraph.
-
-@item compression=@{none|gzip|zip|bzip2@}
-Compression format for output file.
-
-@end table
-
-@c ------------------------------------------------------------------------------------------------------------------
-
-@node WindowSplit,  , LiftOver, Extracting
+@node WindowSplit,  , SelectChr, Extracting
 @subsection Split alignment blocks into smaller parts
 
 The @command{WindowSplit} filter subdivides blocks into smaller ones of a regular size, typically for window-based analyses.
@@ -709,6 +659,7 @@ In the last case, the windows will have at least the specified size, but might b
 * MinBlockLength::
 * MinBlockSize::
 * XFullGap::
+* RemoveEmptySequences::
 * AlnFilter::
 * AlnFilter2::
 * EntropyFilter::
@@ -771,7 +722,7 @@ The minimum size.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node XFullGap, AlnFilter, MinBlockSize, Cleaning
+@node XFullGap, RemoveEmptySequences, MinBlockSize, Cleaning
 @subsection Exclude full gap columns
 
 Remove gap-only columns from blocks. This does not modify coordinates and might be necessary after a @command{Subset} filter.
@@ -799,7 +750,7 @@ A coma separated, within parentheses, list of species. Any column containing a g
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node RemoveEmptySequences, ExtractFeature, Merge, Extracting
+@node RemoveEmptySequences, AlnFilter, XFullGap, Cleaning
 @subsection Remove empty sequences
 
 The @command{RemoveEmptySequences} filter remove sequences containing only gap (or unresolved characters) in each block.
@@ -826,7 +777,7 @@ Tell if unresolved characters count as "empty" as well.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node AlnFilter, AlnFilter2, XFullGap, Cleaning
+@node AlnFilter, AlnFilter2, RemoveEmptySequences, Cleaning
 @subsection Alignment filtering
 
 Split alignment blocks by removing regions with ambiguous alignments.
@@ -2307,13 +2258,64 @@ The option will have no effect in case the names do not contain coordinates.
 @section Miscelaneous filters
 
 @menu
+* LiftOver::
 * SystemCall::
 @end menu
 
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node SystemCall,  , Miscelaneous, Miscelaneous
+@node LiftOver, SystemCall, Miscelaneous, Miscelaneous
+@subsection Convert coordinates from one genome to another
+
+The @command{LiftOver} mimmics the behavior of the famous UCSC liftover utility.
+Features are read from any supported format, and a convertion table is generated for all features included in the alignment.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...]
+    LiftOver(                               \
+        ref_species=species1,               \
+        target_species=species2,            \
+        feature.file=species1.gff3.gz,      \
+        feature.file.compression=gzip,      \
+        feature.format=GFF,                 \
+        file=sp1_to_sp2.tln,                \
+        compression=none),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+
+@item ref_species=@{string@}
+The name of the species for which the coordinates of the features are provided.
+
+@item target_species=@{string@}
+The name of the species to which the coordinates of the features should be converted.
+
+@item feature.file=@{path@}
+The file where the features are described.
+
+@item feature.file.compression=@{none|gzip|zip|bzip2@}
+Compression format for the feature file.
+
+@item feature.format=@{GFF|GTF|BedGraph@}
+Format for the feature file, currently GFF (v3.0), GTF or BedGraph.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node SystemCall,  , LiftOver, Miscelaneous
 @subsection Call an external program on each block.
 
 The @command{SystemCall} filter runs an external program on each block.
