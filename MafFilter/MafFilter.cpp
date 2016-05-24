@@ -153,7 +153,7 @@ int main(int args, char** argv)
     vector<MafIterator*> its;
     its.push_back(currentIterator);
     vector<filtering_ostream*> ostreams;
-    for (unsigned int a = 0; a < actions.size(); a++) {
+    for (size_t a = 0; a < actions.size(); a++) {
       string cmdName;
       map<string, string> cmdArgs;
       KeyvalTools::parseProcedure(actions[a], cmdName, cmdArgs);
@@ -1354,6 +1354,29 @@ int main(int args, char** argv)
         if (species.size() < 2)
           throw Exception("PlinkOutput: at least two genomes are necessary to call SNPs.");
         PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3);
+
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+
+      // +----------------------+
+      // | SequenceLDhot output |
+      // +----------------------+
+      else if (cmdName == "SequenceLDhotOutput") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        ApplicationTools::displayResult("-- Output file", outputFile);
+
+        string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        if (!TextTools::isEmpty(reference))
+          ApplicationTools::displayResult("-- Reference sequence", reference);
+        else
+          reference = "";
+        
+        SequenceLDhotOutputMafIterator* iterator = new SequenceLDhotOutputMafIterator(currentIterator, outputFile, reference);
 
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
