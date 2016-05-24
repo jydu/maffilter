@@ -1297,6 +1297,14 @@ Number of sites without gap,
 @item
 Number of complete sites (no gap, no unresolved character),
 @item
+Number of complete sites with only one state (constant sites),
+@item
+Number of complete sites with only two states (biallelic sites),
+@item
+Number of complete sites with only three states (triallelic sites),
+@item
+Number of complete sites with all four states (quadriallelic sites),
+@item
 Number of parsimony-informative sites.
 @end itemize
 The statistics are computed for a given subset of species (typically forming a ingroup).
