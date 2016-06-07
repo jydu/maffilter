@@ -1376,7 +1376,10 @@ int main(int args, char** argv)
         else
           reference = "";
         
-        SequenceLDhotOutputMafIterator* iterator = new SequenceLDhotOutputMafIterator(currentIterator, outputFile, reference);
+        bool completeOnly = ApplicationTools::getBooleanParameter("complete_only", cmdArgs, true);
+        ApplicationTools::displayBooleanResult("-- Use only complete sites", completeOnly);
+
+        SequenceLDhotOutputMafIterator* iterator = new SequenceLDhotOutputMafIterator(currentIterator, outputFile, completeOnly, reference);
 
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
