@@ -1,3 +1,6 @@
+18/06/16 Julien Dutheil
+* Added call to external tree reconstruction program.
+
 26/04/16 Julien Dutheil
 * Added distance matrix output.
 * Added RemoveEmptySequences filter.

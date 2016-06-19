@@ -2,7 +2,7 @@
 # Author: Julien Dutheil
 # Created: 27/04/2010
 
-ADD_EXECUTABLE(maffilter MafFilter.cpp OutputAsFeaturesMafIterator.cpp SystemCallMafIterator.cpp)
+ADD_EXECUTABLE(maffilter MafFilter.cpp OutputAsFeaturesMafIterator.cpp SystemCallMafIterator.cpp TreeBuildingSystemCallMafIterator.cpp)
 TARGET_LINK_LIBRARIES(maffilter ${LIBS})
 SET_TARGET_PROPERTIES(maffilter PROPERTIES LINK_SEARCH_END_STATIC ${BUILD_STATIC})
 
