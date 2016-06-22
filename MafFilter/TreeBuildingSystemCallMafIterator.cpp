@@ -56,7 +56,7 @@ MafBlock* TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() throw (Excep
   map<string, string> nameIndex;
   for (size_t i = 0; i < names.size(); ++i) {
     names[i] = "seq" + TextTools::toString(i);
-    nameIndex[names[i]] = currentBlock_->getSequence(i).getSpecies(); //We do not store coordinates as part of the name.
+    nameIndex[names[i]] = currentBlock_->getSequence(i).getName();
   }
   aln->setSequencesNames(names);
   

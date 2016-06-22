@@ -798,23 +798,38 @@ int main(int args, char** argv)
             mafStat = new CountClustersMafStatistics(treeProperty, threshold);
             statDesc = " / " + treeProperty;
           } else if (statName == "ModelFit") {
-            SubstitutionModel* model = PhylogeneticsApplicationTools::getSubstitutionModel(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, false);
-            ApplicationTools::displayResult("-- Substitution model", model->getName());
-            string freqDescription = ApplicationTools::getStringParameter("root_freq", statArgs, "None");
-            FrequenciesSet* rootFreqs = 0;
-            if (freqDescription != "None") {
-              rootFreqs = PhylogeneticsApplicationTools::getFrequenciesSet(
-                  &AlphabetTools::DNA_ALPHABET, 0, freqDescription, 0, vector<double>(), 0);
-              ApplicationTools::displayResult("-- Root frequencies", rootFreqs->getName());
+            unique_ptr<SubstitutionModel> model;
+            unique_ptr<SubstitutionModelSet> modelSet;
+            unique_ptr<FrequenciesSet> rootFreqs;
+
+            string modelType = ApplicationTools::getStringParameter("model_type", statArgs, "Homogeneous");
+            if (modelType == "Homogeneous") {
+              model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, true));
+              ApplicationTools::displayResult("-- Substitution model", model->getName());
+              string freqDescription = ApplicationTools::getStringParameter("root_freq", statArgs, "None");
+              if (freqDescription != "None") {
+                rootFreqs.reset(PhylogeneticsApplicationTools::getFrequenciesSet(
+                    &AlphabetTools::DNA_ALPHABET, 0, freqDescription, 0, vector<double>(), 0));
+                ApplicationTools::displayResult("-- Root frequencies", rootFreqs->getName());
+              }
+            } else if (modelType == "Nonhomogeneous") {
+              modelSet.reset(PhylogeneticsApplicationTools::getSubstitutionModelSet(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, true));
+            } else {
+              throw Exception("Unknown model type: " + modelType + ". Must be either Homogeneous or Nonhomogeneous.");
             }
-            DiscreteDistribution* rDist = PhylogeneticsApplicationTools::getRateDistribution(statArgs, "", true, false);
+            
+            unique_ptr<DiscreteDistribution> rDist(PhylogeneticsApplicationTools::getRateDistribution(statArgs, "", true, false));
             ApplicationTools::displayResult("-- Rate distribution", rDist->getName());
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             vector<string> parametersOutput = ApplicationTools::getVectorParameter<string>("parameters_output", statArgs, ',', "");
             vector<string> fixedParametersNames = ApplicationTools::getVectorParameter<string>("fixed_parameters", statArgs, ',', "");
             ParameterList fixedParameters;
             if (fixedParametersNames.size() > 0) {
-              ParameterList parameters = model->getParameters();
+              ParameterList parameters;
+              if (modelSet.get())
+                parameters = modelSet->getParameters();
+              else
+                parameters = model->getParameters();
               parameters.addParameters(rDist->getParameters());
               fixedParameters = parameters.subList(fixedParametersNames);
             }
@@ -829,11 +844,16 @@ int main(int args, char** argv)
             bool reparametrize = ApplicationTools::getBooleanParameter("reparametrize", statArgs, false);
             ApplicationTools::displayBooleanResult("-- Reparametrization", reparametrize);
             if (treeProperty == "none") {
-              Tree* tree = PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false); 
-              mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs), tree, parametersOutput,
-                fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
+              unique_ptr<Tree> tree(PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false)); 
+              if (modelSet.get()) {
+                mafStat = new MaximumLikelihoodModelFitMafStatistics(modelSet.release(), rDist.release(), tree.release(), parametersOutput,
+                    fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
+              } else {
+                mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs.release()), tree.release(), parametersOutput,
+                    fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
+              }
             } else {
-              mafStat = new MaximumLikelihoodModelFitMafStatistics(model, rDist, dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs), treeProperty, parametersOutput,
+              mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs.release()), treeProperty, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             }
           } else {

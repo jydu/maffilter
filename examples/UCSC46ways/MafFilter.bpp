@@ -1,6 +1,6 @@
 CHR=1
 DATA=chr$(CHR)
-input.file=/mnt/dd3/jdutheil/Data/Genomes/UCSC_46ways/maf/$(DATA).maf.gz
+input.file=/mnt/data1/jdutheil/Data/Genomes/UCSC_46ways/maf/$(DATA).maf.gz
 input.file.compression=gzip
 input.format=Maf
 output.log=$(DATA).maffilter.log
