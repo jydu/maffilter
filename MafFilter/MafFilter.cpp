@@ -758,7 +758,9 @@ int main(int args, char** argv)
           } else if (statName == "AlnScore") {
             mafStat = new AlignmentScoreMafStatistics();
           } else if (statName == "BlockCounts") {
-            mafStat = new CharacterCountsMafStatistics(&AlphabetTools::DNA_ALPHABET);
+            vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
+            string suffix = ApplicationTools::getStringParameter("suffix", statArgs, "");
+            mafStat = new CharacterCountsMafStatistics(&AlphabetTools::DNA_ALPHABET, species, suffix);
           } else if (statName == "PairwiseDivergence") {
             string sp1 = ApplicationTools::getStringParameter("species1", statArgs, "");
             string sp2 = ApplicationTools::getStringParameter("species2", statArgs, "");

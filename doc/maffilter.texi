@@ -1253,7 +1253,15 @@ The @command{AlnScore} statistics reports the alignment score associated to the 
 @subsubsection Character frequencies
 The @command{BlockCounts} statistics reports the count of each character found in the block.
 
-(No argument)
+Note: this statistics does not work in case of duplicated sequences (multiple hits from the same chromosome / scaffold / contig).
+
+@heading Arguments:
+@table @command
+@item species=@{list@}
+A list of species to be considered in the counts calculations. If no species is given, all sequences are used.
+@item suffix=@{string@}
+An (optional) suffix to append to the statistics name. Useful in case the statistics should be computed for several species independently.
+@end table
 
 @node PairwiseDivergence, SiteStatistics, BlockCounts, Descriptive
 @subsubsection Pairwise divergence
