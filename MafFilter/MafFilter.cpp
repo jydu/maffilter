@@ -280,18 +280,31 @@ int main(int args, char** argv)
           throw Exception("At least one species should be provided for command 'AlnFilter'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
-        unsigned int gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
+        bool relative   = ApplicationTools::getBooleanParameter("relative", cmdArgs, false);
+        unsigned int gm = 0;
+        double rm = 0;
+        if (relative)
+          rm = ApplicationTools::getDoubleParameter("max.gap", cmdArgs, 0);
+        else
+          gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
         double em       = ApplicationTools::getParameter<double>("max.ent", cmdArgs, 0); //Default means no entropy threshold
         bool missingAsGap = ApplicationTools::getParameter<bool>("missing_as_gap", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
         ApplicationTools::displayResult("-- Window step", st);
-        ApplicationTools::displayResult("-- Max. gaps allowed in Window", gm);
+        if (relative)
+          ApplicationTools::displayResult("-- Max. gaps allowed in Window", TextTools::toString(rm * 100) + "%");
+        else 
+          ApplicationTools::displayResult("-- Max. gaps allowed in Window", gm);
         ApplicationTools::displayResult("-- Max. total entropy in Window", em);
         ApplicationTools::displayBooleanResult("-- Missing sequence replaced by gaps", missingAsGap);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
-        AlignmentFilterMafIterator* iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, em, !trash, missingAsGap);
+        AlignmentFilterMafIterator* iterator;
+        if (relative)
+          iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, rm, em, !trash, missingAsGap);
+        else
+          iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, em, !trash, missingAsGap);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
@@ -339,18 +352,31 @@ int main(int args, char** argv)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
-        unsigned int gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
+        bool relative   = ApplicationTools::getBooleanParameter("relative", cmdArgs, false);
+        unsigned int gm = 0;
+        double rm = 0;
+        if (relative)
+          rm = ApplicationTools::getDoubleParameter("max.gap", cmdArgs, 0);
+        else
+          gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
         unsigned int pm = ApplicationTools::getParameter<unsigned int>("max.pos", cmdArgs, 0);
         bool missingAsGap = ApplicationTools::getParameter<bool>("missing_as_gap", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
         ApplicationTools::displayResult("-- Window step", st);
-        ApplicationTools::displayResult("-- Max. gaps allowed per position", gm);
+        if (relative)
+          ApplicationTools::displayResult("-- Max. gaps allowed per position", TextTools::toString(rm * 100) + "%");
+        else 
+          ApplicationTools::displayResult("-- Max. gaps allowed per position", gm);
         ApplicationTools::displayResult("-- Max. gap positions allowed", pm);
         ApplicationTools::displayBooleanResult("-- Missing sequence replaced by gaps", missingAsGap);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
-        AlignmentFilter2MafIterator* iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, gm, pm, !trash, missingAsGap);
+        AlignmentFilter2MafIterator* iterator;
+        if (relative)
+          iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, rm, pm, !trash, missingAsGap);
+        else
+          iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, gm, pm, !trash, missingAsGap);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);

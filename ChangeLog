@@ -1,3 +1,6 @@
+04/06/16 Julien Dutheil
+* Alignment filters now accept frequencies as maximum amount of gaps.
+
 23/06/16 Julien Dutheil
 * Possibility to count characters for a selection of species only.
 

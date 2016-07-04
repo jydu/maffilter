@@ -799,6 +799,7 @@ maf.filter=                                 \
         max.gap=9,                          \
         max.ent=0.2,                        \
         missing_as_gap=yes,                 \
+        relative=no,                        \
         file=data.trash_aln.maf.gz,         \
         compression=gzip),                  \
     [...]
@@ -818,14 +819,17 @@ The width, in bp, of the sliding window.
 @item window.step=@{int>0@}
 The step by which the window is moved, in bp.
 
-@item max.gap=@{int>0@}
-The maximum number of gaps allowed in each window.
+@item relative=@{boolean@}
+Tell if maximum amount of gap is relative (that is, as a proportion of the total amount of character in each window).
+
+@item max.gap=@{int>0|1>double>0@}
+The maximum number of gaps allowed in each window (if relative is set to no), or the maximum proportion of gaps (if relative is set to yes)
 
 @item max.ent=@{float@}
 The maximum entropy allowed in each window.
 
 @item missing_as_gap=@{yes/no@}
-Tell if unresolved characters should be counted as gaps.
+Tell if missing sequences should be considered as gaps.
 
 @item file=@{none|@{path@}@}
 An optional file were removed alignment parts will be stored, in the MAF format.
@@ -864,6 +868,7 @@ maf.filter=                                 \
         window.step=1,                      \
         max.gap=1,                          \
         max.pos=1,                          \
+        relative=no,                        \
         missing_as_gap=yes,                 \
         file=data.trash_aln.maf.gz,         \
         compression=gzip),                  \
@@ -884,14 +889,17 @@ The width, in bp, of the sliding window.
 @item window.step=@{int>0@}
 The step by which the window is moved, in bp.
 
-@item max.gap=@{int>0@}
-The maximum number of gaps allowed in each site.
+@item relative=@{boolean@}
+Tell if maximum amount of gap is relative (that is, as a proportion of the total amount of character in each site).
+
+@item max.gap=@{int>0|1>double>0@}
+The maximum number of gaps allowed in each site (if relative is set to no), or the maximum proportion of gaps (if relative is set to yes)
 
 @item max.pos=@{int>0@}
 The maximum number of positions with gaps (``indel events'').
 
 @item missing_as_gap=@{yes/no@}
-Tell if unresolved characters should be counted as gaps.
+Tell if missing sequences should be considered as gaps.
 
 @item file=@{none|@{path@}@}
 An optional file were removed alignment parts will be stored, in the MAF format.
