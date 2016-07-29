@@ -479,7 +479,7 @@ The @command{Concatenate} filter fuses consecutive blocks until the concatenated
 @example
 maf.filter=                                 \
     [...],
-    Concatenate(minimum_size=10000),        \
+    Concatenate(minimum_size=10000, ref_species=Hsapiens), \
     [...]
 @end example
 @end cartouche
@@ -490,6 +490,9 @@ maf.filter=                                 \
 
 @item minimum_size=@{int@}
 The minimum size for the blocks to be reached.
+
+@item ref_species=@{string@}
+If given, only blocks with identical chromosome tags in the reference species will be merged.
 
 @end table
 

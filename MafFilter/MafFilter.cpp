@@ -247,8 +247,11 @@ int main(int args, char** argv)
       // +---------------------+
       else if (cmdName == "Concatenate") {
         unsigned int minimumSize = ApplicationTools::getParameter<unsigned int>("minimum_size", cmdArgs, 0);
+        string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "", "", true, 2);
         ApplicationTools::displayResult("-- Minimum final block size", minimumSize);
-        ConcatenateMafIterator* iterator = new ConcatenateMafIterator(currentIterator, minimumSize);
+        if (ref != "")
+          ApplicationTools::displayResult("-- Reference species", ref);
+        ConcatenateMafIterator* iterator = new ConcatenateMafIterator(currentIterator, minimumSize, ref);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
@@ -632,7 +635,7 @@ int main(int args, char** argv)
           ftReader->getAllFeatures(featuresSet);
         else {
           for (size_t i = 0; i < featureType.size(); ++i) {
-            ApplicationTools::displayResult("-- Extract features of type", featureType[i]);
+            ApplicationTools::displayResult("-- Filter features of type", featureType[i]);
             ftReader->getFeaturesOfType(featureType[i], featuresSet);
           }
         }
