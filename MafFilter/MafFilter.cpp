@@ -44,7 +44,6 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <memory>
 using namespace std;
 
-#include <Bpp/Seq/Io/Maf.all>
 #include "OutputAsFeaturesMafIterator.h"
 #include "SystemCallMafIterator.h"
 #include "TreeBuildingSystemCallMafIterator.h"
@@ -70,16 +69,56 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Container/SiteContainerTools.h>
 
 // From bpp-seq-omics and bpp-phyl-omics:
-#include <Bpp/Seq/Io/Maf.all>
+#include <Bpp/Seq/Io/Maf/MafParser.h>
+#include <Bpp/Seq/Io/Maf/SequenceStreamToMafIterator.h>
+#include <Bpp/Seq/Io/Maf/SequenceFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/OrphanSequenceFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/BlockMergerMafIterator.h>
+#include <Bpp/Seq/Io/Maf/BlockLengthMafIterator.h>
+#include <Bpp/Seq/Io/Maf/BlockSizeMafIterator.h>
+#include <Bpp/Seq/Io/Maf/ChromosomeMafIterator.h>
+#include <Bpp/Seq/Io/Maf/ConcatenateMafIterator.h>
+#include <Bpp/Seq/Io/Maf/RemoveEmptySequencesMafIterator.h>
+#include <Bpp/Seq/Io/Maf/DuplicateFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/FeatureFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/QualityFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/MaskFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/EntropyFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/OutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/AlignmentFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/PlinkOutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/SequenceLDhotOutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/CoordinateTranslatorMafIterator.h>
+#include <Bpp/Seq/Io/Maf/CoordinatesOutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/FullGapFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/OutputTreeMafIterator.h>
+#include <Bpp/Seq/Io/Maf/OutputAlignmentMafIterator.h>
+#include <Bpp/Seq/Io/Maf/OutputDistanceMatrixMafIterator.h>
+#include <Bpp/Seq/Io/Maf/VcfOutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/MsmcOutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/SequenceStatisticsMafIterator.h>
+#include <Bpp/Seq/Io/Maf/FeatureExtractorMafIterator.h>
+#include <Bpp/Seq/Io/Maf/WindowSplitMafIterator.h>
+#include <Bpp/Seq/Io/Maf/CountDistanceEstimationMafIterator.h>
+#include <Bpp/Seq/Io/Maf/MaximumLikelihoodDistanceEstimationMafIterator.h>
+#include <Bpp/Seq/Io/Maf/DistanceBasedPhylogenyReconstructionMafIterator.h>
+#include <Bpp/Seq/Io/Maf/TreeManipulationMafIterators.h>
+#include <Bpp/Seq/Io/Maf/MafStatistics.h>
+#include <Bpp/Seq/Io/Maf/CountClustersMafStatistics.h>
+#include <Bpp/Seq/Io/Maf/MaximumLikelihoodModelFitMafStatistics.h>
+#include <Bpp/Seq/Io/Maf/IterationListener.h>
 #include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
 #include <Bpp/Seq/Feature/Gtf/GtfFeatureReader.h>
 #include <Bpp/Seq/Feature/Bed/BedGraphFeatureReader.h>
 
 // From bpp-phyl:
-#include <Bpp/Phyl/Distance.all>
+#include <Bpp/Phyl/Distance/DistanceEstimation.h>
+#include <Bpp/Phyl/Distance/NeighborJoining.h>
+#include <Bpp/Phyl/Distance/BioNJ.h>
 #include <Bpp/Phyl/Io/BppOSubstitutionModelFormat.h>
 #include <Bpp/Phyl/Io/BppORateDistributionFormat.h>
 #include <Bpp/Phyl/Io/BppOTreeReaderFormat.h>
+#include <Bpp/Phyl/OptimizationTools.h>
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 
 using namespace bpp;
@@ -978,7 +1017,7 @@ int main(int args, char** argv)
           }
         }
         ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
-        FeatureExtractor* iterator = new FeatureExtractor(currentIterator, refSpecies, featuresSet, completeOnly, ignoreStrand);
+        FeatureExtractorMafIterator* iterator = new FeatureExtractorMafIterator(currentIterator, refSpecies, featuresSet, completeOnly, ignoreStrand);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
@@ -1575,7 +1614,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- File compression", compress);
         
         //Iterator initialization:
-        CoordinateTranslator* iterator = new CoordinateTranslator(currentIterator, refSpecies, targetSpecies, featuresSet, *out);
+        CoordinateTranslatorMafIterator* iterator = new CoordinateTranslatorMafIterator(currentIterator, refSpecies, targetSpecies, featuresSet, *out);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
@@ -1683,7 +1722,6 @@ int main(int args, char** argv)
 
       else 
         throw Exception("Unknown filter: " + cmdName);
-
     }
 
     //Now loop over the last iterator and that's it!
