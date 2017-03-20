@@ -91,6 +91,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf/CoordinateTranslatorMafIterator.h>
 #include <Bpp/Seq/Io/Maf/CoordinatesOutputMafIterator.h>
 #include <Bpp/Seq/Io/Maf/FullGapFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/FilterTreeMafIterator.h>
 #include <Bpp/Seq/Io/Maf/OutputTreeMafIterator.h>
 #include <Bpp/Seq/Io/Maf/OutputAlignmentMafIterator.h>
 #include <Bpp/Seq/Io/Maf/OutputDistanceMatrixMafIterator.h>
@@ -800,6 +801,59 @@ int main(int args, char** argv)
         currentIterator = iterator;
         its.push_back(iterator);
       }
+
+      
+      // +----------------+
+      // | Tree filtering |
+      // +----------------+
+      else if (cmdName == "TreeFilter") {
+        string treeProperty = ApplicationTools::getStringParameter("tree", cmdArgs, "none");
+        double maxBrLen = ApplicationTools::getDoubleParameter("max_brlen", cmdArgs, 0.1);
+        
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
+        ApplicationTools::displayResult("-- Max. branch length", maxBrLen);
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
+        bool trash = outputFile == "none";
+        FilterTreeMafIterator* iterator = new FilterTreeMafIterator(currentIterator, treeProperty, maxBrLen, !trash);
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        its.push_back(iterator);
+
+        if (!trash) {
+          compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+          filtering_ostream* out = new filtering_ostream;
+          if (compress == "none") {
+          } else if (compress == "gzip") {
+            out->push(gzip_compressor());
+          } else if (compress == "zip") {
+            out->push(zlib_compressor());
+          } else if (compress == "bzip2") {
+            out->push(bzip2_compressor());
+          } else
+            throw Exception("Bad output compression format: " + compress);
+          out->push(file_sink(outputFile));
+          ostreams.push_back(out);
+          ApplicationTools::displayResult("-- File compression for removed blocks", compress);
+
+          //Now build an adaptor for retrieving the trashed blocks:
+          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          //Add an output iterator:
+          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          //And then synchronize the two iterators:
+          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          //Returns last iterator:
+          currentIterator = syncIt;
+          //Keep track of all those iterators:
+          its.push_back(trashIt);
+          its.push_back(syncIt);
+        } else {
+          //We only get the remaining blocks here:
+          currentIterator = iterator;
+        }
+      }
+
+
+
 
 
       // +---------------------+
