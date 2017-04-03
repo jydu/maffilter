@@ -1444,7 +1444,11 @@ int main(int args, char** argv)
         for (size_t i = 0; i < genotypes.size(); ++i) {
           ApplicationTools::displayResult("-- Adding genotype info for", genotypes[i]);
         }
-        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes);
+        
+        bool outputAll = ApplicationTools::getBooleanParameter("all", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Output non-variable positions", outputAll);
+
+        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll);
 
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
