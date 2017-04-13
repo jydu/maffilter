@@ -12,9 +12,9 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.2.0.
+This is the manual of MafFilter, version 1.3.0b.
 
-Copyright @copyright{} 2016 Julien Y. Dutheil
+Copyright @copyright{} 2017 Julien Y. Dutheil
 @end copying
 
 @titlepage
@@ -298,6 +298,9 @@ This mode might be useful to extract annotations and estimate simple statistics.
 Fasta files can be compressed in the same way as MAF files.
 The sequence names are expected to be of the form Species:Chromosome:start:strand:length, with possible empty fields.
 Coordinates are expected to be 0-based (that is, the first nucleotide is position 0). However, passing the @command{zero_based=no} argument to the format name will assume that the first nucleotide is position 1.
+
+@item input.dot=@{error|as_gap@}
+If set to @command{as_gap}, dotted characters in sequences will be converted to gaps and treated as such in any further step of the analysis, including output to files.
 
 @item output.log=@{path@}
 The file where to write log messages.

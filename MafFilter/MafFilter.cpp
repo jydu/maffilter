@@ -159,6 +159,7 @@ int main(int args, char** argv)
     string inputFile = ApplicationTools::getAFilePath("input.file", maffilter.getParams(), true, true);
     string inputFormat = ApplicationTools::getStringParameter("input.format", maffilter.getParams(), "Maf", "", true, false);
     string compress = ApplicationTools::getStringParameter("input.file.compression", maffilter.getParams(), "none");
+    string inputDot = ApplicationTools::getStringParameter("input.dots", maffilter.getParams(), "error", "", true, false);
 
     filtering_istream stream;
     if (compress == "none") {
@@ -178,8 +179,14 @@ int main(int args, char** argv)
 
     MafIterator* currentIterator;
     if (inputFormat == "Maf") {
-      currentIterator = new MafParser(&stream, true);
+      string dotOption = MafParser::DOT_ERROR;
+      if (inputDot == "as_gaps") {
+	ApplicationTools::displayResult("Maf 'dotted' alignment input", string("ON"));
+	dotOption = MafParser::DOT_ASGAP;
+      }
+      currentIterator = new MafParser(&stream, true, dotOption);
     } else {
+      if (inputDot == "as_gaps") throw Exception("'dot_as_gaps' option only available with Maf input.");
       BppOSequenceStreamReaderFormat reader;
       ISequenceStream* seqStream = reader.read(inputFormat);
       map<string, string> cmdArgs(reader.getUnparsedArguments());

@@ -1,3 +1,8 @@
+13/04/17 Julien Dutheil
+* Possibility to allow for dots in maf alignments (treated as gaps)
+* VCF output can included non-variable sites (experimental)
+* Added support for tree-based filtering
+
 04/06/16 Julien Dutheil
 * Alignment filters now accept frequencies as maximum amount of gaps.
 
