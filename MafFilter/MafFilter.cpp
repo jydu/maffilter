@@ -179,10 +179,10 @@ int main(int args, char** argv)
 
     MafIterator* currentIterator;
     if (inputFormat == "Maf") {
-      string dotOption = MafParser::DOT_ERROR;
+      short dotOption = MafParser::DOT_ERROR;
       if (inputDot == "as_gaps") {
-	ApplicationTools::displayResult("Maf 'dotted' alignment input", string("ON"));
-	dotOption = MafParser::DOT_ASGAP;
+        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("ON"));
+        dotOption = MafParser::DOT_ASGAP;
       }
       currentIterator = new MafParser(&stream, true, dotOption);
     } else {
