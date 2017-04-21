@@ -817,7 +817,6 @@ int main(int args, char** argv)
         string treeProperty = ApplicationTools::getStringParameter("tree", cmdArgs, "none");
         double maxBrLen = ApplicationTools::getDoubleParameter("max_brlen", cmdArgs, 0.1);
         
-        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         ApplicationTools::displayResult("-- Max. branch length", maxBrLen);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";

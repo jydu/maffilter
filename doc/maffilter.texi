@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename maffilter.info
-@settitle MafFilter Manual 1.2.0
+@settitle MafFilter Manual 1.2.0b
 @c @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
@@ -12,7 +12,7 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.3.0b.
+This is the manual of MafFilter, version 1.2.0b.
 
 Copyright @copyright{} 2017 Julien Y. Dutheil
 @end copying
@@ -20,7 +20,7 @@ Copyright @copyright{} 2017 Julien Y. Dutheil
 @titlepage
 @title MafFilter Manual
 @author Julien Dutheil
-@author @email{julien.dutheil@@univ-montp2.fr}
+@author @email{dutheil@@evolbio.mpg.de}
 
 
 @c The following two commands start the copyright page.
@@ -110,6 +110,7 @@ Phylogenetics
 * DistanceBasedPhylogeny::
 * NewOutgroup::
 * DropSpecies::
+* TreeFilter::
 
 Exporting blocks and data
 
@@ -1685,6 +1686,7 @@ Transform parameters to remove constraints (can improve optimization, but is usu
 * DistanceBasedPhylogeny::
 * NewOutgroup::
 * DropSpecies::
+* TreeFilter::
 @end menu
 
 @node DistanceEstimation, DistanceBasedPhylogeny, Phylogenetics, Phylogenetics
@@ -1883,7 +1885,7 @@ A rooted tree.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node DropSpecies,  , NewOutgroup, Phylogenetics
+@node DropSpecies, TreeFilter, NewOutgroup, Phylogenetics
 @subsubsection Remove a species from a tree
 
 The @command{DropSpecies} removes a leaf from a tree.
@@ -1918,6 +1920,47 @@ The name of the species to remove. All leaves in the tree, if any, corresponding
 @table @command
 @item (user-defined tag)
 An edited tree.
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node TreeFilter,  , DropSpecies, Phylogenetics
+@subsubsection Filter blocks based on their associated trees
+
+The @command{TreeFilter} filters blocks based on their associated trees. Currently, filter is only performed based on the branch lengths.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    TreeFilter(                             \
+        tree=BioNJ,                         \
+        max_brlen=0.01,                     \
+        file=data.trash_tree.maf.gz,        \
+        compression=gzip),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+
+@item tree=@{string@}
+The tag name of the tree to analyse.
+
+@item max_brlen=@{float>0@}
+Branch length threshold: any block with a tree containing at least one branch lenght longer than the given threshold will be filtered out.
+
+@item file=@{none|@{path@}@}
+An optional file were removed alignment parts will be stored, in the MAF format.
+This can be helpful for visual inspection and fine tuning of the filter parameters.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file (if file != none).
+
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
@@ -2042,7 +2085,8 @@ maf.filter=                                 \
         file=snp.vcf.gz,                    \
         compression=gzip,                   \
         reference=Ref,                      \
-        genotypes=(sample1,sample2)),       \
+        genotypes=(sample1,sample2),        \
+        all=no),                            \
     [...]
 @end example
 @end cartouche
