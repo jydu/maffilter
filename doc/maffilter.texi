@@ -1927,7 +1927,7 @@ An edited tree.
 @node TreeFilter,  , DropSpecies, Phylogenetics
 @subsubsection Filter blocks based on their associated trees
 
-The @command{TreeFilter} filters blocks based on their associated trees. Currently, filter is only performed based on the branch lengths.
+The @command{TreeFilter} (experimental) filters blocks based on their associated trees. Currently, filter is only performed based on the branch lengths.
 
 @heading Synopsis:
 
