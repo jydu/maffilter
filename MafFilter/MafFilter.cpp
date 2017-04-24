@@ -181,9 +181,13 @@ int main(int args, char** argv)
     if (inputFormat == "Maf") {
       short dotOption = MafParser::DOT_ERROR;
       if (inputDot == "as_gaps") {
-        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("ON"));
+        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("resolved as gaps"));
         dotOption = MafParser::DOT_ASGAP;
+      } else if (inputDot == "as_unresolved") {
+        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("resolved as unresolved"));
+        dotOption = MafParser::DOT_ASUNRES;
       }
+
       currentIterator = new MafParser(&stream, true, dotOption);
     } else {
       if (inputDot == "as_gaps") throw Exception("'dot_as_gaps' option only available with Maf input.");
