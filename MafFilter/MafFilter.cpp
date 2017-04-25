@@ -178,17 +178,21 @@ int main(int args, char** argv)
     StlOutputStream log(new ofstream(logFile.c_str(), ios::out));
 
     MafIterator* currentIterator;
+
     if (inputFormat == "Maf") {
       short dotOption = MafParser::DOT_ERROR;
       if (inputDot == "as_gaps") {
-        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("resolved as gaps"));
+        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("converted to gaps"));
         dotOption = MafParser::DOT_ASGAP;
       } else if (inputDot == "as_unresolved") {
-        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("resolved as unresolved"));
+        ApplicationTools::displayResult("Maf 'dotted' alignment input", string("converted to unresolved"));
         dotOption = MafParser::DOT_ASUNRES;
       }
 
-      currentIterator = new MafParser(&stream, true, dotOption);
+      bool checkSize = ApplicationTools::getBooleanParameter("input.check_sequence_size", maffilter.getParams(), true, "", true, false);
+      if (!checkSize)
+        ApplicationTools::displayBooleanResult("Check size of sequences", false);
+      currentIterator = new MafParser(&stream, true, checkSize, dotOption);
     } else {
       if (inputDot == "as_gaps") throw Exception("'dot_as_gaps' option only available with Maf input.");
       BppOSequenceStreamReaderFormat reader;
