@@ -1049,8 +1049,8 @@ int main(int args, char** argv)
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
         vector<string> featureType = ApplicationTools::getVectorParameter<string>("feature.type", cmdArgs, ',', "all");
         if (featureType.size() == 0)
-          throw Exception("At least one feature should be provided for command 'FeatureFilter'.");
-        ApplicationTools::displayResult("-- Features to remove", featureFile + " (" + featureFormat + ")");
+          throw Exception("At least one feature should be provided for command 'ExtractFeature'.");
+        ApplicationTools::displayResult("-- Features to extract", featureFile + " (" + featureFormat + ")");
         ApplicationTools::displayResult("-- Features are for species", refSpecies);
         ApplicationTools::displayBooleanResult("-- Features are strand-aware", !ignoreStrand);
         ApplicationTools::displayBooleanResult("-- Extract incomplete features", !completeOnly);
