@@ -1,3 +1,5 @@
+18/05/17 -*- Version 1.2.0 -*-
+
 13/04/17 Julien Dutheil
 * Possibility to allow for dots in maf alignments (treated as gaps)
 * VCF output can included non-variable sites (experimental)
@@ -15,6 +17,10 @@
 26/04/16 Julien Dutheil
 * Added distance matrix output.
 * Added RemoveEmptySequences filter.
+
+09/02/16 Julien Dutheil
+* Features in BedGraph format are now supported.
+* New LiftOver filter.
 
 18/12/15 Julien Dutheil
 * SequenceStatistics can now write in compressed file.

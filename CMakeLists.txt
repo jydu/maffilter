@@ -3,7 +3,7 @@
 # Created: 27/04/2010
 
 # Global parameters
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
 PROJECT(maffilter CXX)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -35,8 +35,13 @@ IF(NOT BUILD_STATIC)
 ENDIF()
 IF(BUILD_STATIC)
   MESSAGE("-- Static linkage requested.")
-  SET(CMAKE_CXX_FLAGS "-static -static-libgcc -static-libstdc++ ${CMAKE_CXX_FLAGS}")
+  set (private-compile-options -static -static-libgcc ${private-compile-options})
 ENDIF()
+
+# Find dependencies (add install directory to search)
+if (CMAKE_INSTALL_PREFIX)
+  set (CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
+endif (CMAKE_INSTALL_PREFIX)
 
 #build info?
 IF(NOT DEFINED INFO)
@@ -103,54 +108,6 @@ IF(PDFTEX_EXE)
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "doc/maffilter.pdf;doc/maffilter.aux;doc/maffilter.cp;doc/maffilter.fn;doc/maffilter.info;doc/maffilter.ky;doc/maffilter.log;doc/maffilter.pg;doc/maffilter.toc;doc/maffilter.tp;doc/maffilter.vr")
 ENDIF(PDFTEX_EXE)
 
-#here is a useful function:
-MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
-  #start:
-  FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
-  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
-
-  IF(BUILD_STATIC)
-    SET(${lib_name}_STATIC_NAMES lib${lib_name}.a)
-    FIND_LIBRARY(${lib_name}_STATIC_LIBRARY NAMES ${${lib_name}_STATIC_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
-    IF(${lib_name}_STATIC_LIBRARY)
-      MESSAGE("-- Library ${lib_name} found here:")
-      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
-      MESSAGE("   static libraries: ${${lib_name}_STATIC_LIBRARY}")
-    ELSE()
-      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
-    ENDIF()
-    #add the dependency:
-    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_STATIC_LIBRARY})
-  ELSE()
-    SET(${lib_name}_NAMES ${lib_name} ${lib_name}.lib ${lib_name}.dll)
-    FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
-    IF(${lib_name}_LIBRARY)
-      MESSAGE("-- Library ${lib_name} found here:")
-      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
-      MESSAGE("   dynamic libraries: ${${lib_name}_LIBRARY}")
-    ELSE()
-      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
-    ENDIF()
-    #add the dependency:
-    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
-  ENDIF()
-  
-ENDMACRO(IMPROVED_FIND_LIBRARY)
-
-# Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
-# standard install location
-IF(CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
-ENDIF(CMAKE_INSTALL_PREFIX)
-
-#Find the libraries. The order is very important for static linkage, it won't
-#link if you change it!
-IMPROVED_FIND_LIBRARY(LIBS bpp-phyl-omics Bpp/Seq/Io/Maf/AbstractDistanceEstimationMafIterator.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-phyl Bpp/Phyl/Tree.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-seq-omics Bpp/Seq/Feature/SequenceFeature.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
-IMPROVED_FIND_LIBRARY(LIBS bpp-core Bpp/Clonable.h)
-
 #Find boost libraries
 SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
 SET(Boost_USE_MULTITHREADED ON)
@@ -161,6 +118,8 @@ IF(Boost_FOUND)
   SET(LIBS ${LIBS} ${Boost_LIBRARIES})
   MESSAGE("-- Boost found: ${Boost_INCLUDE_DIRS}")
 ENDIF()
+
+find_package (bpp-phyl-omics 1.0.0 REQUIRED)
 
 # Find the zlib installation
 IMPROVED_FIND_LIBRARY(LIBS z zlib.h)
@@ -194,14 +153,14 @@ ADD_SUBDIRECTORY(man)
 # Packager
 SET(CPACK_PACKAGE_NAME "maffilter")
 SET(CPACK_PACKAGE_VENDOR "Julien Dutheil")
-SET(CPACK_PACKAGE_VERSION "1.1.0")
+SET(CPACK_PACKAGE_VERSION "1.2.0")
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
-SET(CPACK_PACKAGE_VERSION_MINOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "2")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Filtering of genome alignment in the Multiple Alignment Format (MAF)")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.txt")
-SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS.txt")
-SET(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS")
+SET(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL")
 SET(CPACK_SOURCE_GENERATOR "TGZ")
 SET(CPACK_SOURCE_IGNORE_FILES
  "CMakeFiles"
