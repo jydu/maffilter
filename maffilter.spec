@@ -1,5 +1,5 @@
 %define _basename maffilter
-%define _version 1.1.0
+%define _version 1.2.0
 %define _release 1
 %define _prefix /usr
 
@@ -14,29 +14,29 @@ Source: http://biopp.univ-montp2.fr/repos/sources/maffilter/%{_basename}-%{_vers
 Summary: The Multiple Alignment Format file processor
 Group: Productivity/Scientific/Other
 
-Requires: libbpp-phyl-omics1 = 2.2.0
-Requires: libbpp-seq-omics1 = 2.2.0
-Requires: libbpp-phyl9 = 2.2.0
-Requires: libbpp-seq9 = 2.2.0
-Requires: libbpp-core2 = 2.2.0
+Requires: libbpp-phyl-omics1 = 2.3.0
+Requires: libbpp-seq-omics1 = 2.3.0
+Requires: libbpp-phyl9 = 2.3.0
+Requires: libbpp-seq9 = 2.3.0
+Requires: libbpp-core2 = 2.3.0
 Requires: zlib
 Requires: libbz2
 
 BuildRoot: %{_builddir}/%{_basename}-root
-BuildRequires: cmake >= 2.6.0
-BuildRequires: gcc-c++ >= 4.0.0
+BuildRequires: cmake >= 2.8.11
+BuildRequires: gcc-c++ >= 4.7.0
 BuildRequires: groff
 BuildRequires: texinfo >= 4.0.0
-BuildRequires: libbpp-core2 = 2.2.0
-BuildRequires: libbpp-core-devel = 2.2.0
-BuildRequires: libbpp-seq9 = 2.2.0
-BuildRequires: libbpp-seq-devel = 2.2.0
-BuildRequires: libbpp-phyl9 = 2.2.0
-BuildRequires: libbpp-phyl-devel = 2.2.0
-BuildRequires: libbpp-seq-omics1 = 2.2.0
-BuildRequires: libbpp-seq-omics-devel = 2.2.0
-BuildRequires: libbpp-phyl-omics1 = 2.2.0
-BuildRequires: libbpp-phyl-omics-devel = 2.2.0
+BuildRequires: libbpp-core2 = 2.3.0
+BuildRequires: libbpp-core-devel = 2.3.0
+BuildRequires: libbpp-seq9 = 2.3.0
+BuildRequires: libbpp-seq-devel = 2.3.0
+BuildRequires: libbpp-phyl9 = 2.3.0
+BuildRequires: libbpp-phyl-devel = 2.3.0
+BuildRequires: libbpp-seq-omics1 = 2.3.0
+BuildRequires: libbpp-seq-omics-devel = 2.3.0
+BuildRequires: libbpp-phyl-omics1 = 2.3.0
+BuildRequires: libbpp-phyl-omics-devel = 2.3.0
 BuildRequires: zlib-devel
 BuildRequires: libbz2-devel
 
@@ -116,5 +116,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/info/maffilter.info.%{zipext}
 
 %changelog
+* Wed May 24 2017 Julien Dutheil <dutheil@evolbio.mpg.de 1.2.0-1
 * Fri Sep 26 2014 Julien Dutheil <julien.dutheil@univ-montp2.fr> 1.1.0-1
 - Initial spec file.

@@ -141,7 +141,7 @@ int main(int args, char** argv)
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 1.2.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 26/04/16 *" << endl;
+  cout << "*                                           Last Modif. 24/04/17 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 

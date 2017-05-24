@@ -35,7 +35,7 @@ IF(NOT BUILD_STATIC)
 ENDIF()
 IF(BUILD_STATIC)
   MESSAGE("-- Static linkage requested.")
-  set (private-compile-options -static -static-libgcc ${private-compile-options})
+  SET (CMAKE_CXX_FLAGS "-static -static-libgcc ${CMAKE_CXX_FLAGS}")
 ENDIF()
 
 # Find dependencies (add install directory to search)
@@ -43,70 +43,7 @@ if (CMAKE_INSTALL_PREFIX)
   set (CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
 endif (CMAKE_INSTALL_PREFIX)
 
-#build info?
-IF(NOT DEFINED INFO)
-  SET(INFO UNIX)
-ENDIF(NOT DEFINED INFO)
-
-#build man pages?
-IF(NOT DEFINED MAN)
-  SET(MAN UNIX)
-ENDIF(NOT DEFINED MAN)
-
-#find executables for documentation
-IF(MAN)
-  FIND_PROGRAM(NROFF_EXE NAMES nroff)
-  IF(NROFF_EXE)
-    MESSAGE("-- Found nroff here: ${NROFF_EXE}")
-    MESSAGE("   Adding targets: man")
-
-    ADD_CUSTOM_TARGET(man
-      ALL
-      COMMAND cp maffilter.1.txt maffilter.1
-      COMMAND ${DOC_COMPRESS} -f maffilter.1
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
-      )
-    SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "man/maffilter.1.${DOC_COMPRESS_EXT}")
-  ELSE()
-    MESSAGE(FATAL_ERROR "Program nroff required but not found.")
-  ENDIF()
-ENDIF(MAN)
-
-IF(INFO)
-  FIND_PROGRAM(MAKEINFO_EXE NAMES makeinfo)
-  IF(MAKEINFO_EXE)
-    MESSAGE("-- Found makeinfo here: ${MAKEINFO_EXE}")
-    MESSAGE("   Adding targets: info, html")
- 
-    SET(ADD_INFO_TO "ALL")
-    MESSAGE("   Adding target info to target all")
-    
-    ADD_CUSTOM_TARGET(info
-      ${ADD_INFO_TO}
-      COMMAND ${MAKEINFO_EXE} maffilter.texi
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-      )
-
-    ADD_CUSTOM_TARGET(html
-      COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely maffilter.texi
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-      )
-  ELSE(MAKEINFO_EXE)
-    MESSAGE(FATAL_ERROR p"Program makeinfo required but not found.")
-  ENDIF(MAKEINFO_EXE)
-ENDIF(INFO)
-
-FIND_PROGRAM(PDFTEX_EXE NAMES pdftex)
-IF(PDFTEX_EXE)
-  MESSAGE("-- Found pdftex here: ${PDFTEX_EXE}")
-  MESSAGE("   Adding target: pdf")
-
-  ADD_CUSTOM_TARGET(pdf
-    COMMAND ${PDFTEX_EXE} maffilter.texi
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-    )
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "doc/maffilter.pdf;doc/maffilter.aux;doc/maffilter.cp;doc/maffilter.fn;doc/maffilter.info;doc/maffilter.ky;doc/maffilter.log;doc/maffilter.pg;doc/maffilter.toc;doc/maffilter.tp;doc/maffilter.vr")
-ENDIF(PDFTEX_EXE)
+find_package (bpp-phyl-omics 1.0.1 REQUIRED)
 
 #Find boost libraries
 SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
@@ -116,10 +53,52 @@ FIND_PACKAGE( Boost 1.34.0 COMPONENTS iostreams )
 IF(Boost_FOUND)
   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
   SET(LIBS ${LIBS} ${Boost_LIBRARIES})
-  MESSAGE("-- Boost found: ${Boost_INCLUDE_DIRS}")
+  MESSAGE("-- Boost libraries found here:")
+  MESSAGE("   includes: ${Boost_INCLUDE_DIRS}")
+  MESSAGE("   dynamic libraries: ${Boost_LIBRARIES}")
 ENDIF()
 
-find_package (bpp-phyl-omics 1.0.0 REQUIRED)
+
+#here is a useful function:
+MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
+  #start:
+  FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
+  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
+
+  IF(BUILD_STATIC)
+    SET(${lib_name}_STATIC_NAMES lib${lib_name}.a)
+    FIND_LIBRARY(${lib_name}_STATIC_LIBRARY NAMES ${${lib_name}_STATIC_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
+    IF(${lib_name}_STATIC_LIBRARY)
+      MESSAGE("-- Library ${lib_name} found here:")
+      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
+      MESSAGE("   static libraries: ${${lib_name}_STATIC_LIBRARY}")
+    ELSE()
+      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+    ENDIF()
+    #add the dependency:
+    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_STATIC_LIBRARY})
+  ELSE()
+    SET(${lib_name}_NAMES ${lib_name} ${lib_name}.lib ${lib_name}.dll)
+    FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
+    IF(${lib_name}_LIBRARY)
+      MESSAGE("-- Library ${lib_name} found here:")
+      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
+      MESSAGE("   dynamic libraries: ${${lib_name}_LIBRARY}")
+    ELSE()
+      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+    ENDIF()
+    #add the dependency:
+    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
+  ENDIF()
+  
+ENDMACRO(IMPROVED_FIND_LIBRARY)
+
+# Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
+# standard install location
+IF(CMAKE_INSTALL_PREFIX)
+  SET(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
+ENDIF(CMAKE_INSTALL_PREFIX)
+
 
 # Find the zlib installation
 IMPROVED_FIND_LIBRARY(LIBS z zlib.h)
@@ -152,7 +131,7 @@ ADD_SUBDIRECTORY(man)
 
 # Packager
 SET(CPACK_PACKAGE_NAME "maffilter")
-SET(CPACK_PACKAGE_VENDOR "Julien Dutheil")
+SET(CPACK_PACKAGE_VENDOR "Julien Y. Dutheil")
 SET(CPACK_PACKAGE_VERSION "1.2.0")
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "2")
@@ -162,32 +141,14 @@ SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS")
 SET(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL")
 SET(CPACK_SOURCE_GENERATOR "TGZ")
-SET(CPACK_SOURCE_IGNORE_FILES
- "CMakeFiles"
- "Makefile"
- "_CPack_Packages"
- "CMakeCache.txt"
- ".*\\\\.cmake"
- ".*\\\\.git"
- ".*\\\\.gz"
- ".*\\\\.zip"
- ".*\\\\.deb"
- ".*\\\\.rpm"
- ".*\\\\.dmg"
- ".*\\\\.sh"
- ".*\\\\..*\\\\.swp"
- ".*stamp"
- "\\\\.sh"
- "\\\\..*\\\\.swp"
- "MafFilter/\\\\..*"
- "man/.*\\\\.1.${DOC_COMPRESS_EXT}"
- "install_manifest.txt"
- "DartConfiguration.tcl"
- ${CPACK_SOURCE_IGNORE_FILES}
-)
-IF (MACOS)
-  SET(CPACK_GENERATOR "Bundle")
-ENDIF()
+# /!\ This assumes that an external build is used
+SET(CPACK_SOURCE_IGNORE_FILES 
+       "/build/" 
+       "/examples/" 
+       "/\\\\.git/" 
+       "/\\\\.gitignore" 
+       ${CPACK_SOURCE_IGNORE_FILES}
+       )
 
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET(CPACK_DEBSOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}.orig")
@@ -195,20 +156,6 @@ INCLUDE(CPack)
 
 #This adds the 'dist' target
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-# 'clean' is not (yet) a first class target. However, we need to clean the directories before building the sources:
-IF("${CMAKE_GENERATOR}" MATCHES "Make")
-  ADD_CUSTOM_TARGET(make_clean
-    COMMAND ${CMAKE_MAKE_PROGRAM} clean
-    WORKING_DIRECTORY ${CMAKE_CURRENT_DIR}
-  )
-  ADD_DEPENDENCIES(dist make_clean)
-
-  ADD_CUSTOM_TARGET(make_clean_man
-    COMMAND rm -f *.${DOC_COMPRESS_EXT}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
-  )
-  ADD_DEPENDENCIES(dist make_clean_man)
-ENDIF()
 
 IF (UNIX)
 
