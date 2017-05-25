@@ -20,7 +20,6 @@ Requires: libbpp-phyl9 = 2.3.0
 Requires: libbpp-seq9 = 2.3.0
 Requires: libbpp-core2 = 2.3.0
 Requires: zlib
-Requires: libbz2
 
 BuildRoot: %{_builddir}/%{_basename}-root
 BuildRequires: cmake >= 2.8.11
@@ -38,8 +37,14 @@ BuildRequires: libbpp-seq-omics-devel = 2.3.0
 BuildRequires: libbpp-phyl-omics1 = 2.3.0
 BuildRequires: libbpp-phyl-omics-devel = 2.3.0
 BuildRequires: zlib-devel
-BuildRequires: libbz2-devel
 
+%if 0%{?fedora} >= 22
+Requires: bzip2-libs
+BuildRequires: bzip2-devel
+%else
+Requires: libbz2
+BuildRequires: libbz2-devel
+%endif
 
 AutoReq: yes
 AutoProv: yes
@@ -110,7 +115,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS.txt COPYING.txt INSTALL.txt ChangeLog
+%doc AUTHORS LICENSE INSTALL ChangeLog
 %{_prefix}/bin/maffilter
 %{_prefix}/share/man/man1/maffilter.1.%{zipext}
 %{_prefix}/share/info/maffilter.info.%{zipext}
