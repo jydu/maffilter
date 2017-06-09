@@ -26,10 +26,25 @@ else (NOT MAKEINFO)
     COMMENT "Generating info page"
     VERBATIM
     )
-  install (FILES ${output} DESTINATION share/info)
 
-  # Add "info" target, built with "all" (needed because install will fail if not built).
-  add_custom_target (info ALL DEPENDS ${output})
+  # Install, and have "info" built with "all" (install needs the file to be built)
+  if (NOT COMPRESS_BIN)
+    # Install uncompressed info page
+    install (FILES ${output} DESTINATION ${CMAKE_INSTALL_INFODIR})
+    add_custom_target (info ALL DEPENDS ${output})
+  else ()
+    # Compress and install compressed file
+    set (compressed_ouput ${output}.${COMPRESS_EXT})
+    add_custom_command (
+      OUTPUT ${compressed_ouput}
+      COMMAND ${COMPRESS_BIN} ${COMPRESS_ARGS} ${output} > ${compressed_ouput}
+      DEPENDS ${output}
+      COMMENT "Compressing info page"
+      VERBATIM
+      )
+    install (FILES ${compressed_ouput} DESTINATION ${CMAKE_INSTALL_INFODIR})
+    add_custom_target (info ALL DEPENDS ${compressed_ouput})
+  endif ()
 
   # Also provide a "html" target that builds html doc (not installed, and not part of "all").
   set (output ${CMAKE_CURRENT_BINARY_DIR}/maffilter.html)
@@ -56,6 +71,5 @@ else (NOT MAKEINFO)
       VERBATIM
       )
     add_custom_target (pdf DEPENDS ${output})
-  endif (TEXIDVI)
-endif (NOT MAKEINFO)
-
+  endif ()
+endif ()

@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename maffilter.info
-@settitle MafFilter Manual 1.2.0
+@settitle MafFilter Manual 1.2.1
 @c @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
@@ -12,7 +12,7 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.2.0.
+This is the manual of MafFilter, version 1.2.1.
 
 Copyright @copyright{} 2017 Julien Y. Dutheil
 @end copying

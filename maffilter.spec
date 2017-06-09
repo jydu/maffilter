@@ -1,5 +1,5 @@
 %define _basename maffilter
-%define _version 1.2.0
+%define _version 1.2.1
 %define _release 1
 %define _prefix /usr
 
@@ -10,15 +10,15 @@ Version: %{_version}
 Release: %{_release}
 License: CECILL-2.0
 Vendor: The Bio++ Project
-Source: http://biopp.univ-montp2.fr/repos/sources/maffilter/%{_basename}-%{_version}.tar.gz
+Source: %{_basename}-%{_version}.tar.gz
 Summary: The Multiple Alignment Format file processor
 Group: Productivity/Scientific/Other
 
-Requires: libbpp-phyl-omics1 = 2.3.0
-Requires: libbpp-seq-omics1 = 2.3.0
-Requires: libbpp-phyl9 = 2.3.0
-Requires: libbpp-seq9 = 2.3.0
-Requires: libbpp-core2 = 2.3.0
+Requires: libbpp-phyl-omics2 = 2.3.1
+Requires: libbpp-seq-omics2 = 2.3.1
+Requires: libbpp-phyl11 = 2.3.1
+Requires: libbpp-seq11 = 2.3.1
+Requires: libbpp-core3 = 2.3.1
 Requires: zlib
 
 BuildRoot: %{_builddir}/%{_basename}-root
@@ -26,16 +26,16 @@ BuildRequires: cmake >= 2.8.11
 BuildRequires: gcc-c++ >= 4.7.0
 BuildRequires: groff
 BuildRequires: texinfo >= 4.0.0
-BuildRequires: libbpp-core2 = 2.3.0
-BuildRequires: libbpp-core-devel = 2.3.0
-BuildRequires: libbpp-seq9 = 2.3.0
-BuildRequires: libbpp-seq-devel = 2.3.0
-BuildRequires: libbpp-phyl9 = 2.3.0
-BuildRequires: libbpp-phyl-devel = 2.3.0
-BuildRequires: libbpp-seq-omics1 = 2.3.0
-BuildRequires: libbpp-seq-omics-devel = 2.3.0
-BuildRequires: libbpp-phyl-omics1 = 2.3.0
-BuildRequires: libbpp-phyl-omics-devel = 2.3.0
+BuildRequires: libbpp-core3 = 2.3.1
+BuildRequires: libbpp-core-devel = 2.3.1
+BuildRequires: libbpp-seq11 = 2.3.1
+BuildRequires: libbpp-seq-devel = 2.3.1
+BuildRequires: libbpp-phyl11 = 2.3.1
+BuildRequires: libbpp-phyl-devel = 2.3.1
+BuildRequires: libbpp-seq-omics2 = 2.3.1
+BuildRequires: libbpp-seq-omics-devel = 2.3.1
+BuildRequires: libbpp-phyl-omics2 = 2.3.1
+BuildRequires: libbpp-phyl-omics-devel = 2.3.1
 BuildRequires: zlib-devel
 
 %if 0%{?fedora} >= 22
@@ -87,21 +87,10 @@ Many filters are available, from alignment cleaning to phylogeny reconstruction 
 %setup -q
 
 %build
-CFLAGS="-I%{_prefix}/include $RPM_OPT_FLAGS"
-CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=%{_prefix}"
-if [ %{_lib} == 'lib64' ] ; then
-  CMAKE_FLAGS="$CMAKE_FLAGS -DLIB_SUFFIX=64"
-fi
-if [ %{zipext} == 'lzma' ] ; then
-  CMAKE_FLAGS="$CMAKE_FLAGS -DDOC_COMPRESS=lzma -DDOC_COMPRESS_EXT=lzma"
-fi
-if [ %{zipext} == 'xz' ] ; then
-  CMAKE_FLAGS="$CMAKE_FLAGS -DDOC_COMPRESS=xz -DDOC_COMPRESS_EXT=xz"
-fi
-
+CFLAGS="$RPM_OPT_FLAGS"
+CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=%{_prefix} -DCOMPRESS_PROGRAM=%{compress_program}"
 cmake $CMAKE_FLAGS .
 make
-make info
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
@@ -121,6 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/info/maffilter.info.%{zipext}
 
 %changelog
-* Wed May 24 2017 Julien Dutheil <dutheil@evolbio.mpg.de 1.2.0-1
+* Fri Jun 09 2017 Julien Dutheil <dutheil@evolbio.mpg.de> 1.2.1-1
+* Wed May 24 2017 Julien Dutheil <dutheil@evolbio.mpg.de> 1.2.0-1
 * Fri Sep 26 2014 Julien Dutheil <julien.dutheil@univ-montp2.fr> 1.1.0-1
 - Initial spec file.

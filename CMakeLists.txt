@@ -14,17 +14,6 @@ ENDIF()
 
 SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Weffc++ -Wshadow")
 
-IF(NOT DOC_COMPRESS)
-  SET(DOC_COMPRESS gzip CACHE STRING
-      "Set program for compressing documentation."
-      FORCE)
-ENDIF(NOT DOC_COMPRESS)
-
-IF(NOT DOC_COMPRESS_EXT)
-  SET(DOC_COMPRESS_EXT gz CACHE STRING
-      "Set extension of compressed documentation."
-      FORCE)
-ENDIF(NOT DOC_COMPRESS_EXT)
 
 
 #static linkage?
@@ -38,12 +27,43 @@ IF(BUILD_STATIC)
   SET (CMAKE_CXX_FLAGS "-static -static-libgcc ${CMAKE_CXX_FLAGS}")
 ENDIF()
 
+# Check compression program
+# COMPRESS_PROGRAM controls the choice of program
+# COMPRESS_EXT can be used to override the file extension
+if (NOT COMPRESS_PROGRAM)
+  set (COMPRESS_PROGRAM gzip CACHE STRING "Set program for compressing documentation" FORCE)
+endif ()
+find_program (COMPRESS_BIN NAMES ${COMPRESS_PROGRAM} DOC "${COMPRESS_PROGRAM} compression program")
+if (NOT COMPRESS_BIN)
+  message (STATUS "${COMPRESS_PROGRAM} program not found, text doc will not be compressed")
+else ()
+  # Deduce COMPRESS_EXT for known compression programs if not set
+  if (NOT COMPRESS_EXT)
+    if (${COMPRESS_PROGRAM} STREQUAL "gzip")
+      set (COMPRESS_EXT "gz")
+    elseif (${COMPRESS_PROGRAM} STREQUAL "bzip2")
+      set (COMPRESS_EXT "bz2")
+    else ()
+      set (COMPRESS_EXT "${COMPRESS_PROGRAM}") # Default: program name (works for xz/lzma)
+    endif ()
+  endif ()
+  # Generate command line args (always add -c to output compressed file to stdout)
+  if (${COMPRESS_PROGRAM} STREQUAL "gzip")
+    # -n for no timestamp in files (reproducible builds)
+    set (COMPRESS_ARGS -c -n)
+  else ()
+    set (COMPRESS_ARGS -c)
+  endif ()
+  message (STATUS "Found ${COMPRESS_BIN} compression program, using file extension .${COMPRESS_EXT}")
+endif ()
+
 # Find dependencies (add install directory to search)
 if (CMAKE_INSTALL_PREFIX)
   set (CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
 endif (CMAKE_INSTALL_PREFIX)
 
-find_package (bpp-phyl-omics 1.0.1 REQUIRED)
+include (GNUInstallDirs)
+find_package (bpp-phyl-omics 2.0.0 REQUIRED)
 
 #Find boost libraries
 SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
@@ -132,10 +152,10 @@ ADD_SUBDIRECTORY(man)
 # Packager
 SET(CPACK_PACKAGE_NAME "maffilter")
 SET(CPACK_PACKAGE_VENDOR "Julien Y. Dutheil")
-SET(CPACK_PACKAGE_VERSION "1.2.0")
+SET(CPACK_PACKAGE_VERSION "1.2.1")
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "2")
-SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "1")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Filtering of genome alignment in the Multiple Alignment Format (MAF)")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS")
