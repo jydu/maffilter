@@ -1,7 +1,7 @@
 MafFilter is a program dedicated to the analysis of genome alignments. It parses and manipulates [MAF files](https://genome.ucsc.edu/FAQ/FAQformat.html#format5) as well as more simple fasta files. Despite various filtering options and format conversion tools, MafFilter can compute a wide range of statistics (phylogenetic trees, nucleotide diversity, inferrence of selection, etc.). Current version is 1.2.1.
 
 
-## What does !MafFilter do?
+## What can MafFilter do?
 
 !MafFilter applies a series of "filters" to a MAF file, in order to clean it, extract data and computer statistics while keeping track of the associated meta-data such as genome coordinates and quality scores.
 
