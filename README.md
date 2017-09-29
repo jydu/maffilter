@@ -1,6 +1,6 @@
 # MafFilter
 
-The MafFilter genome alignment processor.
+The MafFilter genome alignment processor [[website]](https://jydu.github.io/maffilter/).
 
 If you are using maffilter, please consider citing
 
