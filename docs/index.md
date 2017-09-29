@@ -16,8 +16,8 @@ MafFilter is a program dedicated to the analysis of genome alignments. It parses
 
 MafFilter is built using the [Bio++ libraries](http://biopp.univ-montp2.fr), as well as the boost iostream library for handling of compressed files. [Debian](https://packages.debian.org/search?keywords=maffilter&searchon=names&suite=stable&section=all) and [RPM](https://download.opensuse.org/repositories/home:/jdutheil:/Bio++2.3.0/) packages are available.
 
-For compiling the programs yourself, from the downloaded sources or from the git repository, please follow the instructions from the Bio++ website [http://biopp.univ-montp2.fr/wiki/index.php/Installation].
+For compiling the programs yourself, from the downloaded sources or from the git repository, please follow the instructions from the [Bio++ website](http://biopp.univ-montp2.fr/wiki/index.php/Installation).
 
 ## How do I use it? 
 
-Several example data sets are distributed along with the source code of the package. A reference manual is also available [[http://biopp.univ-montp2.fr/manual/html/maffilter/|here]], or can be downloaded as [[http://biopp.univ-montp2.fr/manual/pdf/maffilter/|PDF]]. Questions can be asked on the dedicated forum: [[https://groups.google.com/forum/?hl=en#!forum/maffilter|here]].
+Several example data sets are distributed along with the source code of the package. A reference manual is also available [here](http://biopp.univ-montp2.fr/manual/html/maffilter/), or can be downloaded as [PDf](http://biopp.univ-montp2.fr/manual/pdf/maffilter/). Questions can be asked on the dedicated forum: [here](https://groups.google.com/forum/?hl=en#!forum/maffilter).
