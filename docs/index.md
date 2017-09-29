@@ -21,3 +21,34 @@ For compiling the programs yourself, from the downloaded sources or from the git
 ## How do I use it? 
 
 Several example data sets are distributed along with the source code of the package. A reference manual is also available [here](http://biopp.univ-montp2.fr/manual/html/maffilter/), or can be downloaded as [PDF](http://biopp.univ-montp2.fr/manual/pdf/maffilter/). Questions can be asked on the dedicated forum: [here](https://groups.google.com/forum/?hl=en#!forum/maffilter).
+
+## References
+
+The MafFilter program was published in
+
+```
+Dutheil JY, Gaillard S, Stukenbrock EH.
+BMC Genomics. 2014 Jan 22;15:53.
+MafFilter: a highly flexible and extensible multiple genome alignment files processor.
+```
+Please consider citing this work if you are using the program. 
+
+MafFilter was originally developped in the context of the study of the Gorilla genome sequence
+
+```
+Scally A, Dutheil JY, Hillier LW, Jordan GE, Goodhead I, Herrero J, Hobolth A, Lappalainen T, Mailund T, Marques-Bonet T, McCarthy S, Montgomery SH, Schwalie PC, Tang YA, Ward MC, Xue Y, Yngvadottir B, Alkan C, Andersen LN, Ayub Q, Ball EV, Beal K, Bradley BJ, Chen Y, Clee CM, Fitzgerald S, Graves TA, Gu Y, Heath P, Heger A, Karakoc E, Kolb-Kokocinski A, Laird GK, Lunter G, Meader S, Mort M, Mullikin JC, Munch K, O'Connor TD, Phillips AD, Prado-Martinez J, Rogers AS, Sajjadian S, Schmidt D, Shaw K, Simpson JT, Stenson PD, Turner DJ, Vigilant L, Vilella AJ, Whitener W, Zhu B, Cooper DN, de Jong P, Dermitzakis ET, Eichler EE, Flicek P, Goldman N, Mundy NI, Ning Z, Odom DT, Ponting CP, Quail MA, Ryder OA, Searle SM, Warren WC, Wilson RK, Schierup MH, Rogers J, Tyler-Smith C, Durbin R.
+Nature. 2012 Mar 7;483(7388):169-75.
+Insights into hominid evolution from the gorilla genome sequence.
+```
+and was further developped in the following studies:
+
+```
+Stukenbrock EH, Bataillon T, Dutheil JY, Hansen TT, Li R, Zala M, McDonald BA, Wang J, Schierup MH.
+Genome Res. 2011 Dec;21(12):2157-66.
+The making of a new pathogen: insights from comparative population genomics of the domesticated wheat pathogen Mycosphaerella graminicola and its wild sister species.
+
+Stukenbrock EH, Christiansen FB, Hansen TT, Dutheil JY, Schierup MH.
+Proc Natl Acad Sci U S A. 2012 Jul 3;109(27):10954-9.
+Fusion of two divergent fungal individuals led to the recent emergence of a unique widespread pathogen species.
+
+```
