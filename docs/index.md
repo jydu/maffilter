@@ -14,7 +14,7 @@
 
 ## How can I get it?
 
-**MafFilter** is built using the [Bio++ libraries](http://biopp.univ-montp2.fr), as well as the boost iostream library for handling of compressed files. [Debian](https://packages.debian.org/search?keywords=maffilter&searchon=names&suite=stable&section=all) and [RPM](https://download.opensuse.org/repositories/home:/jdutheil:/Bio++2.3.0/) packages are available.
+**MafFilter** is built using the [Bio++ libraries](http://biopp.univ-montp2.fr), as well as the boost iostream library for handling of compressed files. [Debian](https://packages.debian.org/search?keywords=maffilter&searchon=names&suite=all&section=all) and [RPM](https://download.opensuse.org/repositories/home:/jdutheil:/Bio++2.3.0/) packages are available.
 
 For compiling the programs yourself, from the downloaded sources or from the git repository, please follow the instructions from the [Bio++ website](http://biopp.univ-montp2.fr/wiki/index.php/Installation).
 
