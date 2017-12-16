@@ -115,6 +115,7 @@ Exporting blocks and data
 
 * Output::
 * OutputAlignments::
+* OutputAsTable::
 * VcfOutput::
 * MsmcOutput::
 * PlinkOutput::
@@ -1979,6 +1980,7 @@ Compression format for output file (if file != none).
 @menu
 * Output::
 * OutputAlignments::
+* OutputAsTable::
 * VcfOutput::
 * MsmcOutput::
 * PlinkOutput::
@@ -2022,7 +2024,7 @@ Tell if sequences should be masked (if a mask annotation is available), or if ma
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node OutputAlignments, VcfOutput, Output, Exporting
+@node OutputAlignments, OutputAsTable, Output, Exporting
 @subsection Write alignment blocks to an external alignment file.
 
 The @command{OutputAlignments} filter writes all blocks to an external alignment file, potentially losing some information such as coordinates and scores.
@@ -2074,7 +2076,47 @@ The name of reference sequence, which will only be used when %c, %b or %e codes 
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node VcfOutput, MsmcOutput, OutputAlignments, Exporting
+@node OutputAsTable, VcfOutput, OutputAlignments, Exporting
+@subsection Export given positions into a table format.
+
+The @command{OutputAsTable} filter writes the nucleotide content of given positions in a table format.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    OutputTable(                            \
+        file=data.txt,                      \
+        species=Species1,Species2,Species3, \
+        reference=RefSpecies,               \
+        compression=none),                  \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item file=@{none|@{path@}@}
+A file path where to write date in table format.
+
+@item compression=@{none|gzip|zip|bzip2@}
+Compression format for output file.
+
+@item species=@{list of @{string@}}
+Select species for which data should be output (one column per species).
+
+@item reference=@{string@}
+Which species should be used for outputting coordinates.
+
+@end table
+
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node VcfOutput, MsmcOutput, OutputAsTable, Exporting
 @subsection Call SNPs from alignment blocks and export to VCF file
 
 The @command{VcfOutput} filter call SNPs from each block and output them to a VCF file.
