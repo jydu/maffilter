@@ -1639,9 +1639,11 @@ int main(int args, char** argv)
         string targetSpecies = ApplicationTools::getStringParameter("target_species", cmdArgs, "none");
         string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
+        bool outputClosest   = ApplicationTools::getBooleanParameter("target_closest_position", cmdArgs, true);
         ApplicationTools::displayResult("-- Features to lift over", featureFile + " (" + featureFormat + ")");
         ApplicationTools::displayResult("-- from species", refSpecies);
         ApplicationTools::displayResult("-- to species", targetSpecies);
+        ApplicationTools::displayBooleanResult("-- closest position if gap", outputClosest);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
         if (compress == "none") {
@@ -1686,7 +1688,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- File compression", compress);
         
         //Iterator initialization:
-        CoordinateTranslatorMafIterator* iterator = new CoordinateTranslatorMafIterator(currentIterator, refSpecies, targetSpecies, featuresSet, *out);
+        CoordinateTranslatorMafIterator* iterator = new CoordinateTranslatorMafIterator(currentIterator, refSpecies, targetSpecies, featuresSet, *out, outputClosest);
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);

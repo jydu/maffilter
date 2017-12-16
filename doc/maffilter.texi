@@ -2362,6 +2362,7 @@ maf.filter=                                 \
     LiftOver(                               \
         ref_species=species1,               \
         target_species=species2,            \
+        target_closest_position=yes,        \
         feature.file=species1.gff3.gz,      \
         feature.file.compression=gzip,      \
         feature.format=GFF,                 \
@@ -2380,6 +2381,9 @@ The name of the species for which the coordinates of the features are provided.
 
 @item target_species=@{string@}
 The name of the species to which the coordinates of the features should be converted.
+
+@item target_closest_position=@{boolean@}
+In case the target sequence has a gap at the given position, outputs the coordinate of the previous non-gap position, otherwise NA.
 
 @item feature.file=@{path@}
 The file where the features are described.
