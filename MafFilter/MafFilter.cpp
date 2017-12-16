@@ -97,6 +97,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf/OutputDistanceMatrixMafIterator.h>
 #include <Bpp/Seq/Io/Maf/VcfOutputMafIterator.h>
 #include <Bpp/Seq/Io/Maf/MsmcOutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/TableOutputMafIterator.h>
 #include <Bpp/Seq/Io/Maf/SequenceStatisticsMafIterator.h>
 #include <Bpp/Seq/Io/Maf/FeatureExtractorMafIterator.h>
 #include <Bpp/Seq/Io/Maf/WindowSplitMafIterator.h>
@@ -1425,6 +1426,40 @@ int main(int args, char** argv)
         currentIterator = iterator;
         its.push_back(iterator);
       }
+
+
+
+      // +-----------------+
+      // | Output as table |
+      // +-----------------+
+      else if (cmdName == "OutputAsTable") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output table file", outputFile);
+        filtering_ostream* out = new filtering_ostream;
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+        string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        if (reference != "")
+        ApplicationTools::displayResult("-- Reference sequence", reference);
+ 
+        vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "", "", false, false);
+
+        TableOutputMafIterator* iterator = new TableOutputMafIterator(currentIterator, out, species, reference);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
 
 
 
