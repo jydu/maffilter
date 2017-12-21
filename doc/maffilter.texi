@@ -2105,7 +2105,7 @@ A file path where to write date in table format.
 @item compression=@{none|gzip|zip|bzip2@}
 Compression format for output file.
 
-@item species=@{list of @{string@}}
+@item species=@{list of @{string@}@}
 Select species for which data should be output (one column per species).
 
 @item reference=@{string@}
