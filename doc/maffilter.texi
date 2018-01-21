@@ -65,6 +65,7 @@ Extracting data
 * SelectOrphans::
 * Merge::
 * Concatenate::
+* OrderFilter::
 * ExtractFeature::
 * SelectChr::
 * WindowSplit::
@@ -341,6 +342,7 @@ The next section present all available filters and their corresponding arguments
 * SelectOrphans::
 * Merge::
 * Concatenate::
+* OrderFilter::
 * ExtractFeature::
 * SelectChr::
 * WindowSplit::
@@ -478,7 +480,7 @@ Sequences annotated with such chromosomes will not be checked for synteny and th
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Concatenate, ExtractFeature, Merge, Extracting
+@node Concatenate, OrderFilter, Merge, Extracting
 @subsection Concatenating: merge consecutive blocks up to a certain size
 
 The @command{Concatenate} filter fuses consecutive blocks until the concatenated block reaches a minimal size.
@@ -508,7 +510,46 @@ If given, only blocks with identical chromosome tags in the reference species wi
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node ExtractFeature, SelectChr, Concatenate, Extracting
+@node OrderFilter, ExtractFeature, Concatenate, Extracting
+@subsection OrderFilter: check and eventually discard unordered or overlapping blocks
+
+The @command{OrderFilter} filter check if blocks are sorted according to previous block.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    OrderFilter(                            \
+        reference=ref_genome,               \
+        do_unsorted=discard,                \
+        do_overlapping=discard),            \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+
+@item reference=@{string@}
+The sequence for which coordinates should be checked. Block where the reference sequence is absent will be considered as ordered.
+
+Important note: the alignment is supposed to be projected according to the reference sequence. Using the filter on another species might lead to unexpected behavior, in particular as the the reference species is supposed to be mapped on the + strand only.
+
+@item do_unsorted=@{none|discard|error@}
+Action to perform in case an unsorted block is found (that is, when the right coordinate of the current block is before the left coordinate of the previous one).
+If 'discard', the block will be removed. If 'error', the maffilter with stop with an error.
+
+@item do_overlapping=@{none|discard|error@}
+Action to perform in case an ovelrapping block is found (that is, when the left coordinate of the current block is before the right coordinate of the previous one, and the right coordinate of the current block is not before the left coordinate of the previous one).
+If 'discard', the block will be removed. If 'error', the maffilter with stop with an error.
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node ExtractFeature, SelectChr, OrderFilter, Extracting
 @subsection Extract features from the alignment
 
 The @command{ExtractFeature} extracts parts of the alignment corresponding to certain features.
