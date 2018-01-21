@@ -80,6 +80,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf/ConcatenateMafIterator.h>
 #include <Bpp/Seq/Io/Maf/RemoveEmptySequencesMafIterator.h>
 #include <Bpp/Seq/Io/Maf/DuplicateFilterMafIterator.h>
+#include <Bpp/Seq/Io/Maf/OrderFilterMafIterator.h>
 #include <Bpp/Seq/Io/Maf/FeatureFilterMafIterator.h>
 #include <Bpp/Seq/Io/Maf/QualityFilterMafIterator.h>
 #include <Bpp/Seq/Io/Maf/MaskFilterMafIterator.h>
@@ -798,6 +799,33 @@ int main(int args, char** argv)
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
         DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
+        iterator->setLogStream(&log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
+
+      // +-----------------+
+      // | Order filtering |
+      // +-----------------+
+      else if (cmdName == "OrderFilter") {
+        string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
+        ApplicationTools::displayResult("-- Reference species", ref);
+
+        string unsortedAction = ApplicationTools::getStringParameter("do_unsorted", cmdArgs, "exception");
+        ApplicationTools::displayResult("-- Unsorted block action", unsortedAction);
+        if (unsortedAction != "none" && unsortedAction != "discard" && unsortedAction != "error")
+          throw Exception("'do_unsorted' must be one of 'none', 'discard' or 'error'.");
+
+        string overlappingAction = ApplicationTools::getStringParameter("do_overlapping", cmdArgs, "exception");
+        ApplicationTools::displayResult("-- Overlapping block action", overlappingAction);
+        if (overlappingAction != "none" && overlappingAction != "discard" && overlappingAction != "error")
+          throw Exception("'do_overlapping' must be one of 'none', 'discard' or 'error'.");
+
+        OrderFilterMafIterator* iterator = new OrderFilterMafIterator(currentIterator, ref,
+            unsortedAction == "discard", unsortedAction == "error",
+            overlappingAction == "discard", overlappingAction == "error");
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
@@ -1583,10 +1611,14 @@ int main(int args, char** argv)
         bool map3 = ApplicationTools::getBooleanParameter("map3", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Ouput map3 file", map3);
 
+        bool recodeChr = ApplicationTools::getBooleanParameter("recode_chr", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Recode chromosomes", recodeChr);
+
         vector<string> species = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
         if (species.size() < 2)
           throw Exception("PlinkOutput: at least two genomes are necessary to call SNPs.");
-        PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3);
+
+        PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3, recodeChr);
 
         iterator->setLogStream(&log);
         iterator->setVerbose(verbose);

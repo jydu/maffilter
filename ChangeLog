@@ -1,3 +1,6 @@
+21/01/18 Julien Dutheil
+* Added OrderFilter.
+
 16/12/17 Julien Dutheil
 * Added OutputAsTable filter
 * Improved LiftOver
