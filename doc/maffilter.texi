@@ -454,7 +454,8 @@ maf.filter=                                 \
     Merge(                                  \
         species=(species1, species2, etc),  \
         dist_max=0,                         \
-        ignore_chr=(Random,Unknown)),       \
+        ignore_chr=(Random,Unknown),        \
+        rename_chimeric_chromosomes=yes),   \
     [...]
 @end example
 @end cartouche
@@ -475,6 +476,10 @@ If dist_max is greater than 0, sequences will be filled with 'N' to preserve coo
 @item ignore_chr=@{none | (list)@}
 An optional parenthetic list of chromosomes to ignore (typically "Unknown", or "Random", etc.).
 Sequences annotated with such chromosomes will not be checked for synteny and the corresponding block will not be fused.
+
+@item rename_chimeric_chromosomes=@{boolean@}
+When distinct chromosomes are merged (in non specified species), their names are concatenated. If this option is set to "yes",
+then merged chromosomes will be renamed as "chimtigXXX" where XXX is a number auto-incremented for each species.
 
 @end table
 

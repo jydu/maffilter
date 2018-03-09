@@ -141,9 +141,9 @@ void help()
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
-  cout << "*                  MAF Filter, version 1.2.1                     *" << endl;
+  cout << "*                  MAF Filter, version 1.3.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 09/06/17 *" << endl;
+  cout << "*                                           Last Modif. 09/03/18 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -175,9 +175,9 @@ int main(int args, char** argv)
       throw Exception("Bad input incompression format: " + compress);
     stream.push(file_source(inputFile));
     
-    string logFile = ApplicationTools::getAFilePath("output.log", maffilter.getParams(), true, false);
+    string logFile = ApplicationTools::getAFilePath("output.log", maffilter.getParams(), false, false);
 
-    StlOutputStream log(new ofstream(logFile.c_str(), ios::out));
+    shared_ptr<StlOutputStream> log(new StlOutputStream(new ofstream(logFile.c_str(), ios::out)));
 
     MafIterator* currentIterator;
 
@@ -239,7 +239,7 @@ int main(int args, char** argv)
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Subset'.");
         SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, keep, rmdupl);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -258,7 +258,7 @@ int main(int args, char** argv)
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'SelectOrphans'.");
         OrphanSequenceFilterMafIterator* iterator = new OrphanSequenceFilterMafIterator(currentIterator, species, strict, rmdupl);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -278,8 +278,10 @@ int main(int args, char** argv)
         }
         unsigned int distMax = ApplicationTools::getParameter<unsigned int>("dist_max", cmdArgs, 0);
         ApplicationTools::displayResult("-- Maximum distance allowed", distMax);
-        BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax);
-        iterator->setLogStream(&log);
+        bool renameChimeras = ApplicationTools::getBooleanParameter("rename_chimeric_chromosomes", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Rename chimeric chromosomes", renameChimeras);
+        BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax, renameChimeras);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         if (cmdArgs.find("ignore.chr") != cmdArgs.end()) {
           throw Exception("ignore.chr argument in Merge is deprecated: use ignore_chr instead.");
@@ -309,7 +311,7 @@ int main(int args, char** argv)
         if (ref != "")
           ApplicationTools::displayResult("-- Reference species", ref);
         ConcatenateMafIterator* iterator = new ConcatenateMafIterator(currentIterator, minimumSize, ref);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -324,7 +326,7 @@ int main(int args, char** argv)
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'XFullGap'.");
         FullGapFilterMafIterator* iterator = new FullGapFilterMafIterator(currentIterator, species);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -365,7 +367,7 @@ int main(int args, char** argv)
           iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, rm, em, !trash, missingAsGap);
         else
           iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, em, !trash, missingAsGap);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -437,7 +439,7 @@ int main(int args, char** argv)
           iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, rm, pm, !trash, missingAsGap);
         else
           iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, gm, pm, !trash, missingAsGap);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -501,7 +503,7 @@ int main(int args, char** argv)
         if (ignoreGaps && missingAsGap)
           throw Exception("Error, incompatible options ingore_gaps=yes and missing_as_gap=yes.");
         EntropyFilterMafIterator* iterator = new EntropyFilterMafIterator(currentIterator, species, ws, st, em, pm, !trash, missingAsGap, ignoreGaps);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -557,7 +559,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Max. masked sites allowed in Window", mm);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         MaskFilterMafIterator* iterator = new MaskFilterMafIterator(currentIterator, species, ws, st, mm, !trash);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -612,7 +614,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Min. average quality allowed in Window", mq);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         QualityFilterMafIterator* iterator = new QualityFilterMafIterator(currentIterator, species, ws, st, mq, !trash);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -698,7 +700,7 @@ int main(int args, char** argv)
         }
         ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
         FeatureFilterMafIterator* iterator = new FeatureFilterMafIterator(currentIterator, refSpecies, featuresSet, !trash);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -747,7 +749,7 @@ int main(int args, char** argv)
         unsigned int minLength = ApplicationTools::getParameter<unsigned int>("min_length", cmdArgs, 0);
         ApplicationTools::displayResult("-- Minimum block length required", minLength);
         BlockLengthMafIterator* iterator = new BlockLengthMafIterator(currentIterator, minLength);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -765,7 +767,7 @@ int main(int args, char** argv)
         if (minSize > 5)
           ApplicationTools::displayWarning("!! Warning, in previous version of maffilter BlockLength was named BlockSize... Check!");
         BlockSizeMafIterator* iterator = new BlockSizeMafIterator(currentIterator, minSize);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -783,7 +785,7 @@ int main(int args, char** argv)
         string chr = ApplicationTools::getStringParameter("chromosome", cmdArgs, "");
         ApplicationTools::displayResult("-- Chromosome", chr);
         ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chr);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -799,7 +801,7 @@ int main(int args, char** argv)
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
         DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -826,7 +828,7 @@ int main(int args, char** argv)
         OrderFilterMafIterator* iterator = new OrderFilterMafIterator(currentIterator, ref,
             unsortedAction == "discard", unsortedAction == "error",
             overlappingAction == "discard", overlappingAction == "error");
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -840,7 +842,7 @@ int main(int args, char** argv)
         bool unresolvedAsGaps = ApplicationTools::getBooleanParameter("unresolved_as_gaps", cmdArgs, "");
         ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGaps);
         RemoveEmptySequencesMafIterator* iterator = new RemoveEmptySequencesMafIterator(currentIterator, unresolvedAsGaps);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -858,7 +860,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         FilterTreeMafIterator* iterator = new FilterTreeMafIterator(currentIterator, treeProperty, maxBrLen, !trash);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -1115,7 +1117,7 @@ int main(int args, char** argv)
         }
         ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
         FeatureExtractorMafIterator* iterator = new FeatureExtractorMafIterator(currentIterator, refSpecies, featuresSet, completeOnly, ignoreStrand);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -1150,7 +1152,7 @@ int main(int args, char** argv)
           ApplicationTools::displayBooleanResult("-- Keep small blocks", keepSmallBlocks);
 
         WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, splitOption, keepSmallBlocks);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -1184,7 +1186,7 @@ int main(int args, char** argv)
 
           CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap, extendedSeqNames);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
-          iterator->setLogStream(&log);
+          iterator->setLogStream(log);
           currentIterator = iterator;
           its.push_back(iterator);
         } else if (distMethod == "ml") {
@@ -1217,7 +1219,7 @@ int main(int args, char** argv)
           
           OutputStream* profiler =
             (prPath == "none") ? 0 :
-              (prPath == "std") ? ApplicationTools::message :
+              (prPath == "std") ? ApplicationTools::message.get() :
               new StlOutputStream(new ofstream(prPath.c_str(), ios::out));
           if (profiler)
             profiler->setPrecision(20);
@@ -1227,7 +1229,7 @@ int main(int args, char** argv)
 
           OutputStream* messenger =
             (mhPath == "none") ? 0 :
-              (mhPath == "std") ? ApplicationTools::message :
+              (mhPath == "std") ? ApplicationTools::message.get() :
               new StlOutputStream(new ofstream(mhPath.c_str(), ios::out));
           if (messenger)
             messenger->setPrecision(20);
@@ -1238,7 +1240,7 @@ int main(int args, char** argv)
           MaximumLikelihoodDistanceEstimationMafIterator* iterator = new MaximumLikelihoodDistanceEstimationMafIterator(currentIterator,
               distEst.release(), propGapsToKeep, gapsAsUnresolved, paramOpt, extendedSeqNames);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
-          iterator->setLogStream(&log);
+          iterator->setLogStream(log);
           iterator->setVerbose(verbose);
           currentIterator = iterator;
           its.push_back(iterator);
@@ -1273,7 +1275,7 @@ int main(int args, char** argv)
 
         DistanceBasedPhylogenyReconstructionMafIterator* iterator = new DistanceBasedPhylogenyReconstructionMafIterator(currentIterator, distMethod, distProperty);
         ApplicationTools::displayResult("-- Writing block-wise trees to", iterator->getPropertyName());
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -1306,7 +1308,7 @@ int main(int args, char** argv)
 
         TreeBuildingSystemCallMafIterator* iterator = new TreeBuildingSystemCallMafIterator(currentIterator, alnWriter, programInputFile, treeReader, programOutputFile, command, propertyName);
 
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -1325,7 +1327,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Rerooting according to species", outgroup);
         NewOutgroupMafIterator* iterator = new NewOutgroupMafIterator(currentIterator, treePropertyInput, treePropertyOutput, outgroup);
         ApplicationTools::displayResult("-- Writing tree to", treePropertyOutput);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -1343,7 +1345,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Removing leaves from species", species);
         DropSpeciesMafIterator* iterator = new DropSpeciesMafIterator(currentIterator, treePropertyInput, treePropertyOutput, species);
         ApplicationTools::displayResult("-- Writing tree to", treePropertyOutput);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);
       }
@@ -1527,7 +1529,7 @@ int main(int args, char** argv)
 
         VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll);
 
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -1566,7 +1568,7 @@ int main(int args, char** argv)
           throw Exception("MsmcOutput: at least two genomes are necessary to call SNPs.");
         MsmcOutputMafIterator* iterator = new MsmcOutputMafIterator(currentIterator, out, species, reference);
 
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -1620,7 +1622,7 @@ int main(int args, char** argv)
 
         PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3, recodeChr);
 
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -1646,7 +1648,7 @@ int main(int args, char** argv)
 
         SequenceLDhotOutputMafIterator* iterator = new SequenceLDhotOutputMafIterator(currentIterator, outputFile, completeOnly, reference);
 
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -1688,7 +1690,7 @@ int main(int args, char** argv)
         }
         CoordinatesOutputMafIterator* iterator = new CoordinatesOutputMafIterator(currentIterator, out, species, includeSrcSize);
 
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
@@ -1756,7 +1758,7 @@ int main(int args, char** argv)
         
         //Iterator initialization:
         CoordinateTranslatorMafIterator* iterator = new CoordinateTranslatorMafIterator(currentIterator, refSpecies, targetSpecies, featuresSet, *out, outputClosest);
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         its.push_back(iterator);
 
@@ -1854,7 +1856,7 @@ int main(int args, char** argv)
 
         SystemCallMafIterator* iterator = new SystemCallMafIterator(currentIterator, alnWriter, programInputFile, alnReader, programOutputFile, command);
 
-        iterator->setLogStream(&log);
+        iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
