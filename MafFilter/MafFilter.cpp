@@ -176,8 +176,10 @@ int main(int args, char** argv)
     stream.push(file_source(inputFile));
     
     string logFile = ApplicationTools::getAFilePath("output.log", maffilter.getParams(), false, false);
-
-    shared_ptr<StlOutputStream> log(new StlOutputStream(new ofstream(logFile.c_str(), ios::out)));
+    shared_ptr<StlOutputStream> log;
+    if (logFile != "none") {
+      log.reset(new StlOutputStream(new ofstream(logFile.c_str(), ios::out)));
+    }
 
     MafIterator* currentIterator;
 
