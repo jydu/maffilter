@@ -1570,7 +1570,7 @@ Note that the ``species'' terminology relates to multispecies alignments, as ori
 @command{DiversityStatistics} computes sequence diversity statistics, including:
 @itemize
 @item
-Number of seggregating sites,
+Number of segregating sites,
 @item
 Watterson's theta.
 @item
@@ -2243,7 +2243,7 @@ Compression format for output file.
 A species name corresponding to the sequence to use as reference.
 
 @item genotypes=@{list of species@}
-A list of species for which seggregating sites should be called. It might not contain the reference species, which is then only used for coordinates output.
+A list of species for which segregating sites should be called. It might not contain the reference species, which is then only used for coordinates output.
 Blocks with do not contain all species will not be called, as well as block not contianing the reference species. Note that the alignment has to be projected
 againt the reference species, otherwise an error will be reported.
 
@@ -2291,7 +2291,7 @@ Compression format for output file.
 A species name corresponding to the sequence to use as reference.
 
 @item genotypes=@{list of species@}
-A list of species for which seggregating sites should be called. It might not contain the reference species, which is then only used for coordinates output.
+A list of species for which segregating sites should be called. It might not contain the reference species, which is then only used for coordinates output.
 Blocks with do not contain all species will not be called, as well as block not contianing the reference species. Note that the alignment has to be projected
 againt the reference species, otherwise an error will be reported.
 
