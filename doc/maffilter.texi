@@ -1446,7 +1446,7 @@ First species to consider (resp. second, third and fourth).
 @subsubsection Site frequency spectrum
 The @command{SiteFrequencySpectrum} computes the site frequency spectrum for each block.
 Only positions in the alignment with only two states are considered.
-The proportions of doubletons are then computed by bins.
+The proportions of bi-allelic sites are then computed by bins.
 Lets consider the following example with 7 sequences:
 @verbatim
 ACGT
