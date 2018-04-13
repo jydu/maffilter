@@ -937,6 +937,8 @@ int main(int args, char** argv)
           } else if (statName == "SiteFrequencySpectrum") {
             vector<double> bounds  = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
             vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
+            if (ingroup.size() < 2)
+              throw Exception("ERROR: at least two ingroup sequences are required to compute the site frequency spectrum.");
             string outgroup        = ApplicationTools::getStringParameter("outgroup", statArgs, "", "", false, true);
             mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds, ingroup, outgroup); 
           } else if (statName == "FourSpeciesSitePatternCounts") {
@@ -962,6 +964,8 @@ int main(int args, char** argv)
             mafStat = new PolymorphismMafStatistics(species); 
           } else if (statName == "DiversityStatistics") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
+            if (species.size() < 2)
+              throw Exception("ERROR: at least two sequences are required to compute diversity estimators.");
             mafStat = new SequenceDiversityMafStatistics(species); 
           } else if (statName == "CountClusters") {
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
