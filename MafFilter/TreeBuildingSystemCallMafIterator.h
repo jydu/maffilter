@@ -105,7 +105,7 @@ class TreeBuildingSystemCallMafIterator:
 
 
   public:
-    MafBlock* analyseCurrentBlock_() throw (Exception);
+    MafBlock* analyseCurrentBlock_();
 
 };
 
