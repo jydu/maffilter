@@ -1617,7 +1617,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reference sequence", reference);
         
         bool map3 = ApplicationTools::getBooleanParameter("map3", cmdArgs, false);
-        ApplicationTools::displayBooleanResult("-- Ouput map3 file", map3);
+        ApplicationTools::displayBooleanResult("-- Output map3 file", map3);
 
         bool recodeChr = ApplicationTools::getBooleanParameter("recode_chr", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Recode chromosomes", recodeChr);
