@@ -1,4 +1,4 @@
-**MafFilter** is a program dedicated to the analysis of genome alignments. It parses and manipulates [MAF files](https://genome.ucsc.edu/FAQ/FAQformat.html#format5) as well as more simple fasta files. Despite various filtering options and format conversion tools, **MafFilter** can compute a wide range of statistics (phylogenetic trees, nucleotide diversity, inferrence of selection, etc.). Current version is 1.2.1.
+**MafFilter** is a program dedicated to the analysis of genome alignments. It parses and manipulates [MAF files](https://genome.ucsc.edu/FAQ/FAQformat.html#format5) as well as more simple fasta files. Despite various filtering options and format conversion tools, **MafFilter** can compute a wide range of statistics (phylogenetic trees, nucleotide diversity, inferrence of selection, etc.). Current version is 1.3.0.
 
 
 ## What can MafFilter do?
@@ -14,7 +14,7 @@
 
 ## How can I get it?
 
-**MafFilter** is built using the [Bio++ libraries](http://biopp.univ-montp2.fr), as well as the boost iostream library for handling of compressed files. [Debian](https://packages.debian.org/search?keywords=maffilter&searchon=names&suite=all&section=all) and [RPM](https://download.opensuse.org/repositories/home:/jdutheil:/Bio++2.3.0/) packages are available.
+**MafFilter** is built using the [Bio++ libraries](http://biopp.univ-montp2.fr), as well as the boost iostream library for handling of compressed files. [Debian](https://packages.debian.org/search?keywords=maffilter&searchon=names&suite=all&section=all) and [RPM](https://download.opensuse.org/repositories/home:/jdutheil:/Bio++2.4.0/) packages are available.
 
 For compiling the programs yourself, from the downloaded sources or from the git repository, please follow the instructions from the [Bio++ website](http://biopp.univ-montp2.fr/wiki/index.php/Installation).
 
