@@ -58,6 +58,19 @@ else (NOT MAKEINFO)
     )
   add_custom_target (html DEPENDS ${output})
 
+  # Also provide a "html-multipages" target that builds html doc (not installed, and not part of "all").
+  set (output ${CMAKE_CURRENT_BINARY_DIR}/html/)
+  set (makeinfo-css "http://www.w3.org/StyleSheets/Core/Steely")
+  add_custom_command (
+    OUTPUT ${output}
+    COMMAND ${MAKEINFO} --html --no-headers --css-ref=${makeinfo-css} -o ${output} ${input}
+    DEPENDS ${input}
+    COMMENT "Generating html (multipages) doc"
+    VERBATIM
+    )
+  add_custom_target (html-multipages DEPENDS ${output})
+
+
   # Provide a "pdf" target that builds pdf doc (not installed, not part of "all").
   find_program (TEXIDVI NAMES texi2dvi)
   if (TEXIDVI)

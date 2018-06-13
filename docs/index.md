@@ -22,7 +22,7 @@ For compiling the programs yourself, from the downloaded sources or from the git
 
 Several example data sets are distributed along with the source code of the package.
 PDF and HTML documentation can be generated from the source distribution using `make pdf` and `make html`, respectively.
-The HTML reference manual is also browsable [here](maffilter.html).
+The HTML reference manual is also browsable as [here](maffilter.html) (single page) and [here](Manual/index.html) (multi-pages).
 Questions can be posted on the dedicated forum: [here](https://groups.google.com/forum/?hl=en#!forum/maffilter).
 
 ## References
