@@ -20,7 +20,10 @@ For compiling the programs yourself, from the downloaded sources or from the git
 
 ## How do I use it? 
 
-Several example data sets are distributed along with the source code of the package. A reference manual is also available [here](http://biopp.univ-montp2.fr/manual/html/maffilter/), or can be downloaded as [PDF](http://biopp.univ-montp2.fr/manual/pdf/maffilter/). Questions can be asked on the dedicated forum: [here](https://groups.google.com/forum/?hl=en#!forum/maffilter).
+Several example data sets are distributed along with the source code of the package.
+PDF and HTML documentation can be generated from the source distribution using `make pdf` and `make html`, respectively.
+The HTML reference manual is also browsable [here](maffilter.html).
+Questions can be posted on the dedicated forum: [here](https://groups.google.com/forum/?hl=en#!forum/maffilter).
 
 ## References
 
