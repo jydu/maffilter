@@ -13,7 +13,7 @@ find_program (MAKEINFO NAMES makeinfo texi2any DOC "makeinfo doc generator progr
 if (NOT MAKEINFO)
   message (STATUS "makeinfo program not found: 'info' and 'html' target disabled (builds info/html doc)")
 else (NOT MAKEINFO)
-  message (STATUS "Found makeinfo as '${MAKEINFO}': 'info' and 'html' target enabled (builds info/html doc)")
+  message (STATUS "Found ${MAKEINFO}: 'info' and 'html' target enabled (builds info/html doc)")
 
   set (input ${CMAKE_CURRENT_SOURCE_DIR}/maffilter.texi)
 

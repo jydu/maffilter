@@ -35,7 +35,7 @@ BuildRequires: libbpp-phyl-omics3 = 2.4.1
 BuildRequires: libbpp-phyl-omics-devel = 2.4.1
 BuildRequires: zlib-devel
 
-%if 0%{?fedora} >= 22
+%if 0%{?fedora} >= 22 || 0%{?mageia} <= 6
 Requires: bzip2-libs
 BuildRequires: bzip2-devel
 %else

@@ -23,7 +23,7 @@ IF(NOT BUILD_STATIC)
       FORCE)
 ENDIF()
 IF(BUILD_STATIC)
-  MESSAGE("-- Static linkage requested.")
+  MESSAGE(STATUS "Static linkage requested.")
   SET (CMAKE_CXX_FLAGS "-static -static-libgcc ${CMAKE_CXX_FLAGS}")
 ENDIF()
 
