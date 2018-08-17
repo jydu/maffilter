@@ -25,7 +25,7 @@ BuildRequires: groff
 BuildRequires: texinfo >= 4.0.0
 BuildRequires: libbpp-core4 = 2.4.1
 BuildRequires: libbpp-core-devel = 2.4.1
-BuildRequires: libbpp-seq12 = 2.4.0
+BuildRequires: libbpp-seq12 = 2.4.1
 BuildRequires: libbpp-seq-devel = 2.4.1
 BuildRequires: libbpp-phyl12 = 2.4.1
 BuildRequires: libbpp-phyl-devel = 2.4.1
