@@ -3,7 +3,7 @@
 URL: http://bioweb.me/maffilter
 
 Name: maffilter
-Version: 1.3.0
+Version: 1.3.1
 Release: 1%{?dist}
 License: CECILL-2.0
 Vendor: The Bio++ Project
@@ -11,11 +11,11 @@ Source: %{name}-%{version}.tar.gz
 Summary: The Multiple Alignment Format file processor
 Group: Productivity/Scientific/Other
 
-Requires: libbpp-phyl-omics3 = 2.4.0
-Requires: libbpp-seq-omics3 = 2.4.0
-Requires: libbpp-phyl12 = 2.4.0
-Requires: libbpp-seq12 = 2.4.0
-Requires: libbpp-core4 = 2.4.0
+Requires: libbpp-phyl-omics3 = 2.4.1
+Requires: libbpp-seq-omics3 = 2.4.1
+Requires: libbpp-phyl12 = 2.4.1
+Requires: libbpp-seq12 = 2.4.1
+Requires: libbpp-core4 = 2.4.1
 Requires: zlib
 
 BuildRoot: %{_builddir}/%{name}-root
@@ -23,16 +23,16 @@ BuildRequires: cmake >= 2.8.11
 BuildRequires: gcc-c++ >= 4.7.0
 BuildRequires: groff
 BuildRequires: texinfo >= 4.0.0
-BuildRequires: libbpp-core4 = 2.4.0
-BuildRequires: libbpp-core-devel = 2.4.0
+BuildRequires: libbpp-core4 = 2.4.1
+BuildRequires: libbpp-core-devel = 2.4.1
 BuildRequires: libbpp-seq12 = 2.4.0
-BuildRequires: libbpp-seq-devel = 2.4.0
-BuildRequires: libbpp-phyl12 = 2.4.0
-BuildRequires: libbpp-phyl-devel = 2.4.0
-BuildRequires: libbpp-seq-omics3 = 2.4.0
-BuildRequires: libbpp-seq-omics-devel = 2.4.0
-BuildRequires: libbpp-phyl-omics3 = 2.4.0
-BuildRequires: libbpp-phyl-omics-devel = 2.4.0
+BuildRequires: libbpp-seq-devel = 2.4.1
+BuildRequires: libbpp-phyl12 = 2.4.1
+BuildRequires: libbpp-phyl-devel = 2.4.1
+BuildRequires: libbpp-seq-omics3 = 2.4.1
+BuildRequires: libbpp-seq-omics-devel = 2.4.1
+BuildRequires: libbpp-phyl-omics3 = 2.4.1
+BuildRequires: libbpp-phyl-omics-devel = 2.4.1
 BuildRequires: zlib-devel
 
 %if 0%{?fedora} >= 22
@@ -107,6 +107,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/info/maffilter.info.%{zipext}
 
 %changelog
+* Fri Aug 17 2018 Julien Dutheil <dutheil@evolbio.mpg.de> 1.3.1-1
+- Compatibility update with bio++ 2.4.1
+- Documentation update
 * Wed Mar 14 2018 Julien Dutheil <dutheil@evolbio.mpg.de> 1.3.0-1
 * Fri Jun 09 2017 Julien Dutheil <dutheil@evolbio.mpg.de> 1.2.1-1
 * Wed May 24 2017 Julien Dutheil <dutheil@evolbio.mpg.de> 1.2.0-1

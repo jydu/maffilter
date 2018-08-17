@@ -133,7 +133,7 @@ void help()
   (*ApplicationTools::message << "      ... param=option_file").endLine();
   (*ApplicationTools::message).endLine();
   (*ApplicationTools::message << "  Refer to the MafFilter Manual for a list of available options.").endLine();
-  (*ApplicationTools::message << "  Online version: http://biopp.univ-montp2.fr/manual/html/maffilter/").endLine();
+  (*ApplicationTools::message << "  Online version: https://jydu.github.io/maffilter/Manual/index.html").endLine();
   (*ApplicationTools::message << "  Or type 'info maffilter' in a terminal.").endLine();
   (*ApplicationTools::message << "__________________________________________________________________________").endLine();
 }
@@ -141,9 +141,9 @@ void help()
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
-  cout << "*                  MAF Filter, version 1.3.0                     *" << endl;
+  cout << "*                  MAF Filter, version 1.3.1                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 09/03/18 *" << endl;
+  cout << "*                                           Last Modif. 18/08/18 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
