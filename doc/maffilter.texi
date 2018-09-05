@@ -108,6 +108,7 @@ Phylogenetics
 
 * DistanceEstimation::
 * DistanceBasedPhylogeny::
+* ExternalTreeBuilding::
 * NewOutgroup::
 * DropSpecies::
 * TreeFilter::
@@ -1736,6 +1737,7 @@ Transform parameters to remove constraints (can improve optimization, but is usu
 @menu
 * DistanceEstimation::
 * DistanceBasedPhylogeny::
+* ExternalTreeBuilding::
 * NewOutgroup::
 * DropSpecies::
 * TreeFilter::
@@ -1851,7 +1853,7 @@ The estimated pairwise distance matrix.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node DistanceBasedPhylogeny, NewOutgroup, DistanceEstimation, Phylogenetics
+@node DistanceBasedPhylogeny, ExternalTreeBuilding, DistanceEstimation, Phylogenetics
 @subsubsection Hierarchical clustering based on distances
 
 Performs hierarchical clustering from a previously computed distance matrix.
@@ -1898,7 +1900,64 @@ The resulting tree.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node NewOutgroup, DropSpecies, DistanceBasedPhylogeny, Phylogenetics
+@node ExternalTreeBuilding, NewOutgroup, DistanceBasedPhylogeny, Phylogenetics
+@subsubsection Call an external phylogenetic software to reconstruct tree
+
+Call an external phylogenetics software to build the tree and import it.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    ExternalTreeBuilding(                   \
+        input.file=tmp.phy,                 \
+        input.format=Phylip(                \
+          order=sequential, type=extended), \
+        output.file=tmp.phy_phyml_tree,     \
+        output.format=Newick,               \
+        property_name=PhyML,                \
+        call=runPhyml.sh,                   \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+@item input.file=@{none|@{path@}@}
+A file path where to write the block alignment, to be used as input by the external program.
+
+@item input.format=@{string@}
+Alignment format for input file.
+
+@item output.file=@{none|@{path@}@}
+A file path where to read the generated tree.
+
+@item output.format=@{string@}
+The tree format.
+
+@item call=@{string@}
+The system call to run the external program.
+
+@item property_name=@{string@}
+The label to use when importing tree as meta-data.
+
+@end table
+
+
+@heading Extra-data:
+
+@table @command
+@item (user-specified tag name)
+The reconstructed tree.
+@end table
+
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node NewOutgroup, DropSpecies, ExternalTreeBuilding, Phylogenetics
 @subsubsection Root trees
 
 The @command{NewOutgroup} filter takes an input tree and (re)root it according to a given species name.
