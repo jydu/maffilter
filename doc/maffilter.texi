@@ -2238,7 +2238,8 @@ maf.filter=                                 \
         compression=gzip,                   \
         reference=Ref,                      \
         genotypes=(sample1,sample2),        \
-        all=no),                            \
+        all=no,                             \
+        diploids=no),                       \
     [...]
 @end example
 @end cartouche
@@ -2262,6 +2263,10 @@ Please note that species should be unique in each block, otherwise an error will
 
 @item all=@{boolean@}
 If set to 'yes', also output non-variable positions in the VCF file.
+
+@item diploids=@{boolean@}
+If set to 'yes', 'artificial' homozygous diploids are written instead of haploid genotypes.
+This option might be useful for downstream software that do not properly accomodate haploid data.
 
 @end table
 

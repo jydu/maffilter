@@ -1533,7 +1533,10 @@ int main(int args, char** argv)
         bool outputAll = ApplicationTools::getBooleanParameter("all", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output non-variable positions", outputAll);
 
-        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll);
+        bool outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
+
+        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll, outputDiploids);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
