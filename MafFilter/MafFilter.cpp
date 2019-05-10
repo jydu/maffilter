@@ -1857,13 +1857,17 @@ int main(int args, char** argv)
         string programOutputFormat = ApplicationTools::getStringParameter("output.format", cmdArgs, "Fasta");
         BppOAlignmentReaderFormat bppoReader(1);
         IAlignment* alnReader(bppoReader.read(programOutputFormat));
+        
+        bool hotTest = ApplicationTools::getBooleanParameter("hot", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Compute HoT score", hotTest);
 
         string command = ApplicationTools::getStringParameter("call", cmdArgs, "echo \"TODO: implement wrapper!\"");
         
         ApplicationTools::displayResult("-- External call", name);
         ApplicationTools::displayResult("   Command", command);
 
-        SystemCallMafIterator* iterator = new SystemCallMafIterator(currentIterator, alnWriter, programInputFile, alnReader, programOutputFile, command);
+        SystemCallMafIterator* iterator = new SystemCallMafIterator(currentIterator, 
+            alnWriter, programInputFile, alnReader, programOutputFile, command, hotTest);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);

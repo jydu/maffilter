@@ -63,6 +63,7 @@ class SystemCallMafIterator:
     std::unique_ptr<IAlignment> alnReader_;
     std::string outputFile_;
     std::string call_;
+    bool hotTest_;
 
   public:
     SystemCallMafIterator(
@@ -71,13 +72,15 @@ class SystemCallMafIterator:
         const std::string& inputFile,
         IAlignment* alnReader,
         const std::string& outputFile,
-        const std::string& callCmd) :
+        const std::string& callCmd,
+        bool hotTest = false) :
       AbstractFilterMafIterator(iterator),
           alnWriter_(alnWriter),
           inputFile_(inputFile),
           alnReader_(alnReader),
           outputFile_(outputFile),
-          call_(callCmd)
+          call_(callCmd),
+          hotTest_(hotTest)
     {}
 
   private:
@@ -87,7 +90,8 @@ class SystemCallMafIterator:
       inputFile_(iterator.inputFile_),
       alnReader_(),
       outputFile_(iterator.outputFile_),
-      call_(iterator.call_)
+      call_(iterator.call_),
+      hotTest_(iterator.hotTest_)
     {}
     
     SystemCallMafIterator& operator=(const SystemCallMafIterator& iterator)
@@ -95,6 +99,7 @@ class SystemCallMafIterator:
       inputFile_ = iterator.inputFile_;
       outputFile_ = iterator.outputFile_;
       call_ = iterator.call_;
+      hotTest_ = iterator.hotTest_;
       return *this;
     }
 
