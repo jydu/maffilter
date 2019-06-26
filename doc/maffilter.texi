@@ -1713,6 +1713,9 @@ A list of parameters which should not be optimized, but fixed to their initila v
 @item reestimate_brlen=@{boolean@}
 Tell if the branches of the tree should be reestimated for each block together with other model parameters.
 
+@item global_clock=@{boolean@}
+Tell if a global molecular clock should be enforced (only the heights of the nodes are optimized).
+
 @item max_freq_gaps=@{float@}
 The maximum proportion of gaps for a site to be included in the analysis.
 
