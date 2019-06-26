@@ -100,6 +100,7 @@ Arguments:
 * FourSpeciesSitePatternCounts::
 * SiteFrequencySpectrum::
 * PolymorphismStatistics::
+* FstStatistics::
 * DiversityStatistics::
 * CountClusters::
 * ModelFit::
@@ -1265,6 +1266,7 @@ Here is the list of currently available statistical functions:
 * FourSpeciesSitePatternCounts::
 * SiteFrequencySpectrum::
 * PolymorphismStatistics::
+* FstStatistics::
 * DiversityStatistics::
 * CountClusters::
 * ModelFit::
@@ -1505,7 +1507,7 @@ If empty, the folded frequency spectrum will be returned (1/5 and 4/5 frequences
 
 @end table
 
-@node PolymorphismStatistics, DiversityStatistics, SiteFrequencySpectrum, Descriptive
+@node PolymorphismStatistics, FstStatistics, SiteFrequencySpectrum, Descriptive
 @subsubsection Polymorphism statistics
 Compute various statistics describing sequence polymorphism. Two aligned sets of ``species'' are compared, and the number of polymorphic / fixed sites are computed: 
 @table @command
@@ -1545,12 +1547,11 @@ maf.filter=                                 \
     SequenceStatistics(                     \
         statistics=(\                       \
             [...],                                                    
-            SiteFrequencySpectrum(          \
-                bounds=(-0.5, 0.5, 1.5),    \
-                ingroup=(pop1, pop2, pop3), \
-                outgroup=species2,          \
+            PolymorphismStatistics(         \
+                species1=(A,B,C,D),         \
+                species2=(E,F,G,H,I)        \
             [...]),                         \
-        ref_species=pop1,                   \
+        ref_species=A,                      \
         file=data.statistics.csv),          \
     [...]
 @end example
@@ -1566,7 +1567,42 @@ A list of species for set 2.
 
 Note that the ``species'' terminology relates to multispecies alignments, as originally implemented in the MultiZ aligner. These statistics will however be most relevant when the aligned sequences are actually from individuals from the same population / species. The term ``species'' is here therefore to be taken in terchnical terms (a sequence id in the alignment), and not biological. 
 
-@node DiversityStatistics, CountClusters, PolymorphismStatistics, Descriptive
+@node FstStatistics, DiversityStatistics, PolymorphismStatistics, Descriptive
+@subsubsection Fst statistics
+Compute population divergence statistics (Fst), between two aligned sets of individuals. Hudson's 1992  estimator is used.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],                                   
+    SequenceStatistics(                     \
+        statistics=(\                       \
+            [...],                                                    
+            FstStatistics(                  \
+                species1=(A,B,C,D),         \
+                species2=(E,F,G,H,I)        \
+            [...]),                         \
+        ref_species=A,                      \
+        file=data.statistics.csv),          \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+@table @command
+@item species1=@{list@}
+A list of species for set 1.
+@item species2=@{list@}
+A list of species for set 2.
+@end table
+
+Note that the ``species'' terminology relates to multispecies alignments, as originally implemented in the MultiZ aligner. These statistics will however be most relevant when the aligned sequences are actually from individuals from the same population / species. The term ``species'' is here therefore to be taken in terchnical terms (a sequence id in the alignment), and not biological. 
+
+
+
+@node DiversityStatistics, CountClusters, FstStatistics, Descriptive
 @subsubsection Sequence diversity statistics
 @command{DiversityStatistics} computes sequence diversity statistics, including:
 @itemize
