@@ -65,6 +65,7 @@ endif (CMAKE_INSTALL_PREFIX)
 
 include (GNUInstallDirs)
 find_package (bpp-phyl-omics 3.0.0 REQUIRED)
+find_package (bpp-popgen 8.0.0 REQUIRED)
 
 #Find boost libraries
 SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})

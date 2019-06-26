@@ -2,7 +2,7 @@
 # Author: Julien Dutheil
 # Created: 27/04/2010
 
-ADD_EXECUTABLE(maffilter MafFilter.cpp OutputAsFeaturesMafIterator.cpp SystemCallMafIterator.cpp TreeBuildingSystemCallMafIterator.cpp)
+ADD_EXECUTABLE(maffilter MafFilter.cpp OutputAsFeaturesMafIterator.cpp SystemCallMafIterator.cpp TreeBuildingSystemCallMafIterator.cpp PopGenMafStatistics.cpp)
 set (maffilter-targets
   maffilter
   )
