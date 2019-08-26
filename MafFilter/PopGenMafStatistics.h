@@ -54,16 +54,18 @@ namespace bpp {
  * Hudson's 92 estimator is used.
  */
 class FstMafStatistics:
-  public AbstractMafStatisticsSimple
+  public AbstractMafStatistics
 {
+
   private:
     std::vector<std::string> pop1_, pop2_;
+    unsigned int nbPermutations_;
+    bool verbose_;
 
   public:
-    FstMafStatistics(std::vector<std::string>& pop1, std::vector<std::string>& pop2):
-      AbstractMafStatisticsSimple("Fst"), pop1_(pop1), pop2_(pop2)
-    {
-    }
+    FstMafStatistics(std::vector<std::string>& pop1, std::vector<std::string>& pop2, unsigned int nbPermutations = 0, bool verbose = true):
+      AbstractMafStatistics(), pop1_(pop1), pop2_(pop2), nbPermutations_(nbPermutations), verbose_(verbose)
+    {}
 
     virtual ~FstMafStatistics() {}
 
@@ -71,6 +73,7 @@ class FstMafStatistics:
     std::string getShortName() const { return "FstStatistics"; }
     std::string getFullName() const { return "Fst statistics."; }
     void compute(const MafBlock& block);
+    std::vector<std::string> getSupportedTags() const;
 };
 
 

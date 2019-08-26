@@ -1582,7 +1582,9 @@ maf.filter=                                 \
             [...],                                                    
             FstStatistics(                  \
                 species1=(A,B,C,D),         \
-                species2=(E,F,G,H,I)        \
+                species2=(E,F,G,H,I),       \
+                permutation_number = 1000,  \
+                verbose = yes               \
             [...]),                         \
         ref_species=A,                      \
         file=data.statistics.csv),          \
@@ -1596,6 +1598,10 @@ maf.filter=                                 \
 A list of species for set 1.
 @item species2=@{list@}
 A list of species for set 2.
+@item permutation_number=@{int>=0@}
+The number of permutations to perform to compute p-values. If set to 0 (the default), no p-value computation is performed.
+@item verbose=@{boolean@}
+Tell if a progress bar should be shown in case permutations are to be performed.
 @end table
 
 Note that the ``species'' terminology relates to multispecies alignments, as originally implemented in the MultiZ aligner. These statistics will however be most relevant when the aligned sequences are actually from individuals from the same population / species. The term ``species'' is here therefore to be taken in terchnical terms (a sequence id in the alignment), and not biological. 
