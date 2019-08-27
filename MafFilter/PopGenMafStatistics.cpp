@@ -36,8 +36,10 @@ vector<string> FstMafStatistics::FstMafStatistics::getSupportedTags() const
 {
   vector<string> tags;
   tags.push_back("Fst");
-  if (nbPermutations_ > 0)
+  if (minNbPermutations_ > 0 || maxNbPermutations_ > 0) {
     tags.push_back("Fst.p-value");
+    tags.push_back("Fst.nb-perm");
+  }
   return tags;
 }
 
@@ -54,11 +56,13 @@ void FstMafStatistics::compute(const MafBlock& block)
   }
   double fst = SequenceStatistics::fstHudson92(poly, 1, 2);
   result_.setValue("Fst", fst);
-  if (nbPermutations_ > 0) {
+  if (minNbPermutations_ > 0 || maxNbPermutations_ > 0) {
     double nbTests = 0;
-    for (size_t i = 0; i < nbPermutations_; ++i) {
+    double nbPermutations = 0;
+    while(nbPermutations < minNbPermutations_ || (nbTests == 0 && nbPermutations < maxNbPermutations_)) {
+      ++nbPermutations;
       if (verbose_) {
-        ApplicationTools::displayGauge(i, nbPermutations_, '=', "Compute Fst on permutations");
+        ApplicationTools::displayGauge(nbPermutations, maxNbPermutations_, '=', "Compute Fst on permutations");
       }
       vector<string> individuals = pop1_;
       individuals.insert(individuals.end(), pop2_.begin(), pop2_.end());
@@ -72,8 +76,9 @@ void FstMafStatistics::compute(const MafBlock& block)
       double randFst = SequenceStatistics::fstHudson92(poly, 1, 2);
       if (randFst >= fst) ++nbTests;
     }
-    double pv = (nbTests + 1) / static_cast<double>(nbPermutations_ + 1);
+    double pv = (nbTests + 1) / static_cast<double>(nbPermutations);
     result_.setValue("Fst.p-value", pv);
+    result_.setValue("Fst.nb-perm", nbPermutations);
   }
 }
 

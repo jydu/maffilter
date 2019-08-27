@@ -59,12 +59,19 @@ class FstMafStatistics:
 
   private:
     std::vector<std::string> pop1_, pop2_;
-    unsigned int nbPermutations_;
+    unsigned int minNbPermutations_;
+    unsigned int maxNbPermutations_;
     bool verbose_;
 
   public:
-    FstMafStatistics(std::vector<std::string>& pop1, std::vector<std::string>& pop2, unsigned int nbPermutations = 0, bool verbose = true):
-      AbstractMafStatistics(), pop1_(pop1), pop2_(pop2), nbPermutations_(nbPermutations), verbose_(verbose)
+    FstMafStatistics(std::vector<std::string>& pop1, std::vector<std::string>& pop2,
+        unsigned int minNbPermutations = 0,
+        unsigned int maxNbPermutations = 0,
+        bool verbose = true):
+      AbstractMafStatistics(), pop1_(pop1), pop2_(pop2),
+      minNbPermutations_(minNbPermutations),
+      maxNbPermutations_(maxNbPermutations),
+      verbose_(verbose)
     {}
 
     virtual ~FstMafStatistics() {}

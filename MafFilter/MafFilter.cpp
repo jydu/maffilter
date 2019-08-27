@@ -957,11 +957,14 @@ int main(int args, char** argv)
           } else if (statName == "FstStatistics") {
             vector<string> species1 = ApplicationTools::getVectorParameter<string>("species1", statArgs, ',', "", "", false, true);
             vector<string> species2 = ApplicationTools::getVectorParameter<string>("species2", statArgs, ',', "", "", false, true);
-            unsigned int nbPermutations = ApplicationTools::getParameter<unsigned int>("permutation_number", statArgs, 0, "", false, true);
+            unsigned int minNbPermutations = ApplicationTools::getParameter<unsigned int>("min_permutation_number", statArgs, 0, "", false, true);
+            unsigned int maxNbPermutations = ApplicationTools::getParameter<unsigned int>("max_permutation_number", statArgs, 0, "", false, true);
             bool verboseStat = ApplicationTools::getBooleanParameter("verbose", statArgs, true, "", false, true);
-            if (nbPermutations > 0)
-              ApplicationTools::displayResult("-- Nb. permutations", nbPermutations);
-            mafStat = new FstMafStatistics(species1, species2, nbPermutations, verboseStat); 
+            if (minNbPermutations > 0 || maxNbPermutations > 0) {
+              ApplicationTools::displayResult("-- Min. Nb. permutations", minNbPermutations);
+              ApplicationTools::displayResult("-- Max. Nb. permutations", maxNbPermutations);
+            }
+            mafStat = new FstMafStatistics(species1, species2, minNbPermutations, maxNbPermutations, verboseStat); 
           } else if (statName == "CountClusters") {
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);

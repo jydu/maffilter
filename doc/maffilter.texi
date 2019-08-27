@@ -1598,8 +1598,11 @@ maf.filter=                                 \
 A list of species for set 1.
 @item species2=@{list@}
 A list of species for set 2.
-@item permutation_number=@{int>=0@}
-The number of permutations to perform to compute p-values. If set to 0 (the default), no p-value computation is performed.
+@item min_permutation_number=@{int>=0@}
+The minimum number of permutations to perform to compute p-values. If set to 0 (the default), no p-value computation is performed.
+@item max_permutation_number=@{int>=0@}
+If no permutation led to a Fst value at least as high as the observed one, continue until at least one such value is reach, or the specified maximum number of permutations is reached.
+This allows the minimum possible p-value to be 1/(max_permutation_number + 1) instead of 1/(min_permutation_number + 1), without spending to much time on cases where the Fst is not significant.
 @item verbose=@{boolean@}
 Tell if a progress bar should be shown in case permutations are to be performed.
 @end table
