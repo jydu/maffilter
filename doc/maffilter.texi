@@ -2308,6 +2308,7 @@ A species name corresponding to the sequence to use as reference.
 A list of species for which genotypes informations should be written. If not, void, a 'FORMAT' column will be added to the output, as well as oneextra column per species to genotype.
 If the species is not present in this particular, or if a N or Gap is present, a dot ('.') will be written in the column.
 Please note that species should be unique in each block, otherwise an error will occur.
+Species can be further combined in groups as @{(sample1,sample2),(sample3,sample4)@} to create (phased) polyploids.
 
 @item all=@{boolean@}
 If set to 'yes', also output non-variable positions in the VCF file.
@@ -2315,6 +2316,7 @@ If set to 'yes', also output non-variable positions in the VCF file.
 @item diploids=@{boolean@}
 If set to 'yes', 'artificial' homozygous diploids are written instead of haploid genotypes.
 This option might be useful for downstream software that do not properly accomodate haploid data.
+It only work when species are not already grouped in polyploids.
 
 @end table
 

@@ -1523,16 +1523,26 @@ int main(int args, char** argv)
           throw Exception("A reference sequence should be provided for filter 'VcfOutput'.");
         ApplicationTools::displayResult("-- Reference sequence", reference);
         
-        vector<string> genotypes = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
+        vector< vector<string> >genotypes = ApplicationTools::getVectorOfVectorsParameter<string>("genotypes", cmdArgs, ',', "");
         for (size_t i = 0; i < genotypes.size(); ++i) {
-          ApplicationTools::displayResult("-- Adding genotype info for", genotypes[i]);
+          string tmp = "";
+          for (auto g : genotypes[i]) {
+            if (tmp != "") tmp += "|";
+            tmp += g;
+          }
+          ApplicationTools::displayResult("-- Adding genotype info for", tmp);
         }
         
         bool outputAll = ApplicationTools::getBooleanParameter("all", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output non-variable positions", outputAll);
 
-        bool outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
-        ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
+        bool outputDiploids;
+        if (genotypes.size() > 0 && genotypes[0].size() == 1) {
+          outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
+          ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
+        } else {
+          outputDiploids = false;
+        }
 
         VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll, outputDiploids);
 
