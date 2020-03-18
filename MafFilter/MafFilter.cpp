@@ -1216,7 +1216,7 @@ int main(int args, char** argv)
           ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
           
           BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true, 1);
-          unique_ptr<SubstitutionModel> model(modelReader.read(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
+          unique_ptr<SubstitutionModel> model(modelReader.readSubstitutionModel(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
           BppORateDistributionFormat rdistReader(true);
           unique_ptr<DiscreteDistribution> rdist(rdistReader.read(rdistDesc, true)); 
           unique_ptr<DistanceEstimation> distEst(new DistanceEstimation(model.release(), rdist.release()));
