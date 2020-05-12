@@ -973,7 +973,7 @@ int main(int args, char** argv)
           } else if (statName == "ModelFit") {
             unique_ptr<SubstitutionModel> model;
             unique_ptr<SubstitutionModelSet> modelSet;
-            unique_ptr<FrequenciesSet> rootFreqs;
+            unique_ptr<FrequencySet> rootFreqs;
 
             string modelType = ApplicationTools::getStringParameter("model_type", statArgs, "Homogeneous");
             if (modelType == "Homogeneous") {
@@ -981,7 +981,7 @@ int main(int args, char** argv)
               ApplicationTools::displayResult("-- Substitution model", model->getName());
               string freqDescription = ApplicationTools::getStringParameter("root_freq", statArgs, "None");
               if (freqDescription != "None") {
-                rootFreqs.reset(PhylogeneticsApplicationTools::getFrequenciesSet(
+                rootFreqs.reset(PhylogeneticsApplicationTools::getFrequencySet(
                     &AlphabetTools::DNA_ALPHABET, 0, freqDescription, 0, vector<double>(), 0));
                 ApplicationTools::displayResult("-- Root frequencies", rootFreqs->getName());
               }
@@ -1022,11 +1022,11 @@ int main(int args, char** argv)
                 mafStat = new MaximumLikelihoodModelFitMafStatistics(modelSet.release(), rDist.release(), tree.release(), parametersOutput,
                     fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
               } else {
-                mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs.release()), tree.release(), parametersOutput,
+                mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequencySet*>(rootFreqs.release()), tree.release(), parametersOutput,
                     fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
               }
             } else {
-              mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequenciesSet*>(rootFreqs.release()), treeProperty, parametersOutput,
+              mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequencySet*>(rootFreqs.release()), treeProperty, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             }
           } else {
@@ -1218,7 +1218,7 @@ int main(int args, char** argv)
           BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true, 1);
           unique_ptr<SubstitutionModel> model(modelReader.readSubstitutionModel(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
           BppORateDistributionFormat rdistReader(true);
-          unique_ptr<DiscreteDistribution> rdist(rdistReader.read(rdistDesc, true)); 
+          unique_ptr<DiscreteDistribution> rdist(rdistReader.readDiscreteDistribution(rdistDesc, true)); 
           unique_ptr<DistanceEstimation> distEst(new DistanceEstimation(model.release(), rdist.release()));
           
           OutputStream* profiler =
@@ -1300,7 +1300,7 @@ int main(int args, char** argv)
         string programOutputFile = ApplicationTools::getAFilePath("output.file", cmdArgs, true, false);
         string programOutputFormat = ApplicationTools::getStringParameter("output.format", cmdArgs, "Newick");
         BppOTreeReaderFormat bppoReader(1);
-        ITree* treeReader(bppoReader.read(programOutputFormat));
+        ITree* treeReader(bppoReader.readITree(programOutputFormat));
 
         string propertyName = ApplicationTools::getStringParameter("property_name", cmdArgs, "ExternalTree");
         ApplicationTools::displayResult("-- Registering block-wise trees to", propertyName);

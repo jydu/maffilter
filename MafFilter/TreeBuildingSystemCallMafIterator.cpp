@@ -54,7 +54,7 @@ MafBlock* TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
   if (rc) throw Exception("TreeBuildingSystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
 
   //Then read the generated tree and assign sequence names:
-  unique_ptr< Tree > result(treeReader_->read(outputFile_));
+  unique_ptr< Tree > result(treeReader_->readTree(outputFile_));
   unique_ptr< TreeTemplate<Node> > tree(new TreeTemplate<Node>(*result));
   vector<Node*> leaves = tree->getLeaves();
   for (size_t i = 0; i < leaves.size(); ++i) {
