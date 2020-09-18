@@ -24,7 +24,7 @@ IF(NOT BUILD_STATIC)
 ENDIF()
 IF(BUILD_STATIC)
   MESSAGE(STATUS "Static linkage requested.")
-  SET (CMAKE_CXX_FLAGS "-static -static-libgcc ${CMAKE_CXX_FLAGS}")
+  SET (CMAKE_CXX_FLAGS "-static -static-libstdc++ -static-libgcc ${CMAKE_CXX_FLAGS}")
 ENDIF()
 
 # Check compression program
@@ -77,7 +77,7 @@ IF(Boost_FOUND)
   SET(LIBS ${LIBS} ${Boost_LIBRARIES})
   MESSAGE("-- Boost libraries found here:")
   MESSAGE("   includes: ${Boost_INCLUDE_DIRS}")
-  MESSAGE("   dynamic libraries: ${Boost_LIBRARIES}")
+  MESSAGE("   libraries: ${Boost_LIBRARIES}")
 ENDIF()
 
 
