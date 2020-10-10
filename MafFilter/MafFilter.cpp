@@ -1004,7 +1004,7 @@ int main(int args, char** argv)
               else
                 parameters = model->getParameters();
               parameters.addParameters(rDist->getParameters());
-              fixedParameters = parameters.subList(fixedParametersNames);
+              fixedParameters = parameters.createSubList(fixedParametersNames);
             }
             bool reestimateBrLen = ApplicationTools::getBooleanParameter("reestimate_brlen", statArgs, true);
             ApplicationTools::displayBooleanResult("-- Reestimate branch lengths", reestimateBrLen);
