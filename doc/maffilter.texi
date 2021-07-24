@@ -649,7 +649,6 @@ The name of the chromosome/contig/scaffold to be filtered.
 @subsection Split alignment blocks into smaller parts
 
 The @command{WindowSplit} filter subdivides blocks into smaller ones of a regular size, typically for window-based analyses.
-It is possible to generate overlapping windows.
 
 @heading Synopsis:
 
