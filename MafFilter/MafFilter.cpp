@@ -1139,6 +1139,9 @@ int main(int args, char** argv)
         }
         unsigned int preferredSize = ApplicationTools::getParameter<unsigned int>("preferred_size", cmdArgs, 0);
         ApplicationTools::displayResult("-- Preferred size", preferredSize);
+        unsigned int windowStep = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, preferredSize);
+        ApplicationTools::displayResult("-- Window step", windowStep);
+
         string splitOptionStr = ApplicationTools::getStringParameter("align", cmdArgs, "center");
         short splitOption;
         if (splitOptionStr == "ragged_left")
@@ -1155,7 +1158,7 @@ int main(int args, char** argv)
         if (splitOptionStr == "adjust")
           ApplicationTools::displayBooleanResult("-- Keep small blocks", keepSmallBlocks);
 
-        WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, splitOption, keepSmallBlocks);
+        WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, windowStep, splitOption, keepSmallBlocks);
         iterator->setLogStream(log);
         currentIterator = iterator;
         its.push_back(iterator);

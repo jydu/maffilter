@@ -649,6 +649,7 @@ The name of the chromosome/contig/scaffold to be filtered.
 @subsection Split alignment blocks into smaller parts
 
 The @command{WindowSplit} filter subdivides blocks into smaller ones of a regular size, typically for window-based analyses.
+Overlapping windows are partially supported (see options below).
 
 @heading Synopsis:
 
@@ -658,6 +659,7 @@ maf.filter=                                 \
     [...],
     WindowSplit(                            \
         preferred_size=1000,                \
+        window_step=1000,                   \
         align=center,                       \
         keep_small_blocks=no),              \
     [...]
@@ -670,6 +672,9 @@ maf.filter=                                 \
 
 @item preferred_size=@{int>0@}
 The preferred size for the output windows.
+
+@item window_step=@{int>0@}
+The nuùber of nucleotides by which the window should be slid. Only supported with "align=ragged_left". Default value is equal to "preferred_size", that is, non-overlapping windows.
 
 @item align=@{ragged_left|ragged_right|center|adjust@}
 Specifies how to align windows on the block:
