@@ -1527,8 +1527,10 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reference sequence", reference);
         
         vector< vector<string> >genotypes = ApplicationTools::getVectorOfVectorsParameter<string>("genotypes", cmdArgs, ',', "");
+	bool allSingles = true;
         for (size_t i = 0; i < genotypes.size(); ++i) {
           string tmp = "";
+	  if (genotypes[i].size() > 1) allSingles = false;
           for (auto g : genotypes[i]) {
             if (tmp != "") tmp += "|";
             tmp += g;
@@ -1539,15 +1541,16 @@ int main(int args, char** argv)
         bool outputAll = ApplicationTools::getBooleanParameter("all", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output non-variable positions", outputAll);
 
-        bool outputDiploids;
-        if (genotypes.size() > 0 && genotypes[0].size() == 1) {
-          outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
+        VcfOutputMafIterator* iterator;
+        if (genotypes.size() > 0 && allSingles) {
+	  vector<string> simpleGenotypes;
+	  for (auto g : genotypes) simpleGenotypes.push_back(g[0]);
+          double outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
           ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
+          iterator = new VcfOutputMafIterator(currentIterator, out, reference, simpleGenotypes, outputAll, outputDiploids);
         } else {
-          outputDiploids = false;
+          iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll);
         }
-
-        VcfOutputMafIterator* iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll, outputDiploids);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
