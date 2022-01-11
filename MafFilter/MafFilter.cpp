@@ -971,39 +971,17 @@ int main(int args, char** argv)
             mafStat = new CountClustersMafStatistics(treeProperty, threshold);
             statDesc = " / " + treeProperty;
           } else if (statName == "ModelFit") {
-            unique_ptr<SubstitutionModel> model;
-            unique_ptr<SubstitutionModelSet> modelSet;
-            unique_ptr<FrequencySet> rootFreqs;
+	    shared_ptr<AutonomousSubstitutionProcess> process;
+	    vector<PhyloTree*> vTree;
+	    vTree.push_back(nullptr);
+            process.reset(PhylogeneticsApplicationTools::getSubstitutionProcess(&AlphabetTools::DNA_ALPHABET, 0, nullptr, vTree, statArgs, "", true, true, 1));
 
-            string modelType = ApplicationTools::getStringParameter("model_type", statArgs, "Homogeneous");
-            if (modelType == "Homogeneous") {
-              model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, true));
-              ApplicationTools::displayResult("-- Substitution model", model->getName());
-              string freqDescription = ApplicationTools::getStringParameter("root_freq", statArgs, "None");
-              if (freqDescription != "None") {
-                rootFreqs.reset(PhylogeneticsApplicationTools::getFrequencySet(
-                    &AlphabetTools::DNA_ALPHABET, 0, freqDescription, 0, vector<double>(), 0));
-                ApplicationTools::displayResult("-- Root frequencies", rootFreqs->getName());
-              }
-            } else if (modelType == "Nonhomogeneous") {
-              modelSet.reset(PhylogeneticsApplicationTools::getSubstitutionModelSet(&AlphabetTools::DNA_ALPHABET, 0, 0, statArgs, "", true, true));
-            } else {
-              throw Exception("Unknown model type: " + modelType + ". Must be either Homogeneous or Nonhomogeneous.");
-            }
-            
-            unique_ptr<DiscreteDistribution> rDist(PhylogeneticsApplicationTools::getRateDistribution(statArgs, "", true, false));
-            ApplicationTools::displayResult("-- Rate distribution", rDist->getName());
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             vector<string> parametersOutput = ApplicationTools::getVectorParameter<string>("parameters_output", statArgs, ',', "");
             vector<string> fixedParametersNames = ApplicationTools::getVectorParameter<string>("fixed_parameters", statArgs, ',', "");
             ParameterList fixedParameters;
             if (fixedParametersNames.size() > 0) {
-              ParameterList parameters;
-              if (modelSet.get())
-                parameters = modelSet->getParameters();
-              else
-                parameters = model->getParameters();
-              parameters.addParameters(rDist->getParameters());
+              ParameterList parameters = process->getParameters();
               fixedParameters = parameters.createSubList(fixedParametersNames);
             }
             bool reestimateBrLen = ApplicationTools::getBooleanParameter("reestimate_brlen", statArgs, true);
@@ -1017,16 +995,11 @@ int main(int args, char** argv)
             bool reparametrize = ApplicationTools::getBooleanParameter("reparametrize", statArgs, false);
             ApplicationTools::displayBooleanResult("-- Reparametrization", reparametrize);
             if (treeProperty == "none") {
-              unique_ptr<Tree> tree(PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false)); 
-              if (modelSet.get()) {
-                mafStat = new MaximumLikelihoodModelFitMafStatistics(modelSet.release(), rDist.release(), tree.release(), parametersOutput,
-                    fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
-              } else {
-                mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequencySet*>(rootFreqs.release()), tree.release(), parametersOutput,
-                    fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
-              }
+              unique_ptr< TreeTemplate<Node> > tree(dynamic_cast< TreeTemplate<Node> *>(PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false))); 
+              mafStat = new MaximumLikelihoodModelFitMafStatistics(process, tree.release(), parametersOutput,
+                  fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             } else {
-              mafStat = new MaximumLikelihoodModelFitMafStatistics(model.release(), rDist.release(), dynamic_cast<NucleotideFrequencySet*>(rootFreqs.release()), treeProperty, parametersOutput,
+              mafStat = new MaximumLikelihoodModelFitMafStatistics(process, treeProperty, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             }
           } else {
@@ -1197,7 +1170,6 @@ int main(int args, char** argv)
           currentIterator = iterator;
           its.push_back(iterator);
         } else if (distMethod == "ml") {
-          string modelDesc = ApplicationTools::getStringParameter("model", cmdArgs, "JC()");
           string rdistDesc = ApplicationTools::getStringParameter("rate", cmdArgs, "Constant()");
           string paramOpt  = ApplicationTools::getStringParameter("parameter_estimation", cmdArgs, "initial");
           if (paramOpt == "initial") {
@@ -1218,11 +1190,13 @@ int main(int args, char** argv)
           bool extendedSeqNames = ApplicationTools::getBooleanParameter("extended_names", cmdArgs, true);
           ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
           
-          BppOSubstitutionModelFormat modelReader(BppOSubstitutionModelFormat::DNA, false, false, true, true, 1);
-          unique_ptr<SubstitutionModel> model(modelReader.readSubstitutionModel(&AlphabetTools::DNA_ALPHABET, modelDesc, 0, true));
           BppORateDistributionFormat rdistReader(true);
-          unique_ptr<DiscreteDistribution> rdist(rdistReader.readDiscreteDistribution(rdistDesc, true)); 
-          unique_ptr<DistanceEstimation> distEst(new DistanceEstimation(model.release(), rdist.release()));
+          auto rdist = shared_ptr<DiscreteDistribution>(rdistReader.readDiscreteDistribution(rdistDesc, true));
+	  map<string, string> unparsedparams;
+	  auto model = shared_ptr<BranchModel>(PhylogeneticsApplicationTools::getBranchModel(&AlphabetTools::DNA_ALPHABET, nullptr, nullptr, cmdArgs, unparsedparams));
+
+ 
+          unique_ptr<DistanceEstimation> distEst(new DistanceEstimation(model, rdist));
           
           OutputStream* profiler =
             (prPath == "none") ? 0 :

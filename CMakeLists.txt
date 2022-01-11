@@ -64,8 +64,8 @@ if (CMAKE_INSTALL_PREFIX)
 endif (CMAKE_INSTALL_PREFIX)
 
 include (GNUInstallDirs)
-find_package (bpp-phyl-omics 3.0.0 REQUIRED)
-find_package (bpp-popgen 8.0.0 REQUIRED)
+find_package (bpp-phyl-omics3 1.0.0 REQUIRED)
+find_package (bpp-popgen3 1.0.0 REQUIRED)
 
 #Find boost libraries
 SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
@@ -80,6 +80,7 @@ IF(Boost_FOUND)
   MESSAGE("   libraries: ${Boost_LIBRARIES}")
 ENDIF()
 
+find_package (Eigen3 3.3 REQUIRED PATHS /usr/lib NO_MODULE)
 
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)

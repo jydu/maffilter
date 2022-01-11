@@ -26,7 +26,7 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 #include "TreeBuildingSystemCallMafIterator.h"
 
 // From bpp-phyl
-#include "Bpp/Phyl/TreeTemplate.h"
+#include "Bpp/Phyl/Tree/TreeTemplate.h"
 
 using namespace bpp;
 using namespace std;
