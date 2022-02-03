@@ -68,6 +68,7 @@ Extracting data
 * OrderFilter::
 * ExtractFeature::
 * SelectChr::
+* RenameChr::
 * WindowSplit::
 
 Cleaning alignment blocks
@@ -347,6 +348,7 @@ The next section present all available filters and their corresponding arguments
 * OrderFilter::
 * ExtractFeature::
 * SelectChr::
+* RenameChr::
 * WindowSplit::
 @end menu
 
@@ -613,10 +615,10 @@ If yes, features will be extracted ``as is''. Otherwise, the invert-complement s
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node SelectChr, WindowSplit, ExtractFeature, Extracting
+@node SelectChr, RenameChr, ExtractFeature, Extracting
 @subsection Extract blocks for a given chromosome/contig/scaffold
 
-The @command{SelectChr} filter keeps only block from a given chromosome (or contig or scaffold...) for a given reference species.
+The @command{SelectChr} filter keeps only block from a given set of chromosomes (or contig or scaffold...) for a given reference species.
 
 @heading Synopsis:
 
@@ -626,7 +628,7 @@ maf.filter=                                 \
     [...],
     SelectChr(                              \
         ref_species=species1,               \
-        chromosome=chr01),                  \
+        chromosome=(chr01,chr02)),          \
     [...]
 @end example
 @end cartouche
@@ -638,14 +640,44 @@ maf.filter=                                 \
 @item ref_species=@{string@}
 The species name for which chromosomes should be extracted.
 
-@item chromosome=@{string@}
-The name of the chromosome/contig/scaffold to be filtered.
+@item chromosome=@{(list)@}
+The name of the chromosome(s)/contig(s)/scaffold(s) to be filtered, separated by comas.
 
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node WindowSplit,  , SelectChr, Extracting
+@node RenameChr, WindowSplit, SelectChr, Extracting
+@subsection Rename chromosomes in each block
+
+The @command{RenameChr} update the chromosome names according to a translation table.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    RenameChr(                              \
+        translation_file=chr_tln.csv,       \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+
+@item translation_file=@{path@}
+File path toward a translation file. The translation file should contain two columns, separated by comas, and no header.
+The first column contains the current chromosome names, and the second column contains the new name.
+Chromosome not mentionned in the table will be left untranslated. Additional columns in the table will be ignored.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node WindowSplit,  , RenameChr, Extracting
 @subsection Split alignment blocks into smaller parts
 
 The @command{WindowSplit} filter subdivides blocks into smaller ones of a regular size, typically for window-based analyses.
@@ -2388,6 +2420,7 @@ maf.filter=                                 \
         compression=none,                   \
         reference=Ref,                      \
         genotypes=(sample1,sample2),        \
+        recode_chr=no,                      \
         map3=no)                            \
     [...]
 @end example
@@ -2412,6 +2445,10 @@ A species name corresponding to the sequence to use as reference.
 A list of species for which segregating sites should be called. It might not contain the reference species, which is then only used for coordinates output.
 Blocks with do not contain all species will not be called, as well as block not contianing the reference species. Note that the alignment has to be projected
 againt the reference species, otherwise an error will be reported.
+
+@item recode_chr=@{boolean@}
+Tell if chromosome names should be converted to numbers. If yes, chromosomes will be numbered according to their order of occurrence in the MAF file.
+More control over chromosome names can be achieved using the @command{RenameChr} filter. 
 
 @item map3=@{boolean@}
 Tell if genetic distance column should be ommitted in the Map file. The resulting file should be sued together with the --map3 option in PLINK.

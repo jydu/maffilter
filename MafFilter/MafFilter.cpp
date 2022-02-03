@@ -47,6 +47,7 @@ using namespace boost::iostreams;
 #include <Bpp/App/BppApplication.h>
 #include <Bpp/Text/KeyvalTools.h>
 #include <Bpp/Text/StringTokenizer.h>
+#include <Bpp/Numeric/DataTable.h>
 
 // From bpp-seq:
 #include <Bpp/Seq/SequenceWithQuality.h>
@@ -64,6 +65,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf/BlockLengthMafIterator.h>
 #include <Bpp/Seq/Io/Maf/BlockSizeMafIterator.h>
 #include <Bpp/Seq/Io/Maf/ChromosomeMafIterator.h>
+#include <Bpp/Seq/Io/Maf/ChromosomeRenamingMafIterator.h>
 #include <Bpp/Seq/Io/Maf/ConcatenateMafIterator.h>
 #include <Bpp/Seq/Io/Maf/RemoveEmptySequencesMafIterator.h>
 #include <Bpp/Seq/Io/Maf/DuplicateFilterMafIterator.h>
@@ -771,14 +773,41 @@ int main(int args, char** argv)
         }
         string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
-        string chr = ApplicationTools::getStringParameter("chromosome", cmdArgs, "");
-        ApplicationTools::displayResult("-- Chromosome", chr);
-        ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chr);
+        vector<string> chr = ApplicationTools::getVectorParameter<string>("chromosome", cmdArgs, ',', "", "", false, true);
+	set<string> chrSet(chr.begin(), chr.end());
+	string text = "";
+	if (chrSet.size() > 0) {
+	  text = " +" + TextTools::toString(chrSet.size()) + " chromosomes.";
+	}
+        ApplicationTools::displayResult("-- Chromosome(s):", chr[0] + text);
+        ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chrSet);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
         its.push_back(iterator);
       }
+
+
+      // +---------------------+
+      // | Chromosome renaming |
+      // +---------------------+
+      else if (cmdName == "RenameChr") {
+        string tlnFile = ApplicationTools::getAFilePath("translation_file", cmdArgs, true, true);
+	ifstream tlnInput(tlnFile, ios::in);
+	unique_ptr<DataTable> tlnTable(DataTable::read(tlnInput, ",", false));
+        ApplicationTools::displayResult("-- Chromosome translation table in:", tlnFile);
+	map<string, string> tln;
+	for (size_t i = 0; i < tlnTable->getNumberOfRows(); ++i) {
+	  tln[(*tlnTable)(i, 0)] = (*tlnTable)(i, 1);
+          ApplicationTools::displayResult("-- Translating " + (*tlnTable)(i, 0) + " to", (*tlnTable)(i, 1));
+	}
+        ChromosomeRenamingMafIterator* iterator = new ChromosomeRenamingMafIterator(currentIterator, tln);
+        iterator->setLogStream(log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+        its.push_back(iterator);
+      }
+
 
 
       // +---------------------+

@@ -98,7 +98,7 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
   //Convert and assign the realigned sequences:
   vector<MafSequence*> tmp;
   for (size_t i = 0; i < currentBlock_->getNumberOfSequences(); ++i) {
-    MafSequence* mseq = currentBlock_->getSequence(i).cloneMeta();
+    MafSequence* mseq = currentBlock_->getMafSequence(i).cloneMeta();
     //NB: we discard any putative score associated to this sequence.
     string name = "seq" + TextTools::toString(i);
     mseq->setContent(dynamic_cast<const BasicSequence&>(result->getSequence(name)).toString()); //NB shall we use getContent here?

@@ -42,7 +42,7 @@ MafBlock* TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
   map<string, string> nameIndex;
   for (size_t i = 0; i < names.size(); ++i) {
     names[i] = "seq" + TextTools::toString(i);
-    nameIndex[names[i]] = currentBlock_->getSequence(i).getName();
+    nameIndex[names[i]] = currentBlock_->getMafSequence(i).getName();
   }
   aln->setSequencesNames(names);
   

@@ -24,8 +24,10 @@ maf.filter=\
         SiteStatistics(species=(Hsap,Ptro,Ggor,Ppyg)),                   \
         BlockCounts(),                                                   \
         ModelFit(                                                        \
-          model=HKY85(kappa=1, theta=0.5, theta1=0.5, theta2=0.5),       \
-          root_freq=Full,                                                \
+          model1=HKY85(kappa=1, theta=0.5, theta1=0.5, theta2=0.5),       \
+          nonhomogeneous=yes,                                            \
+          nonhomogeneous.stationarity=no,                                \
+          nonhomogeneous.root_freq=Full,                                 \
           rate_distribution=Gamma(n=4, alpha=0.5),                       \
           tree=BioNJ,                                                    \
           parameters_output=(HKY85.theta_1,HKY85.theta1_1,HKY85.theta2_1,\
