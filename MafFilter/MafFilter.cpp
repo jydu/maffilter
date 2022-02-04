@@ -1642,11 +1642,17 @@ int main(int args, char** argv)
         bool recodeChr = ApplicationTools::getBooleanParameter("recode_chr", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Recode chromosomes", recodeChr);
 
+        bool tabSeparator = ApplicationTools::getBooleanParameter("tab_separator", cmdArgs, true);
+        ApplicationTools::displayResult("-- Column separator", tabSeparator ? "<tab>" : "<space>");
+
+        bool phenotype = ApplicationTools::getIntParameter("penotype", cmdArgs, 0);
+        ApplicationTools::displayResult("-- Phenotype column", phenotype);
+
         vector<string> species = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
         if (species.size() < 2)
           throw Exception("PlinkOutput: at least two genomes are necessary to call SNPs.");
 
-        PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3, recodeChr);
+        PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3, recodeChr, phenotype, tabSeparator ? '\t' : ' ');
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);

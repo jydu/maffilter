@@ -2421,7 +2421,9 @@ maf.filter=                                 \
         reference=Ref,                      \
         genotypes=(sample1,sample2),        \
         recode_chr=no,                      \
-        map3=no)                            \
+        map3=no,                            \
+        phenotype=0,                        \
+        tab_separator=yes)                  \
     [...]
 @end example
 @end cartouche
@@ -2453,6 +2455,12 @@ More control over chromosome names can be achieved using the @command{RenameChr}
 @item map3=@{boolean@}
 Tell if genetic distance column should be ommitted in the Map file. The resulting file should be sued together with the --map3 option in PLINK.
 If set to no, then a 0 genetic distance is written.
+
+@item phenotype=@{int@}
+The phenotype value, 6th column in the PED file. Usually 0 or -9 (missing value)
+
+@item tab_separator=@{boolean@}
+Tell if tabulations should be used to separate columns and genotypes in the PED file. If set to 'no', then spaces will be used.
 
 @end table
 
