@@ -1645,7 +1645,7 @@ int main(int args, char** argv)
         bool tabSeparator = ApplicationTools::getBooleanParameter("tab_separator", cmdArgs, true);
         ApplicationTools::displayResult("-- Column separator", tabSeparator ? "<tab>" : "<space>");
 
-        bool phenotype = ApplicationTools::getIntParameter("penotype", cmdArgs, 0);
+        int phenotype = ApplicationTools::getIntParameter("penotype", cmdArgs, 0);
         ApplicationTools::displayResult("-- Phenotype column", phenotype);
 
         vector<string> species = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
