@@ -2421,6 +2421,7 @@ maf.filter=                                 \
         reference=Ref,                      \
         genotypes=(sample1,sample2),        \
         recode_chr=no,                      \
+        make_diploids=no,                   \
         map3=no,                            \
         phenotype=0,                        \
         tab_separator=yes)                  \
@@ -2451,6 +2452,9 @@ againt the reference species, otherwise an error will be reported.
 @item recode_chr=@{boolean@}
 Tell if chromosome names should be converted to numbers. If yes, chromosomes will be numbered according to their order of occurrence in the MAF file.
 More control over chromosome names can be achieved using the @command{RenameChr} filter. 
+
+@item make_diploids=@{boolean@}
+Tell if genomes should be combined into diploids. Genomes will be combined in the order given by the genotypes argument, genome1 with genome2, genome3 with genome4, etc. In case of an odd number of genomes, the last one will be ignored. If the option is set to 'no', each genome will be output as a homozygous diploid.
 
 @item map3=@{boolean@}
 Tell if genetic distance column should be ommitted in the Map file. The resulting file should be sued together with the --map3 option in PLINK.
