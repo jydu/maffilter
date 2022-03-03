@@ -104,9 +104,9 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
     mseq->setContent(dynamic_cast<const BasicSequence&>(result->getSequence(name)).toString()); //NB shall we use getContent here?
     tmp.push_back(mseq);
   }
-  currentBlock_->getAlignment().clear();
+  currentBlock_->clear();
   for (size_t i = 0; i < tmp.size(); ++i) {
-    currentBlock_->getAlignment().addSequence(*tmp[i], false);
+    currentBlock_->addMafSequence(*tmp[i]);
     delete tmp[i];
   }
 
