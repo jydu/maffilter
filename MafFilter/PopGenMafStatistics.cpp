@@ -47,7 +47,7 @@ void FstMafStatistics::compute(const MafBlock& block)
 {
   PolymorphismSequenceContainer poly(block.getAlignment());
   vector<string> names = block.getSpeciesList();
-  poly.setSequencesNames(names); //Have to be unique, no paralog allowed, otherwise exception thrown.
+  poly.setSequenceNames(names); //Have to be unique, no paralog allowed, otherwise exception thrown.
   for (auto it = pop1_.begin(); it != pop1_.end(); ++it) {
     poly.setGroupId(*it, 1);
   }

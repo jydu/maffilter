@@ -42,7 +42,7 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
   for (size_t i = 0; i < names.size(); ++i) {
     names[i] = "seq" + TextTools::toString(i);
   }
-  aln->setSequencesNames(names);
+  aln->setSequenceNames(names);
   
   //Write sequences to file:
   alnWriter_->writeAlignment(inputFile_, *aln, true);
@@ -74,7 +74,7 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
 
     //Re-reverse the results, and make sure they are in the same order as the non-inverted results:
     unique_ptr<SiteContainer> result2rev(new VectorSiteContainer(result->getAlphabet()));
-    vector<string> seqNames = result->getSequencesNames();
+    vector<string> seqNames = result->getSequenceNames();
     for (const auto i: seqNames) {
       unique_ptr<Sequence> invSeq(SequenceTools::getInvert(result2->getSequence(i)));
       result2rev->addSequence(*invSeq, false);

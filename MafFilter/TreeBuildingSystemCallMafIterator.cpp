@@ -44,7 +44,7 @@ MafBlock* TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
     names[i] = "seq" + TextTools::toString(i);
     nameIndex[names[i]] = currentBlock_->getMafSequence(i).getName();
   }
-  aln->setSequencesNames(names);
+  aln->setSequenceNames(names);
   
   //Write sequences to file:
   alnWriter_->writeAlignment(inputFile_, *aln, true);
