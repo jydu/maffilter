@@ -26,7 +26,7 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef _OUTPUTASFEATURESMAFITERATOR_H_
 #define _OUTPUTASFEATURESMAFITERATOR_H_
 
-#include <Bpp/Seq/Io/Maf/MafIterator.h>
+#include <Bpp/Seq/Io/Maf/AbstractMafIterator.h>
 
 //From the STL:
 #include <iostream>
@@ -42,12 +42,17 @@ class OutputAsFeaturesMafIterator:
   public AbstractFilterMafIterator
 {
   private:
-    std::ostream* output_;
+    std::shared_ptr<std::ostream> output_;
     std::string species_;
 
   public:
-    OutputAsFeaturesMafIterator(MafIterator* iterator, std::ostream* out, const std::string& species) :
-      AbstractFilterMafIterator(iterator), output_(out), species_(species)
+    OutputAsFeaturesMafIterator(
+	std::shared_ptr<MafIteratorInterface> iterator,
+       	std::shared_ptr<std::ostream> out,
+       	const std::string& species) :
+      AbstractFilterMafIterator(iterator),
+      output_(out),
+      species_(species)
     {
       if (output_)
         writeHeader(*output_);
@@ -69,11 +74,11 @@ class OutputAsFeaturesMafIterator:
 
 
   public:
-    MafBlock* analyseCurrentBlock_() {
+    std::unique_ptr<MafBlock> analyseCurrentBlock_() {
       currentBlock_ = iterator_->nextBlock();
       if (output_ && currentBlock_)
         writeBlock(*output_, *currentBlock_);
-      return currentBlock_;
+      return move(currentBlock_);
     }
 
   private:

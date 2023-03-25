@@ -31,20 +31,20 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 using namespace bpp;
 using namespace std;
 
-MafBlock* TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
+unique_ptr<MafBlock> TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
   currentBlock_ = iterator_->nextBlock();
   if (! currentBlock_)
-    return 0;
-  unique_ptr<AlignedSequenceContainer> aln(currentBlock_->getAlignment().clone());
+    return nullptr;
+  auto aln = currentBlock_->getAlignment();
   
   //We translate sequence names to avoid compatibility issues
   vector<string> names(aln->getNumberOfSequences());
   map<string, string> nameIndex;
   for (size_t i = 0; i < names.size(); ++i) {
     names[i] = "seq" + TextTools::toString(i);
-    nameIndex[names[i]] = currentBlock_->getMafSequence(i).getName();
+    nameIndex[names[i]] = currentBlock_->sequence(i).getName();
   }
-  aln->setSequenceNames(names);
+  aln->setSequenceNames(names, true);
   
   //Write sequences to file:
   alnWriter_->writeAlignment(inputFile_, *aln, true);
@@ -54,15 +54,15 @@ MafBlock* TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
   if (rc) throw Exception("TreeBuildingSystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
 
   //Then read the generated tree and assign sequence names:
-  unique_ptr< Tree > result(treeReader_->readTree(outputFile_));
-  unique_ptr< TreeTemplate<Node> > tree(new TreeTemplate<Node>(*result));
+  unique_ptr<Tree> result(treeReader_->readTree(outputFile_));
+  unique_ptr<TreeTemplate<Node>> tree(new TreeTemplate<Node>(*result));
   vector<Node*> leaves = tree->getLeaves();
   for (size_t i = 0; i < leaves.size(); ++i) {
     leaves[i]->setName(nameIndex[leaves[i]->getName()]);
   }
-  currentBlock_->setProperty(propertyName_, tree.release());
+  currentBlock_->setProperty(propertyName_, move(tree));
 
   //Done:
-  return currentBlock_;
+  return move(currentBlock_);
 }
 

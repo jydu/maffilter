@@ -42,8 +42,8 @@ void OutputAsFeaturesMafIterator::writeHeader(std::ostream& out) const
 
 void OutputAsFeaturesMafIterator::writeBlock(std::ostream& out, const MafBlock& block) const
 {
-  if (block.hasMafSequenceForSpecies(species_)) {
-    vector<const MafSequence*> sequences = block.getMafSequencesForSpecies(species_);
+  if (block.hasSequenceForSpecies(species_)) {
+    vector<const MafSequence*> sequences = block.getSequencesForSpecies(species_);
     for (size_t i = 0; i < sequences.size(); ++i) {
       out << sequences[i]->getChromosome() << "\t" << sequences[i]->start() << "\t" << sequences[i]->stop() << "\t" << sequences[i]->getStrand() << "\t" << sequences[i]->getSrcSize() << endl; 
     }

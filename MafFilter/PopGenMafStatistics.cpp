@@ -28,6 +28,7 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 #include <Bpp/PopGen/PolymorphismSequenceContainer.h>
 #include <Bpp/PopGen/SequenceStatistics.h>
 #include <Bpp/App/ApplicationTools.h>
+#include <Bpp/Numeric/Random/RandomTools.h>
 
 using namespace std;
 using namespace bpp;
@@ -45,9 +46,10 @@ vector<string> FstMafStatistics::FstMafStatistics::getSupportedTags() const
 
 void FstMafStatistics::compute(const MafBlock& block)
 {
-  PolymorphismSequenceContainer poly(block.getAlignment());
+  auto aln = block.getAlignment();
+  PolymorphismSequenceContainer poly(*aln);
   vector<string> names = block.getSpeciesList();
-  poly.setSequenceNames(names); //Have to be unique, no paralog allowed, otherwise exception thrown.
+  poly.setSequenceNames(names, true); //Have to be unique, no paralog allowed, otherwise exception thrown.
   for (auto it = pop1_.begin(); it != pop1_.end(); ++it) {
     poly.setGroupId(*it, 1);
   }
@@ -66,7 +68,7 @@ void FstMafStatistics::compute(const MafBlock& block)
       }
       vector<string> individuals = pop1_;
       individuals.insert(individuals.end(), pop2_.begin(), pop2_.end());
-      random_shuffle(individuals.begin(), individuals.end());
+      shuffle(individuals.begin(), individuals.end(), RandomTools::DEFAULT_GENERATOR);
       for (size_t j = 0; j < pop1_.size(); ++j) {
         poly.setGroupId(individuals[j], 1);
       }

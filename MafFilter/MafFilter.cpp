@@ -98,7 +98,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf/MafStatistics.h>
 #include <Bpp/Seq/Io/Maf/CountClustersMafStatistics.h>
 #include <Bpp/Seq/Io/Maf/MaximumLikelihoodModelFitMafStatistics.h>
-#include <Bpp/Seq/Io/Maf/IterationListener.h>
+#include <Bpp/Seq/Io/Maf/AbstractIterationListener.h>
 #include <Bpp/Seq/Feature/Gff/GffFeatureReader.h>
 #include <Bpp/Seq/Feature/Gtf/GtfFeatureReader.h>
 #include <Bpp/Seq/Feature/Bed/BedGraphFeatureReader.h>
@@ -152,25 +152,25 @@ int main(int args, char** argv)
     string compress = ApplicationTools::getStringParameter("input.file.compression", maffilter.getParams(), "none");
     string inputDot = ApplicationTools::getStringParameter("input.dots", maffilter.getParams(), "error", "", true, false);
 
-    filtering_istream stream;
+    auto stream = make_shared<filtering_istream> ();
     if (compress == "none") {
     } else if (compress == "gzip") {
-      stream.push(gzip_decompressor());
+      stream->push(gzip_decompressor());
     } else if (compress == "zip") {
-      stream.push(zlib_decompressor());
+      stream->push(zlib_decompressor());
     } else if (compress == "bzip2") {
-      stream.push(bzip2_decompressor());
+      stream->push(bzip2_decompressor());
     } else
       throw Exception("Bad input incompression format: " + compress);
-    stream.push(file_source(inputFile));
+    stream->push(file_source(inputFile));
     
     string logFile = ApplicationTools::getAFilePath("output.log", maffilter.getParams(), false, false);
-    shared_ptr<StlOutputStream> log;
+    shared_ptr<StlOutputStream> log = nullptr;
     if (logFile != "none") {
-      log.reset(new StlOutputStream(new ofstream(logFile.c_str(), ios::out)));
+      log = make_shared<StlOutputStream>(make_unique<ofstream>(logFile.c_str(), ios::out));
     }
 
-    MafIterator* currentIterator;
+    shared_ptr<MafIteratorInterface> currentIterator;
 
     if (inputFormat == "Maf") {
       short dotOption = MafParser::DOT_ERROR;
@@ -185,14 +185,14 @@ int main(int args, char** argv)
       bool checkSize = ApplicationTools::getBooleanParameter("input.check_sequence_size", maffilter.getParams(), true, "", true, false);
       if (!checkSize)
         ApplicationTools::displayBooleanResult("Check size of sequences", false);
-      currentIterator = new MafParser(&stream, true, checkSize, dotOption);
+      currentIterator = make_shared<MafParser>(stream, true, checkSize, dotOption);
     } else {
       if (inputDot == "as_gaps") throw Exception("'dot_as_gaps' option only available with Maf input.");
       BppOSequenceStreamReaderFormat reader;
-      ISequenceStream* seqStream = reader.read(inputFormat);
+      auto seqStream = reader.read(inputFormat);
       map<string, string> cmdArgs(reader.getUnparsedArguments());
       bool zeroBased = ApplicationTools::getBooleanParameter("zero_based", cmdArgs, true);
-      currentIterator = new SequenceStreamToMafIterator(seqStream, &stream, false, zeroBased);
+      currentIterator = make_shared<SequenceStreamToMafIterator>(move(seqStream), stream, false, zeroBased);
     }
     
     ApplicationTools::displayResult("Reading file", inputFile + " as " + inputFormat + (compress == "none" ? "" : "(" + compress + ")"));
@@ -200,9 +200,7 @@ int main(int args, char** argv)
 
 
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);
-    vector<MafIterator*> its;
-    its.push_back(currentIterator);
-    vector<filtering_ostream*> ostreams;
+    vector<shared_ptr<filtering_ostream>> ostreams;
     for (size_t a = 0; a < actions.size(); a++) {
       string cmdName;
       map<string, string> cmdArgs;
@@ -229,11 +227,10 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Subset'.");
-        SequenceFilterMafIterator* iterator = new SequenceFilterMafIterator(currentIterator, species, strict, keep, rmdupl);
+        auto iterator = make_shared<SequenceFilterMafIterator>(currentIterator, species, strict, keep, rmdupl);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -248,11 +245,10 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'SelectOrphans'.");
-        OrphanSequenceFilterMafIterator* iterator = new OrphanSequenceFilterMafIterator(currentIterator, species, strict, rmdupl);
+        auto iterator = make_shared<OrphanSequenceFilterMafIterator>(currentIterator, species, strict, rmdupl);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -271,7 +267,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Maximum distance allowed", distMax);
         bool renameChimeras = ApplicationTools::getBooleanParameter("rename_chimeric_chromosomes", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Rename chimeric chromosomes", renameChimeras);
-        BlockMergerMafIterator* iterator = new BlockMergerMafIterator(currentIterator, species, distMax, renameChimeras);
+        auto iterator = make_shared<BlockMergerMafIterator>(currentIterator, species, distMax, renameChimeras);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         if (cmdArgs.find("ignore.chr") != cmdArgs.end()) {
@@ -288,7 +284,6 @@ int main(int args, char** argv)
           }
         }
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -301,11 +296,10 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Minimum final block size", minimumSize);
         if (ref != "")
           ApplicationTools::displayResult("-- Reference species", ref);
-        ConcatenateMafIterator* iterator = new ConcatenateMafIterator(currentIterator, minimumSize, ref);
+        auto iterator = make_shared<ConcatenateMafIterator>(currentIterator, minimumSize, ref);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -316,11 +310,10 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'XFullGap'.");
-        FullGapFilterMafIterator* iterator = new FullGapFilterMafIterator(currentIterator, species);
+        auto iterator = make_shared<FullGapFilterMafIterator>(currentIterator, species);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -340,7 +333,7 @@ int main(int args, char** argv)
           rm = ApplicationTools::getDoubleParameter("max.gap", cmdArgs, 0);
         else
           gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
-        double em       = ApplicationTools::getParameter<double>("max.ent", cmdArgs, 0); //Default means no entropy threshold
+        double em         = ApplicationTools::getParameter<double>("max.ent", cmdArgs, 0); //Default means no entropy threshold
         bool missingAsGap = ApplicationTools::getParameter<bool>("missing_as_gap", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
@@ -353,18 +346,17 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Max. total entropy in Window", em);
         ApplicationTools::displayBooleanResult("-- Missing sequence replaced by gaps", missingAsGap);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
-        AlignmentFilterMafIterator* iterator;
+        shared_ptr<AlignmentFilterMafIterator> iterator;
         if (relative)
-          iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, rm, em, !trash, missingAsGap);
+          iterator = make_shared<AlignmentFilterMafIterator>(currentIterator, species, ws, st, rm, em, !trash, missingAsGap);
         else
-          iterator = new AlignmentFilterMafIterator(currentIterator, species, ws, st, gm, em, !trash, missingAsGap);
+          iterator = make_shared<AlignmentFilterMafIterator>(currentIterator, species, ws, st, gm, em, !trash, missingAsGap);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         if (!trash) {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -379,16 +371,13 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
-          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
           //Add an output iterator:
-          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          auto outIt = make_shared<OutputMafIterator>(trashIt, out);
           //And then synchronize the two iterators:
-          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
           //Returns last iterator:
           currentIterator = syncIt;
-          //Keep track of all those iterators:
-          its.push_back(trashIt);
-          its.push_back(syncIt);
         } else {
           //We only get the remaining blocks here:
           currentIterator = iterator;
@@ -425,18 +414,17 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Max. gap positions allowed", pm);
         ApplicationTools::displayBooleanResult("-- Missing sequence replaced by gaps", missingAsGap);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
-        AlignmentFilter2MafIterator* iterator;
+        shared_ptr<AlignmentFilter2MafIterator> iterator;
         if (relative)
-          iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, rm, pm, !trash, missingAsGap);
+          iterator = make_shared<AlignmentFilter2MafIterator>(currentIterator, species, ws, st, rm, pm, !trash, missingAsGap);
         else
-          iterator = new AlignmentFilter2MafIterator(currentIterator, species, ws, st, gm, pm, !trash, missingAsGap);
+          iterator = make_shared<AlignmentFilter2MafIterator>(currentIterator, species, ws, st, gm, pm, !trash, missingAsGap);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         if (!trash) {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -451,16 +439,13 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
-          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
           //Add an output iterator:
-          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          auto outIt = make_shared<OutputMafIterator>(trashIt, out);
           //And then synchronize the two iterators:
-          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
           //Returns last iterator:
           currentIterator = syncIt;
-          //Keep track of all those iterators:
-          its.push_back(trashIt);
-          its.push_back(syncIt);
         } else {
           //We only get the remaining blocks here:
           currentIterator = iterator;
@@ -493,14 +478,13 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         if (ignoreGaps && missingAsGap)
           throw Exception("Error, incompatible options ingore_gaps=yes and missing_as_gap=yes.");
-        EntropyFilterMafIterator* iterator = new EntropyFilterMafIterator(currentIterator, species, ws, st, em, pm, !trash, missingAsGap, ignoreGaps);
+        auto iterator = make_shared<EntropyFilterMafIterator>(currentIterator, species, ws, st, em, pm, !trash, missingAsGap, ignoreGaps);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         if (!trash) {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -515,16 +499,13 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
-          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
           //Add an output iterator:
-          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          auto outIt = make_shared<OutputMafIterator>(trashIt, out);
           //And then synchronize the two iterators:
-          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
           //Returns last iterator:
           currentIterator = syncIt;
-          //Keep track of all those iterators:
-          its.push_back(trashIt);
-          its.push_back(syncIt);
         } else {
           //We only get the remaining blocks here:
           currentIterator = iterator;
@@ -549,14 +530,13 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Window step", st);
         ApplicationTools::displayResult("-- Max. masked sites allowed in Window", mm);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
-        MaskFilterMafIterator* iterator = new MaskFilterMafIterator(currentIterator, species, ws, st, mm, !trash);
+        auto iterator = make_shared<MaskFilterMafIterator>(currentIterator, species, ws, st, mm, !trash);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         if (!trash) {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -571,16 +551,13 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
-          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
           //Add an output iterator:
-          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          auto outIt = make_shared<OutputMafIterator>(trashIt, out);
           //And then synchronize the two iterators:
-          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
           //Returns last iterator:
           currentIterator = syncIt;
-          //Keep track of all those iterators:
-          its.push_back(trashIt);
-          its.push_back(syncIt);
         } else {
           //We only get the remaining blocks here:
           currentIterator = iterator;
@@ -604,14 +581,13 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Window step", st);
         ApplicationTools::displayResult("-- Min. average quality allowed in Window", mq);
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
-        QualityFilterMafIterator* iterator = new QualityFilterMafIterator(currentIterator, species, ws, st, mq, !trash);
+        auto iterator = make_shared<QualityFilterMafIterator>(currentIterator, species, ws, st, mq, !trash);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         if (!trash) {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -626,16 +602,13 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
-          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
           //Add an output iterator:
-          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          auto outIt = make_shared<OutputMafIterator>(trashIt, out);
           //And then synchronize the two iterators:
-          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
           //Returns last iterator:
           currentIterator = syncIt;
-          //Keep track of all those iterators:
-          its.push_back(trashIt);
-          its.push_back(syncIt);
         } else {
           //We only get the remaining blocks here:
           currentIterator = iterator;
@@ -690,14 +663,13 @@ int main(int args, char** argv)
           }
         }
         ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
-        FeatureFilterMafIterator* iterator = new FeatureFilterMafIterator(currentIterator, refSpecies, featuresSet, !trash);
+        auto iterator = make_shared<FeatureFilterMafIterator>(currentIterator, refSpecies, featuresSet, !trash);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         if (!trash) {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -712,16 +684,13 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
-          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
           //Add an output iterator:
-          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          auto outIt = make_shared<OutputMafIterator>(trashIt, out);
           //And then synchronize the two iterators:
-          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
           //Returns last iterator:
           currentIterator = syncIt;
-          //Keep track of all those iterators:
-          its.push_back(trashIt);
-          its.push_back(syncIt);
         } else {
           //We only get the remaining blocks here:
           currentIterator = iterator;
@@ -739,10 +708,9 @@ int main(int args, char** argv)
         }
         unsigned int minLength = ApplicationTools::getParameter<unsigned int>("min_length", cmdArgs, 0);
         ApplicationTools::displayResult("-- Minimum block length required", minLength);
-        BlockLengthMafIterator* iterator = new BlockLengthMafIterator(currentIterator, minLength);
+        auto iterator = make_shared<BlockLengthMafIterator>(currentIterator, minLength);
         iterator->setLogStream(log);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -757,10 +725,9 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Minimum block size required", minSize);
         if (minSize > 5)
           ApplicationTools::displayWarning("!! Warning, in previous version of maffilter BlockLength was named BlockSize... Check!");
-        BlockSizeMafIterator* iterator = new BlockSizeMafIterator(currentIterator, minSize);
+        auto iterator = make_shared<BlockSizeMafIterator>(currentIterator, minSize);
         iterator->setLogStream(log);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -780,11 +747,10 @@ int main(int args, char** argv)
 	  text = " +" + TextTools::toString(chrSet.size()) + " chromosomes.";
 	}
         ApplicationTools::displayResult("-- Chromosome(s):", chr[0] + text);
-        ChromosomeMafIterator* iterator = new ChromosomeMafIterator(currentIterator, ref, chrSet);
+        auto iterator = make_shared<ChromosomeMafIterator>(currentIterator, ref, chrSet);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -801,11 +767,10 @@ int main(int args, char** argv)
 	  tln[(*tlnTable)(i, 0)] = (*tlnTable)(i, 1);
           ApplicationTools::displayResult("-- Translating " + (*tlnTable)(i, 0) + " to", (*tlnTable)(i, 1));
 	}
-        ChromosomeRenamingMafIterator* iterator = new ChromosomeRenamingMafIterator(currentIterator, tln);
+        auto iterator = make_shared<ChromosomeRenamingMafIterator>(currentIterator, tln);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -818,11 +783,10 @@ int main(int args, char** argv)
       else if (cmdName == "DuplicateFilter") {
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
-        DuplicateFilterMafIterator* iterator = new DuplicateFilterMafIterator(currentIterator, ref);
+        auto iterator = make_shared<DuplicateFilterMafIterator>(currentIterator, ref);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -843,13 +807,12 @@ int main(int args, char** argv)
         if (overlappingAction != "none" && overlappingAction != "discard" && overlappingAction != "error")
           throw Exception("'do_overlapping' must be one of 'none', 'discard' or 'error'.");
 
-        OrderFilterMafIterator* iterator = new OrderFilterMafIterator(currentIterator, ref,
+        auto iterator = make_shared<OrderFilterMafIterator>(currentIterator, ref,
             unsortedAction == "discard", unsortedAction == "error",
             overlappingAction == "discard", overlappingAction == "error");
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -859,11 +822,10 @@ int main(int args, char** argv)
       else if (cmdName == "RemoveEmptySequences") {
         bool unresolvedAsGaps = ApplicationTools::getBooleanParameter("unresolved_as_gaps", cmdArgs, "");
         ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGaps);
-        RemoveEmptySequencesMafIterator* iterator = new RemoveEmptySequencesMafIterator(currentIterator, unresolvedAsGaps);
+        auto iterator = make_shared<RemoveEmptySequencesMafIterator>(currentIterator, unresolvedAsGaps);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
       
@@ -877,14 +839,13 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Max. branch length", maxBrLen);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
-        FilterTreeMafIterator* iterator = new FilterTreeMafIterator(currentIterator, treeProperty, maxBrLen, !trash);
+        auto iterator = make_shared<FilterTreeMafIterator>(currentIterator, treeProperty, maxBrLen, !trash);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         if (!trash) {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -899,16 +860,13 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
           //Now build an adaptor for retrieving the trashed blocks:
-          TrashIteratorAdapter* trashIt = new TrashIteratorAdapter(iterator);
+          auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
           //Add an output iterator:
-          OutputMafIterator* outIt = new OutputMafIterator(trashIt, out);
+          auto outIt = make_shared<OutputMafIterator>(trashIt, out);
           //And then synchronize the two iterators:
-          MafIteratorSynchronizer* syncIt = new MafIteratorSynchronizer(iterator, outIt);
+          auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
           //Returns last iterator:
           currentIterator = syncIt;
-          //Keep track of all those iterators:
-          its.push_back(trashIt);
-          its.push_back(syncIt);
         } else {
           //We only get the remaining blocks here:
           currentIterator = iterator;
@@ -926,37 +884,37 @@ int main(int args, char** argv)
         vector<string> statisticsDesc = ApplicationTools::getVectorParameter<string>("statistics", cmdArgs, ',', "", "", false, true);
         
         //Parse all statistics:
-        vector<MafStatistics*> statistics;
+        vector<shared_ptr<MafStatisticsInterface>> statistics;
         for (size_t i = 0; i < statisticsDesc.size(); ++i) {
           string statName;
           map<string, string> statArgs;
           KeyvalTools::parseProcedure(statisticsDesc[i], statName, statArgs);
-          MafStatistics* mafStat = 0;
+          shared_ptr<MafStatisticsInterface> mafStat = nullptr;
           string statDesc = "";
           if (statName == "BlockSize") {
-            mafStat = new BlockSizeMafStatistics();
+            mafStat = make_shared<BlockSizeMafStatistics>();
           } else if (statName == "BlockLength") {
-            mafStat = new BlockLengthMafStatistics();
+            mafStat = make_shared<BlockLengthMafStatistics>();
           } else if (statName == "SequenceLength") {
             string sp = ApplicationTools::getStringParameter("species", statArgs, "");
-            mafStat = new SequenceLengthMafStatistics(sp);
+            mafStat = make_shared<SequenceLengthMafStatistics>(sp);
           } else if (statName == "AlnScore") {
-            mafStat = new AlignmentScoreMafStatistics();
+            mafStat = make_shared<AlignmentScoreMafStatistics>();
           } else if (statName == "BlockCounts") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
             string suffix = ApplicationTools::getStringParameter("suffix", statArgs, "");
-            mafStat = new CharacterCountsMafStatistics(&AlphabetTools::DNA_ALPHABET, species, suffix);
+            mafStat = make_shared<CharacterCountsMafStatistics>(AlphabetTools::DNA_ALPHABET, species, suffix);
           } else if (statName == "PairwiseDivergence") {
             string sp1 = ApplicationTools::getStringParameter("species1", statArgs, "");
             string sp2 = ApplicationTools::getStringParameter("species2", statArgs, "");
-            mafStat = new PairwiseDivergenceMafStatistics(sp1, sp2);
+            mafStat = make_shared<PairwiseDivergenceMafStatistics>(sp1, sp2);
           } else if (statName == "SiteFrequencySpectrum") {
             vector<double> bounds  = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
             vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
             if (ingroup.size() < 2)
               throw Exception("ERROR: at least two ingroup sequences are required to compute the site frequency spectrum.");
             string outgroup        = ApplicationTools::getStringParameter("outgroup", statArgs, "", "", false, true);
-            mafStat = new SiteFrequencySpectrumMafStatistics(&AlphabetTools::DNA_ALPHABET, bounds, ingroup, outgroup); 
+            mafStat = make_shared<SiteFrequencySpectrumMafStatistics>(AlphabetTools::DNA_ALPHABET, bounds, ingroup, outgroup); 
           } else if (statName == "FourSpeciesSitePatternCounts") {
             string species1 = ApplicationTools::getStringParameter("species1", statArgs, "sp1", "", false, true);
             string species2 = ApplicationTools::getStringParameter("species2", statArgs, "sp2", "", false, true);
@@ -967,22 +925,22 @@ int main(int args, char** argv)
             species.push_back(species2);
             species.push_back(species3);
             species.push_back(species4);
-            mafStat = new FourSpeciesPatternCountsMafStatistics(&AlphabetTools::DNA_ALPHABET, species); 
+            mafStat = make_shared<FourSpeciesPatternCountsMafStatistics>(AlphabetTools::DNA_ALPHABET, species); 
           } else if (statName == "SiteStatistics") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
-            mafStat = new SiteMafStatistics(species); 
+            mafStat = make_shared<SiteMafStatistics>(species); 
           } else if (statName == "PolymorphismStatistics") {
             vector<string> species1 = ApplicationTools::getVectorParameter<string>("species1", statArgs, ',', "", "", false, true);
             vector<string> species2 = ApplicationTools::getVectorParameter<string>("species2", statArgs, ',', "", "", false, true);
             vector< vector<string> > species;
             species.push_back(species1);
             species.push_back(species2);
-            mafStat = new PolymorphismMafStatistics(species); 
+            mafStat = make_shared<PolymorphismMafStatistics>(species); 
           } else if (statName == "DiversityStatistics") {
             vector<string> species = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
             if (species.size() < 2)
               throw Exception("ERROR: at least two sequences are required to compute diversity estimators.");
-            mafStat = new SequenceDiversityMafStatistics(species); 
+            mafStat = make_shared<SequenceDiversityMafStatistics>(species); 
           } else if (statName == "FstStatistics") {
             vector<string> species1 = ApplicationTools::getVectorParameter<string>("species1", statArgs, ',', "", "", false, true);
             vector<string> species2 = ApplicationTools::getVectorParameter<string>("species2", statArgs, ',', "", "", false, true);
@@ -993,17 +951,17 @@ int main(int args, char** argv)
               ApplicationTools::displayResult("-- Min. Nb. permutations", minNbPermutations);
               ApplicationTools::displayResult("-- Max. Nb. permutations", maxNbPermutations);
             }
-            mafStat = new FstMafStatistics(species1, species2, minNbPermutations, maxNbPermutations, verboseStat); 
+            mafStat = make_shared<FstMafStatistics>(species1, species2, minNbPermutations, maxNbPermutations, verboseStat); 
           } else if (statName == "CountClusters") {
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);
-            mafStat = new CountClustersMafStatistics(treeProperty, threshold);
+            mafStat = make_shared<CountClustersMafStatistics>(treeProperty, threshold);
             statDesc = " / " + treeProperty;
           } else if (statName == "ModelFit") {
-	    shared_ptr<AutonomousSubstitutionProcess> process;
-	    vector<PhyloTree*> vTree;
+	    shared_ptr<AutonomousSubstitutionProcessInterface> process;
+	    vector<shared_ptr<PhyloTree>> vTree;
 	    vTree.push_back(nullptr);
-            process.reset(PhylogeneticsApplicationTools::getSubstitutionProcess(&AlphabetTools::DNA_ALPHABET, 0, nullptr, vTree, statArgs, "", true, true, 1));
+            process = PhylogeneticsApplicationTools::getSubstitutionProcess(AlphabetTools::DNA_ALPHABET, 0, nullptr, vTree, statArgs, "", true, true, 1);
 
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             vector<string> parametersOutput = ApplicationTools::getVectorParameter<string>("parameters_output", statArgs, ',', "");
@@ -1024,11 +982,12 @@ int main(int args, char** argv)
             bool reparametrize = ApplicationTools::getBooleanParameter("reparametrize", statArgs, false);
             ApplicationTools::displayBooleanResult("-- Reparametrization", reparametrize);
             if (treeProperty == "none") {
-              unique_ptr< TreeTemplate<Node> > tree(dynamic_cast< TreeTemplate<Node> *>(PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false))); 
-              mafStat = new MaximumLikelihoodModelFitMafStatistics(process, tree.release(), parametersOutput,
+              auto tree = PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false);
+	      auto treeTpl = make_shared<TreeTemplate<Node>>(*tree);
+              mafStat = make_shared<MaximumLikelihoodModelFitMafStatistics>(process, treeTpl, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             } else {
-              mafStat = new MaximumLikelihoodModelFitMafStatistics(process, treeProperty, parametersOutput,
+              mafStat = make_shared<MaximumLikelihoodModelFitMafStatistics>(process, treeProperty, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             }
           } else {
@@ -1042,7 +1001,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_unique<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1053,25 +1012,21 @@ int main(int args, char** argv)
         } else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
-        ostreams.push_back(out);
-        //ostreams.push_back(out);
         ApplicationTools::displayResult("-- File compression", compress);
-        //StlOutputStream* output = new StlOutputStream(new ofstream(outputFile.c_str(), ios::out));
-        StlOutputStream* output = new StlOutputStream(out);
+        auto output = make_shared<StlOutputStream>(move(out));
 
-        SequenceStatisticsMafIterator* iterator = new SequenceStatisticsMafIterator(currentIterator, statistics);
+        auto iterator = make_shared<SequenceStatisticsMafIterator>(currentIterator, statistics);
         
         if (cmdArgs.find("reference") != cmdArgs.end()) {
           throw Exception("reference argument in SequenceStatistics is deprecated: use ref_species instead.");
         }
         string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         ApplicationTools::displayResult("-- Reference species", ref);
-        CsvStatisticsOutputIterationListener* listener = new CsvStatisticsOutputIterationListener(iterator, ref, output);
+        auto listener = make_unique<CsvStatisticsOutputIterationListener>(iterator, ref, output);
         
-        iterator->addIterationListener(listener);
+        iterator->addIterationListener(move(listener));
         currentIterator = iterator;
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
       }
 
       
@@ -1122,10 +1077,9 @@ int main(int args, char** argv)
           }
         }
         ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
-        FeatureExtractorMafIterator* iterator = new FeatureExtractorMafIterator(currentIterator, refSpecies, featuresSet, completeOnly, ignoreStrand);
+        auto iterator = make_shared<FeatureExtractorMafIterator>(currentIterator, refSpecies, featuresSet, completeOnly, ignoreStrand);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         currentIterator = iterator;
       }
@@ -1160,10 +1114,9 @@ int main(int args, char** argv)
         if (splitOptionStr == "adjust")
           ApplicationTools::displayBooleanResult("-- Keep small blocks", keepSmallBlocks);
 
-        WindowSplitMafIterator* iterator = new WindowSplitMafIterator(currentIterator, preferredSize, windowStep, splitOption, keepSmallBlocks);
+        auto iterator = make_shared<WindowSplitMafIterator>(currentIterator, preferredSize, windowStep, splitOption, keepSmallBlocks);
         iterator->setLogStream(log);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1193,11 +1146,10 @@ int main(int args, char** argv)
           bool extendedSeqNames = ApplicationTools::getBooleanParameter("extended_names", cmdArgs, true);
           ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
 
-          CountDistanceEstimationMafIterator* iterator = new CountDistanceEstimationMafIterator(currentIterator, gapOption, unresolvedAsGap, extendedSeqNames);
+          auto iterator = make_shared<CountDistanceEstimationMafIterator>(currentIterator, gapOption, unresolvedAsGap, extendedSeqNames);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(log);
           currentIterator = iterator;
-          its.push_back(iterator);
         } else if (distMethod == "ml") {
           string rdistDesc = ApplicationTools::getStringParameter("rate", cmdArgs, "Constant()");
           string paramOpt  = ApplicationTools::getStringParameter("parameter_estimation", cmdArgs, "initial");
@@ -1220,40 +1172,38 @@ int main(int args, char** argv)
           ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
           
           BppORateDistributionFormat rdistReader(true);
-          auto rdist = shared_ptr<DiscreteDistribution>(rdistReader.readDiscreteDistribution(rdistDesc, true));
+          auto rdist = rdistReader.readDiscreteDistribution(rdistDesc, true);
 	  map<string, string> unparsedparams;
-	  auto model = shared_ptr<BranchModel>(PhylogeneticsApplicationTools::getBranchModel(&AlphabetTools::DNA_ALPHABET, nullptr, nullptr, cmdArgs, unparsedparams));
+	  auto model = PhylogeneticsApplicationTools::getBranchModel(AlphabetTools::DNA_ALPHABET, nullptr, nullptr, cmdArgs, unparsedparams);
 
- 
-          unique_ptr<DistanceEstimation> distEst(new DistanceEstimation(model, rdist));
+          auto distEst = make_unique<DistanceEstimation>(move(model), move(rdist));
           
-          OutputStream* profiler =
+          auto profiler =
             (prPath == "none") ? 0 :
-              (prPath == "std") ? ApplicationTools::message.get() :
-              new StlOutputStream(new ofstream(prPath.c_str(), ios::out));
+              (prPath == "std") ? ApplicationTools::message :
+              make_shared<StlOutputStream>(make_unique<fstream>(prPath.c_str(), ios::out));
           if (profiler)
             profiler->setPrecision(20);
           if (verbose)
             ApplicationTools::displayResult("-- Optimization profile in", prPath);
-          distEst->getOptimizer()->setProfiler(profiler);
+          distEst->optimizer().setProfiler(profiler);
 
-          OutputStream* messenger =
-            (mhPath == "none") ? 0 :
-              (mhPath == "std") ? ApplicationTools::message.get() :
-              new StlOutputStream(new ofstream(mhPath.c_str(), ios::out));
+          auto messenger =
+            (mhPath == "none") ? nullptr :
+              (mhPath == "std") ? ApplicationTools::message :
+              make_shared<StlOutputStream>(make_unique<ofstream>(mhPath.c_str(), ios::out));
           if (messenger)
             messenger->setPrecision(20);
           if (verbose)
             ApplicationTools::displayResult("-- Optimization messages in", mhPath);
-          distEst->getOptimizer()->setMessageHandler(messenger);
+          distEst->optimizer().setMessageHandler(messenger);
 
-          MaximumLikelihoodDistanceEstimationMafIterator* iterator = new MaximumLikelihoodDistanceEstimationMafIterator(currentIterator,
-              distEst.release(), propGapsToKeep, gapsAsUnresolved, paramOpt, extendedSeqNames);
+          auto iterator = make_shared<MaximumLikelihoodDistanceEstimationMafIterator>(currentIterator,
+              move(distEst), propGapsToKeep, gapsAsUnresolved, paramOpt, extendedSeqNames);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(log);
           iterator->setVerbose(verbose);
           currentIterator = iterator;
-          its.push_back(iterator);
         } else {
           throw Exception("Unknown distance method: " + distMethod);
         }
@@ -1267,15 +1217,15 @@ int main(int args, char** argv)
       else if (cmdName == "DistanceBasedPhylogeny") {
         string distMethodName = ApplicationTools::getStringParameter("method", cmdArgs, "bionj");
         string distProperty = ApplicationTools::getStringParameter("dist_mat", cmdArgs, "none");
-        DistanceMethod* distMethod = 0;
+        unique_ptr<DistanceMethod> distMethod = nullptr;
         if (distMethodName == "upgma") {
-          distMethod = new PGMA(false);
+          distMethod = make_unique<PGMA>(false);
         } else if (distMethodName == "wpgma") {
-          distMethod = new PGMA(true);
+          distMethod = make_unique<PGMA>(true);
         } else if (distMethodName == "nj") {
-          distMethod = new NeighborJoining(false, false);
+          distMethod = make_unique<NeighborJoining>(false, false);
         } else if (distMethodName == "bionj") {
-          distMethod = new BioNJ(false, false);
+          distMethod = make_unique<BioNJ>(false, false);
         } else {
           throw Exception("Unknown distance-based phylogenetic method: " + distMethodName); 
         }
@@ -1283,11 +1233,10 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reading distance matrix from", distProperty);
         ApplicationTools::displayResult("-- Build distance tree using", distMethodName);
 
-        DistanceBasedPhylogenyReconstructionMafIterator* iterator = new DistanceBasedPhylogenyReconstructionMafIterator(currentIterator, distMethod, distProperty);
+        auto iterator = make_shared<DistanceBasedPhylogenyReconstructionMafIterator>(currentIterator, move(distMethod), distProperty);
         ApplicationTools::displayResult("-- Writing block-wise trees to", iterator->getPropertyName());
         iterator->setLogStream(log);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1301,12 +1250,12 @@ int main(int args, char** argv)
         string programInputFile = ApplicationTools::getAFilePath("input.file", cmdArgs, true, false);
         string programInputFormat = ApplicationTools::getStringParameter("input.format", cmdArgs, "Fasta");
         BppOAlignmentWriterFormat bppoWriter(1);
-        OAlignment* alnWriter(bppoWriter.read(programInputFormat));
+        auto alnWriter = bppoWriter.read(programInputFormat);
 
         string programOutputFile = ApplicationTools::getAFilePath("output.file", cmdArgs, true, false);
         string programOutputFormat = ApplicationTools::getStringParameter("output.format", cmdArgs, "Newick");
         BppOTreeReaderFormat bppoReader(1);
-        ITree* treeReader(bppoReader.readITree(programOutputFormat));
+        auto treeReader = bppoReader.readITree(programOutputFormat);
 
         string propertyName = ApplicationTools::getStringParameter("property_name", cmdArgs, "ExternalTree");
         ApplicationTools::displayResult("-- Registering block-wise trees to", propertyName);
@@ -1316,11 +1265,13 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- External call (tree building)", name);
         ApplicationTools::displayResult("   Command", command);
 
-        TreeBuildingSystemCallMafIterator* iterator = new TreeBuildingSystemCallMafIterator(currentIterator, alnWriter, programInputFile, treeReader, programOutputFile, command, propertyName);
+        auto iterator = make_shared<TreeBuildingSystemCallMafIterator>(currentIterator,
+            move(alnWriter), programInputFile,
+	    move(treeReader), programOutputFile,
+	    command, propertyName);
 
         iterator->setLogStream(log);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1335,11 +1286,10 @@ int main(int args, char** argv)
         string outgroup = ApplicationTools::getStringParameter("outgroup", cmdArgs, "none");
         ApplicationTools::displayResult("-- Reading tree from", treePropertyInput);
         ApplicationTools::displayResult("-- Rerooting according to species", outgroup);
-        NewOutgroupMafIterator* iterator = new NewOutgroupMafIterator(currentIterator, treePropertyInput, treePropertyOutput, outgroup);
+        auto iterator = make_shared<NewOutgroupMafIterator>(currentIterator, treePropertyInput, treePropertyOutput, outgroup);
         ApplicationTools::displayResult("-- Writing tree to", treePropertyOutput);
         iterator->setLogStream(log);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1353,11 +1303,10 @@ int main(int args, char** argv)
         string species = ApplicationTools::getStringParameter("species", cmdArgs, "none");
         ApplicationTools::displayResult("-- Reading tree from", treePropertyInput);
         ApplicationTools::displayResult("-- Removing leaves from species", species);
-        DropSpeciesMafIterator* iterator = new DropSpeciesMafIterator(currentIterator, treePropertyInput, treePropertyOutput, species);
+        auto iterator = make_shared<DropSpeciesMafIterator>(currentIterator, treePropertyInput, treePropertyOutput, species);
         ApplicationTools::displayResult("-- Writing tree to", treePropertyOutput);
         iterator->setLogStream(log);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1369,7 +1318,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1384,9 +1333,8 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- File compression", compress);
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
-        OutputMafIterator* iterator = new OutputMafIterator(currentIterator, out, mask);
+        auto iterator = make_shared<OutputMafIterator>(currentIterator, out, mask);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1408,15 +1356,16 @@ int main(int args, char** argv)
         if (reference != "")
           ApplicationTools::displayResult("-- Reference species", reference);
         
-        OutputAlignmentMafIterator* iterator; 
+        shared_ptr<OutputAlignmentMafIterator> iterator; 
         BppOAlignmentWriterFormat bppoWriter(1);
         string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
-        OAlignment* oAln = bppoWriter.read(description);
+        auto oAln = bppoWriter.read(description);
         if (multipleFiles) {
-          iterator = new OutputAlignmentMafIterator(currentIterator, outputFile, oAln, mask, coords, header, reference);
+          iterator = make_shared<OutputAlignmentMafIterator>(currentIterator,
+			 outputFile, move(oAln), mask, coords, header, reference);
         } else {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
-          filtering_ostream* out = new filtering_ostream;
+          auto out = make_shared<filtering_ostream>();
           if (compress == "none") {
           } else if (compress == "gzip") {
             out->push(gzip_compressor());
@@ -1429,10 +1378,10 @@ int main(int args, char** argv)
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression", compress);
-          iterator = new OutputAlignmentMafIterator(currentIterator, out, oAln, mask, coords, header, reference);
+          iterator = make_shared<OutputAlignmentMafIterator>(currentIterator,
+			 out, move(oAln), mask, coords, header, reference);
         }
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1444,7 +1393,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output feature file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1462,9 +1411,8 @@ int main(int args, char** argv)
           throw Exception("A species name should be provided for command 'OutputAsFeatures'.");
         ApplicationTools::displayResult("-- Species to use", species);
 
-        OutputAsFeaturesMafIterator* iterator = new OutputAsFeaturesMafIterator(currentIterator, out, species);
+        auto iterator = make_shared<OutputAsFeaturesMafIterator>(currentIterator, out, species);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1476,7 +1424,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output table file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1495,9 +1443,8 @@ int main(int args, char** argv)
  
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "", "", false, false);
 
-        TableOutputMafIterator* iterator = new TableOutputMafIterator(currentIterator, out, species, reference);
+        auto iterator = make_shared<TableOutputMafIterator>(currentIterator, out, species, reference);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1510,7 +1457,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1544,21 +1491,20 @@ int main(int args, char** argv)
         bool outputAll = ApplicationTools::getBooleanParameter("all", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output non-variable positions", outputAll);
 
-        VcfOutputMafIterator* iterator;
+        shared_ptr<VcfOutputMafIterator> iterator;
         if (genotypes.size() > 0 && allSingles) {
 	  vector<string> simpleGenotypes;
 	  for (auto g : genotypes) simpleGenotypes.push_back(g[0]);
           double outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
           ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
-          iterator = new VcfOutputMafIterator(currentIterator, out, reference, simpleGenotypes, outputAll, outputDiploids);
+          iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, simpleGenotypes, outputAll, outputDiploids);
         } else {
-          iterator = new VcfOutputMafIterator(currentIterator, out, reference, genotypes, outputAll);
+          iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, genotypes, outputAll);
         }
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1570,7 +1516,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1592,12 +1538,11 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
         if (species.size() < 2)
           throw Exception("MsmcOutput: at least two genomes are necessary to call SNPs.");
-        MsmcOutputMafIterator* iterator = new MsmcOutputMafIterator(currentIterator, out, species, reference);
+        auto iterator = make_shared<MsmcOutputMafIterator>(currentIterator, out, species, reference);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1611,8 +1556,8 @@ int main(int args, char** argv)
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output Ped file", outputPedFile);
         ApplicationTools::displayResult("-- Output Map file", outputMapFile);
-        filtering_ostream* outPed = new filtering_ostream;
-        filtering_ostream* outMap = new filtering_ostream;
+        auto outPed = make_shared<filtering_ostream>();
+        auto outMap = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           outPed->push(gzip_compressor());
@@ -1655,12 +1600,11 @@ int main(int args, char** argv)
         if (species.size() < 2)
           throw Exception("PlinkOutput: at least two genomes are necessary to call SNPs.");
 
-        PlinkOutputMafIterator* iterator = new PlinkOutputMafIterator(currentIterator, outPed, outMap, species, reference, map3, recodeChr, makeDiploids, phenotype, tabSeparator ? '\t' : ' ');
+        auto iterator = make_shared<PlinkOutputMafIterator>(currentIterator, outPed, outMap, species, reference, map3, recodeChr, makeDiploids, phenotype, tabSeparator ? '\t' : ' ');
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1681,12 +1625,11 @@ int main(int args, char** argv)
         bool completeOnly = ApplicationTools::getBooleanParameter("complete_only", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Use only complete sites", completeOnly);
 
-        SequenceLDhotOutputMafIterator* iterator = new SequenceLDhotOutputMafIterator(currentIterator, outputFile, completeOnly, reference);
+        auto iterator = make_shared<SequenceLDhotOutputMafIterator>(currentIterator, outputFile, completeOnly, reference);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1698,7 +1641,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1723,12 +1666,11 @@ int main(int args, char** argv)
         for (size_t i = 0; i < species.size(); ++i) {
           ApplicationTools::displayResult("-- Output coordinates for species", species[i]);
         }
-        CoordinatesOutputMafIterator* iterator = new CoordinatesOutputMafIterator(currentIterator, out, species, includeSrcSize);
+        auto iterator = make_shared<CoordinatesOutputMafIterator>(currentIterator, out, species, includeSrcSize);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1777,7 +1719,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1792,10 +1734,9 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- File compression", compress);
         
         //Iterator initialization:
-        CoordinateTranslatorMafIterator* iterator = new CoordinateTranslatorMafIterator(currentIterator, refSpecies, targetSpecies, featuresSet, *out, outputClosest);
+        auto iterator = make_shared<CoordinateTranslatorMafIterator>(currentIterator, refSpecies, targetSpecies, featuresSet, *out, outputClosest);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        its.push_back(iterator);
 
         currentIterator = iterator;
       }
@@ -1809,7 +1750,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output tree file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1827,9 +1768,8 @@ int main(int args, char** argv)
         bool stripNames = ApplicationTools::getBooleanParameter("strip_names", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Strip names", stripNames);
 
-        OutputTreeMafIterator* iterator = new OutputTreeMafIterator(currentIterator, out, treeProperty, !stripNames);
+        auto iterator = make_shared<OutputTreeMafIterator>(currentIterator, out, treeProperty, !stripNames);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
     
 
@@ -1842,7 +1782,7 @@ int main(int args, char** argv)
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output matrix file", outputFile);
-        filtering_ostream* out = new filtering_ostream;
+        auto out = make_shared<filtering_ostream>();
         if (compress == "none") {
         } else if (compress == "gzip") {
           out->push(gzip_compressor());
@@ -1860,9 +1800,8 @@ int main(int args, char** argv)
         bool stripNames = ApplicationTools::getBooleanParameter("strip_names", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Strip names", stripNames);
 
-        OutputDistanceMatrixMafIterator* iterator = new OutputDistanceMatrixMafIterator(currentIterator, out, distProperty, !stripNames);
+        auto iterator = make_shared<OutputDistanceMatrixMafIterator>(currentIterator, out, distProperty, !stripNames);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
     
 
@@ -1877,12 +1816,12 @@ int main(int args, char** argv)
         string programInputFile = ApplicationTools::getAFilePath("input.file", cmdArgs, true, false);
         string programInputFormat = ApplicationTools::getStringParameter("input.format", cmdArgs, "Fasta");
         BppOAlignmentWriterFormat bppoWriter(1);
-        OAlignment* alnWriter(bppoWriter.read(programInputFormat));
+        auto alnWriter = bppoWriter.read(programInputFormat);
 
         string programOutputFile = ApplicationTools::getAFilePath("output.file", cmdArgs, true, false);
         string programOutputFormat = ApplicationTools::getStringParameter("output.format", cmdArgs, "Fasta");
         BppOAlignmentReaderFormat bppoReader(1);
-        IAlignment* alnReader(bppoReader.read(programOutputFormat));
+        auto alnReader = bppoReader.read(programOutputFormat);
         
         bool hotTest = ApplicationTools::getBooleanParameter("hot", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Compute HoT score", hotTest);
@@ -1892,13 +1831,14 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- External call", name);
         ApplicationTools::displayResult("   Command", command);
 
-        SystemCallMafIterator* iterator = new SystemCallMafIterator(currentIterator, 
-            alnWriter, programInputFile, alnReader, programOutputFile, command, hotTest);
+        auto iterator = make_shared<SystemCallMafIterator>(currentIterator, 
+            move(alnWriter), programInputFile, 
+	    move(alnReader), programOutputFile,
+	    command, hotTest);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
-        its.push_back(iterator);
       }
 
 
@@ -1910,24 +1850,18 @@ int main(int args, char** argv)
     size_t blockCounter = 0;
     size_t alnSize = 0;
     cout << "Parsing..." << endl;
-    while (MafBlock* block = currentIterator->nextBlock())
+    while (auto block = currentIterator->nextBlock())
     {
       alnSize += block->getNumberOfSites();
       cout << '\r' << ++blockCounter << " blocks kept, totalizing " << alnSize << "bp.";
       cout.flush();
       //ApplicationTools::displayUnlimitedGauge(blockCounter++, "Parsing...");
-      delete block;
     }
     ApplicationTools::message->endLine();
 
     //Flush all streams:
-    for (size_t i = 0; i < ostreams.size(); ++i) {
-      close(*ostreams[i]);
-    }
-
-    //Clean memory:
-    for (size_t i = 0; i < its.size(); ++i) {
-      delete its[i];
+    for (auto& os : ostreams) {
+      close(*os);
     }
 
     maffilter.done();

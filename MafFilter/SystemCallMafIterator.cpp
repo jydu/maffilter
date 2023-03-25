@@ -31,18 +31,18 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 using namespace bpp;
 using namespace std;
 
-MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
+unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
   currentBlock_ = iterator_->nextBlock();
   if (! currentBlock_)
     return 0;
-  unique_ptr<AlignedSequenceContainer> aln(currentBlock_->getAlignment().clone());
+  auto aln = currentBlock_->getAlignment();
   
   //We translate sequence names to avoid compatibility issues
   vector<string> names(aln->getNumberOfSequences());
   for (size_t i = 0; i < names.size(); ++i) {
     names[i] = "seq" + TextTools::toString(i);
   }
-  aln->setSequenceNames(names);
+  aln->setSequenceNames(names, true);
   
   //Write sequences to file:
   alnWriter_->writeAlignment(inputFile_, *aln, true);
@@ -52,15 +52,16 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
   if (rc) throw Exception("SystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
   
   //Read the results:
-  unique_ptr<SiteContainer> result(alnReader_->readAlignment(outputFile_, &AlphabetTools::DNA_ALPHABET));
+  auto result = alnReader_->readAlignment(outputFile_, AlphabetTools::DNA_ALPHABET);
 
   //Perform a Head-or-Tail test to compute alignment scores (optional):
   if (hotTest_) {
     //Reverse the alignment:
-    unique_ptr<AlignedSequenceContainer> rev(aln->clone());
+    auto rev = make_unique<AlignedSequenceContainer>(AlphabetTools::DNA_ALPHABET);
     for (size_t i = 0; i < aln->getNumberOfSequences(); ++i) {
-      unique_ptr<Sequence> invSeq(SequenceTools::getInvert(aln->getSequence(i)));
-      rev->setSequence(i, *invSeq, false);
+      auto tmpSeq = SequenceTools::getInvert(aln->sequence(i));
+      auto invSeq = unique_ptr<Sequence>(dynamic_cast<Sequence*>(tmpSeq.release()));
+      rev->addSequence(invSeq->getName(), invSeq);
     }
     //Write reversed sequences to file (so far we use the same file as for the non-reversed alignment):
     alnWriter_->writeAlignment(inputFile_, *rev, true);
@@ -70,14 +71,15 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
     if (rc) throw Exception("SystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
     
     //Read the results:
-    unique_ptr<SiteContainer> result2(alnReader_->readAlignment(outputFile_, &AlphabetTools::DNA_ALPHABET));
+    auto result2 = alnReader_->readAlignment(outputFile_, AlphabetTools::DNA_ALPHABET);
 
     //Re-reverse the results, and make sure they are in the same order as the non-inverted results:
-    unique_ptr<SiteContainer> result2rev(new VectorSiteContainer(result->getAlphabet()));
+    auto result2rev = make_unique<VectorSiteContainer>(result->getAlphabet());
     vector<string> seqNames = result->getSequenceNames();
-    for (const auto i: seqNames) {
-      unique_ptr<Sequence> invSeq(SequenceTools::getInvert(result2->getSequence(i)));
-      result2rev->addSequence(*invSeq, false);
+    for (const auto& i : seqNames) {
+      auto tmpSeq = SequenceTools::getInvert(result2->sequence(i));
+      auto invSeq = unique_ptr<Sequence>(dynamic_cast<Sequence*>(tmpSeq.release()));
+      result2rev->addSequence(invSeq->getName(), invSeq);
     }
 
     //Now we compare the two alignments:
@@ -96,21 +98,20 @@ MafBlock* SystemCallMafIterator::analyseCurrentBlock_() {
   }
 
   //Convert and assign the realigned sequences:
-  vector<MafSequence*> tmp;
+  vector<unique_ptr<MafSequence>> tmp;
   for (size_t i = 0; i < currentBlock_->getNumberOfSequences(); ++i) {
-    MafSequence* mseq = currentBlock_->getMafSequence(i).cloneMeta();
+    unique_ptr<MafSequence> mseq(currentBlock_->sequence(i).cloneMeta());
     //NB: we discard any putative score associated to this sequence.
-    string name = "seq" + TextTools::toString(i);
-    mseq->setContent(dynamic_cast<const BasicSequence&>(result->getSequence(name)).toString()); //NB shall we use getContent here?
-    tmp.push_back(mseq);
+    string seqKey = "seq" + TextTools::toString(i);
+    mseq->setContent(dynamic_cast<const Sequence&>(result->sequence(seqKey)).toString()); //NB shall we use getContent here?
+    tmp.push_back(move(mseq));
   }
   currentBlock_->clear();
   for (size_t i = 0; i < tmp.size(); ++i) {
-    currentBlock_->addMafSequence(*tmp[i]);
-    delete tmp[i];
+    currentBlock_->addSequence(tmp[i]->getName(), tmp[i]);
   }
 
   //Done:
-  return currentBlock_;
+  return move(currentBlock_);
 }
 

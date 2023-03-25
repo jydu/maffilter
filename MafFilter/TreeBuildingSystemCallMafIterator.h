@@ -26,7 +26,7 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef _TREEBUILDINGSYSTEMCALLMAFITERATOR_H_
 #define _TREEBUILDINGSYSTEMCALLMAFITERATOR_H_
 
-#include <Bpp/Seq/Io/Maf/MafIterator.h>
+#include <Bpp/Seq/Io/Maf/AbstractMafIterator.h>
 #include <Bpp/Phyl/Io/IoTree.h>
 #include <Bpp/Seq/Io/OSequence.h>
 
@@ -53,17 +53,17 @@ class TreeBuildingSystemCallMafIterator:
 
   public:
     TreeBuildingSystemCallMafIterator(
-        MafIterator* iterator,
-        OAlignment* alnWriter,
+        std::shared_ptr<MafIteratorInterface> iterator,
+        std::unique_ptr<OAlignment> alnWriter,
         const std::string& inputFile,
-        ITree* treeReader,
+        std::unique_ptr<ITree> treeReader,
         const std::string& outputFile,
         const std::string& callCmd,
         const std::string& propertyName) :
       AbstractFilterMafIterator(iterator),
-          alnWriter_(alnWriter),
+          alnWriter_(std::move(alnWriter)),
           inputFile_(inputFile),
-          treeReader_(treeReader),
+          treeReader_(std::move(treeReader)),
           outputFile_(outputFile),
           call_(callCmd),
           propertyName_(propertyName)
@@ -91,7 +91,7 @@ class TreeBuildingSystemCallMafIterator:
 
 
   public:
-    MafBlock* analyseCurrentBlock_();
+    std::unique_ptr<MafBlock> analyseCurrentBlock_() override;
 
 };
 

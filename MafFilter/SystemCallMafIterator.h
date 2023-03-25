@@ -26,7 +26,7 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef _SYSTEMCALLMAFITERATOR_H_
 #define _SYSTEMCALLMAFITERATOR_H_
 
-#include <Bpp/Seq/Io/Maf/MafIterator.h>
+#include <Bpp/Seq/Io/Maf/AbstractMafIterator.h>
 #include <Bpp/Seq/Io/ISequence.h>
 #include <Bpp/Seq/Io/OSequence.h>
 
@@ -53,17 +53,17 @@ class SystemCallMafIterator:
 
   public:
     SystemCallMafIterator(
-        MafIterator* iterator,
-        OAlignment* alnWriter,
+        std::shared_ptr<MafIteratorInterface> iterator,
+        std::unique_ptr<OAlignment> alnWriter,
         const std::string& inputFile,
-        IAlignment* alnReader,
+        std::unique_ptr<IAlignment> alnReader,
         const std::string& outputFile,
         const std::string& callCmd,
         bool hotTest = false) :
       AbstractFilterMafIterator(iterator),
-          alnWriter_(alnWriter),
+          alnWriter_(std::move(alnWriter)),
           inputFile_(inputFile),
-          alnReader_(alnReader),
+          alnReader_(std::move(alnReader)),
           outputFile_(outputFile),
           call_(callCmd),
           hotTest_(hotTest)
@@ -91,7 +91,7 @@ class SystemCallMafIterator:
 
 
   public:
-    MafBlock* analyseCurrentBlock_();
+    std::unique_ptr<MafBlock> analyseCurrentBlock_();
 
 };
 

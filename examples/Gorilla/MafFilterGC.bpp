@@ -24,14 +24,14 @@ maf.filter=\
         SiteStatistics(species=(Hsap,Ptro,Ggor,Ppyg)),                   \
         BlockCounts(),                                                   \
         ModelFit(                                                        \
-          model1=HKY85(kappa=1, theta=0.5, theta1=0.5, theta2=0.5),       \
-          nonhomogeneous=yes,                                            \
-          nonhomogeneous.stationarity=no,                                \
-          nonhomogeneous.root_freq=Full,                                 \
-          rate_distribution=Gamma(n=4, alpha=0.5),                       \
+          model1=HKY85(kappa=1, theta=0.5, theta1=0.5, theta2=0.5),      \
+          rate_distribution1=Gamma(n=4, alpha=0.5),                      \
+          root_freq1=Full,                                               \
+          process1 = Homogeneous(model=1, rate=1, root_freq=1),          \
           tree=BioNJ,                                                    \
-          parameters_output=(HKY85.theta_1,HKY85.theta1_1,HKY85.theta2_1,\
-            HKY85.kappa_1, Full.theta, Full.theta1, Full.theta2),        \
+          parameters_output=(HKY85.theta,HKY85.theta1,HKY85.theta2,      \
+            HKY85.kappa,                                                 \
+            root.Full.theta, root.Full.theta1, root.Full.theta2),        \
           fixed_parameters=(),                                           \
           reestimate_brlen=yes,                                          \
           max_freq_gaps=0.3,                                             \
