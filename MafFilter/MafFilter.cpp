@@ -958,9 +958,9 @@ int main(int args, char** argv)
             mafStat = make_shared<CountClustersMafStatistics>(treeProperty, threshold);
             statDesc = " / " + treeProperty;
           } else if (statName == "ModelFit") {
-	    shared_ptr<AutonomousSubstitutionProcessInterface> process;
-	    vector<shared_ptr<PhyloTree>> vTree;
-	    vTree.push_back(nullptr);
+	          shared_ptr<AutonomousSubstitutionProcessInterface> process;
+	          vector<shared_ptr<PhyloTree>> vTree;
+	          vTree.push_back(nullptr);
             process = PhylogeneticsApplicationTools::getSubstitutionProcess(AlphabetTools::DNA_ALPHABET, 0, nullptr, vTree, statArgs, "", true, true, 1);
 
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
@@ -983,7 +983,7 @@ int main(int args, char** argv)
             ApplicationTools::displayBooleanResult("-- Reparametrization", reparametrize);
             if (treeProperty == "none") {
               auto tree = PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false);
-	      auto treeTpl = make_shared<TreeTemplate<Node>>(*tree);
+	          auto treeTpl = make_shared<TreeTemplate<Node>>(*tree);
               mafStat = make_shared<MaximumLikelihoodModelFitMafStatistics>(process, treeTpl, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             } else {
