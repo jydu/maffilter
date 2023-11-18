@@ -108,7 +108,7 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
   }
   currentBlock_->clear();
   for (size_t i = 0; i < tmp.size(); ++i) {
-    currentBlock_->addSequence(tmp[i]->getName(), tmp[i]);
+    currentBlock_->addSequence(tmp[i]);
   }
 
   //Done:
