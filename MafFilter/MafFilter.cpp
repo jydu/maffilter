@@ -1217,7 +1217,7 @@ int main(int args, char** argv)
       else if (cmdName == "DistanceBasedPhylogeny") {
         string distMethodName = ApplicationTools::getStringParameter("method", cmdArgs, "bionj");
         string distProperty = ApplicationTools::getStringParameter("dist_mat", cmdArgs, "none");
-        unique_ptr<DistanceMethod> distMethod = nullptr;
+        unique_ptr<DistanceMethodInterface> distMethod = nullptr;
         if (distMethodName == "upgma") {
           distMethod = make_unique<PGMA>(false);
         } else if (distMethodName == "wpgma") {
