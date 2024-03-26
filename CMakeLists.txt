@@ -12,7 +12,7 @@ IF(NOT CMAKE_BUILD_TYPE)
       FORCE)
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Weffc++ -Wshadow")
+add_compile_options(-std=c++14 -Wall -Weffc++ -Wshadow)
 
 
 
