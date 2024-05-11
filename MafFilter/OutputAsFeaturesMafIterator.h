@@ -78,7 +78,7 @@ class OutputAsFeaturesMafIterator:
       currentBlock_ = iterator_->nextBlock();
       if (output_ && currentBlock_)
         writeBlock(*output_, *currentBlock_);
-      return move(currentBlock_);
+      return std::move(currentBlock_);
     }
 
   private:

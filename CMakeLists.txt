@@ -184,7 +184,7 @@ IF (UNIX)
 
 #This creates rpm packages:
 ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
-ADD_DEPENDENCIES(rpm dist info man)
+ADD_DEPENDENCIES(rpm dist)
 
 ENDIF(UNIX)
 

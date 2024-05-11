@@ -192,7 +192,7 @@ int main(int args, char** argv)
       auto seqStream = reader.read(inputFormat);
       map<string, string> cmdArgs(reader.getUnparsedArguments());
       bool zeroBased = ApplicationTools::getBooleanParameter("zero_based", cmdArgs, true);
-      currentIterator = make_shared<SequenceStreamToMafIterator>(move(seqStream), stream, false, zeroBased);
+      currentIterator = make_shared<SequenceStreamToMafIterator>(std::move(seqStream), stream, false, zeroBased);
     }
     
     ApplicationTools::displayResult("Reading file", inputFile + " as " + inputFormat + (compress == "none" ? "" : "(" + compress + ")"));
@@ -1013,7 +1013,7 @@ int main(int args, char** argv)
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ApplicationTools::displayResult("-- File compression", compress);
-        auto output = make_shared<StlOutputStream>(move(out));
+        auto output = make_shared<StlOutputStream>(std::move(out));
 
         auto iterator = make_shared<SequenceStatisticsMafIterator>(currentIterator, statistics);
         
@@ -1024,7 +1024,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reference species", ref);
         auto listener = make_unique<CsvStatisticsOutputIterationListener>(iterator, ref, output);
         
-        iterator->addIterationListener(move(listener));
+        iterator->addIterationListener(std::move(listener));
         currentIterator = iterator;
         iterator->setVerbose(verbose);
       }
@@ -1176,7 +1176,7 @@ int main(int args, char** argv)
 	  map<string, string> unparsedparams;
 	  auto model = PhylogeneticsApplicationTools::getBranchModel(AlphabetTools::DNA_ALPHABET, nullptr, nullptr, cmdArgs, unparsedparams);
 
-          auto distEst = make_unique<DistanceEstimation>(move(model), move(rdist));
+          auto distEst = make_unique<DistanceEstimation>(std::move(model), std::move(rdist));
           
           auto profiler =
             (prPath == "none") ? 0 :
@@ -1199,7 +1199,7 @@ int main(int args, char** argv)
           distEst->optimizer().setMessageHandler(messenger);
 
           auto iterator = make_shared<MaximumLikelihoodDistanceEstimationMafIterator>(currentIterator,
-              move(distEst), propGapsToKeep, gapsAsUnresolved, paramOpt, extendedSeqNames);
+              std::move(distEst), propGapsToKeep, gapsAsUnresolved, paramOpt, extendedSeqNames);
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(log);
           iterator->setVerbose(verbose);
@@ -1233,7 +1233,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reading distance matrix from", distProperty);
         ApplicationTools::displayResult("-- Build distance tree using", distMethodName);
 
-        auto iterator = make_shared<DistanceBasedPhylogenyReconstructionMafIterator>(currentIterator, move(distMethod), distProperty);
+        auto iterator = make_shared<DistanceBasedPhylogenyReconstructionMafIterator>(currentIterator, std::move(distMethod), distProperty);
         ApplicationTools::displayResult("-- Writing block-wise trees to", iterator->getPropertyName());
         iterator->setLogStream(log);
         currentIterator = iterator;
@@ -1266,8 +1266,8 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("   Command", command);
 
         auto iterator = make_shared<TreeBuildingSystemCallMafIterator>(currentIterator,
-            move(alnWriter), programInputFile,
-	    move(treeReader), programOutputFile,
+            std::move(alnWriter), programInputFile,
+	    std::move(treeReader), programOutputFile,
 	    command, propertyName);
 
         iterator->setLogStream(log);
@@ -1362,7 +1362,7 @@ int main(int args, char** argv)
         auto oAln = bppoWriter.read(description);
         if (multipleFiles) {
           iterator = make_shared<OutputAlignmentMafIterator>(currentIterator,
-			 outputFile, move(oAln), mask, coords, header, reference);
+			 outputFile, std::move(oAln), mask, coords, header, reference);
         } else {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
@@ -1379,7 +1379,7 @@ int main(int args, char** argv)
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression", compress);
           iterator = make_shared<OutputAlignmentMafIterator>(currentIterator,
-			 out, move(oAln), mask, coords, header, reference);
+			 out, std::move(oAln), mask, coords, header, reference);
         }
         currentIterator = iterator;
       }
@@ -1832,8 +1832,8 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("   Command", command);
 
         auto iterator = make_shared<SystemCallMafIterator>(currentIterator, 
-            move(alnWriter), programInputFile, 
-	    move(alnReader), programOutputFile,
+            std::move(alnWriter), programInputFile, 
+	    std::move(alnReader), programOutputFile,
 	    command, hotTest);
 
         iterator->setLogStream(log);

@@ -60,9 +60,9 @@ unique_ptr<MafBlock> TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
   for (size_t i = 0; i < leaves.size(); ++i) {
     leaves[i]->setName(nameIndex[leaves[i]->getName()]);
   }
-  currentBlock_->setProperty(propertyName_, move(tree));
+  currentBlock_->setProperty(propertyName_, std::move(tree));
 
   //Done:
-  return move(currentBlock_);
+  return std::move(currentBlock_);
 }
 

@@ -104,7 +104,7 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
     //NB: we discard any putative score associated to this sequence.
     string seqKey = "seq" + TextTools::toString(i);
     mseq->setContent(dynamic_cast<const Sequence&>(result->sequence(seqKey)).toString()); //NB shall we use getContent here?
-    tmp.push_back(move(mseq));
+    tmp.push_back(std::move(mseq));
   }
   currentBlock_->clear();
   for (size_t i = 0; i < tmp.size(); ++i) {
@@ -112,6 +112,6 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
   }
 
   //Done:
-  return move(currentBlock_);
+  return std::move(currentBlock_);
 }
 
