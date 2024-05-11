@@ -424,6 +424,9 @@ All block containing at least one species outside this list will be discarded.
 @item strict=yes/no
 If set to yes, only block containing at least one sequence from each species in the selection will be kept.
         
+@item keep=yes/no
+If strict is set to yes, tells if additional sequences should be kept in the block, or remove so that the output blocks only contain species from the selection.
+        
 @item remove_duplicates=yes/no
 If set to yes, only keep blocks for which only one sequence for each species is present.
 Blocks with paralogous sequences in at least one species will therefore be discarded. 
