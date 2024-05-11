@@ -16,6 +16,7 @@ foreach (target ${maffilter-targets})
   else (BUILD_STATIC)
     target_link_libraries (${target} ${BPP_LIBS_SHARED})
     target_link_libraries (${target} ${LIBS})
+    set_target_properties (${target} PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
   endif (BUILD_STATIC)
 endforeach (target)
 
