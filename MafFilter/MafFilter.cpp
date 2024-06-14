@@ -336,7 +336,7 @@ int main(int args, char** argv)
         else
           gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
         double em         = ApplicationTools::getParameter<double>("max.ent", cmdArgs, 0); //Default means no entropy threshold
-        bool missingAsGap = ApplicationTools::getParameter<bool>("missing_as_gap", cmdArgs, false);
+        bool missingAsGap = ApplicationTools::getBooleanParameter("missing_as_gap", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
@@ -404,7 +404,7 @@ int main(int args, char** argv)
         else
           gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
         unsigned int pm = ApplicationTools::getParameter<unsigned int>("max.pos", cmdArgs, 0);
-        bool missingAsGap = ApplicationTools::getParameter<bool>("missing_as_gap", cmdArgs, false);
+        bool missingAsGap = ApplicationTools::getBooleanParameter("missing_as_gap", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
@@ -467,8 +467,8 @@ int main(int args, char** argv)
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
         double       em = ApplicationTools::getParameter<double>      ("max.ent", cmdArgs, 0);
         unsigned int pm = ApplicationTools::getParameter<unsigned int>("max.pos", cmdArgs, 0);
-        bool missingAsGap = ApplicationTools::getParameter<bool>("missing_as_gap", cmdArgs, false);
-        bool ignoreGaps   = ApplicationTools::getParameter<bool>("ignore_gaps", cmdArgs, false);
+        bool missingAsGap = ApplicationTools::getBooleanParameter("missing_as_gap", cmdArgs, false);
+        bool ignoreGaps   = ApplicationTools::getBooleanParameter("ignore_gaps", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
