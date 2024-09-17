@@ -1023,8 +1023,9 @@ int main(int args, char** argv)
           throw Exception("reference argument in SequenceStatistics is deprecated: use ref_species instead.");
         }
         string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
+        string ref = ApplicationTools::getStringParameter("sep", cmdArgs, "\t");
         ApplicationTools::displayResult("-- Reference species", ref);
-        auto listener = make_unique<CsvStatisticsOutputIterationListener>(iterator, ref, output);
+        auto listener = make_unique<CsvStatisticsOutputIterationListener>(iterator, ref, output, sep);
         
         iterator->addIterationListener(std::move(listener));
         currentIterator = iterator;
