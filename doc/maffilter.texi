@@ -250,7 +250,7 @@ DATA=example.file //A user-defined variable, representing the input maf file, wi
 input.file=$(DATA).maf.gz  //Input maf file, gzipped
 input.file.compression=gzip
 output.log=$(DATA).maffilter.log //Output log file
-maf.filter= //A coma separated list of filters, here empty (the programs only read the input file and exits).
+maf.filter= //A comma-separated list of filters, here empty (the programs only read the input file and exits).
 @end verbatim
 The list of filters can be split on multiple lines for convenience, providing each line is escaped by a '\' at the end to indicate that the next line is a continuation of the current one:
 @verbatim
@@ -378,7 +378,7 @@ maf.filter=                                 \
 
 @table @command
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species. Only sequences corresponding to the selected species will be kept.
+A comma-separated, within parentheses, list of species. Only sequences corresponding to the selected species will be kept.
 Block without sequences from the selection will be discarded.
 
 @item strict=yes/no
@@ -418,7 +418,7 @@ maf.filter=                                 \
 
 @table @command
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species.
+A comma-separated, within parentheses, list of species.
 All block containing at least one species outside this list will be discarded.
 
 @item strict=yes/no
@@ -472,7 +472,7 @@ maf.filter=                                 \
 @table @command
 
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species.
+A comma-separated, within parentheses, list of species.
 These species only will be used for the synteny check.
 Other species will be concatenated in any situation, and their coordinates removed.
 
@@ -644,7 +644,7 @@ maf.filter=                                 \
 The species name for which chromosomes should be extracted.
 
 @item chromosome=@{(list)@}
-The name of the chromosome(s)/contig(s)/scaffold(s) to be filtered, separated by comas.
+The name of the chromosome(s)/contig(s)/scaffold(s) to be filtered, separated by commas.
 
 @end table
 
@@ -672,7 +672,7 @@ maf.filter=                                 \
 @table @command
 
 @item translation_file=@{path@}
-File path toward a translation file. The translation file should contain two columns, separated by comas, and no header.
+File path toward a translation file. The translation file should contain two columns, separated by commas, and no header.
 The first column contains the current chromosome names, and the second column contains the new name.
 Chromosome not mentionned in the table will be left untranslated. Additional columns in the table will be ignored.
 
@@ -844,7 +844,7 @@ maf.filter=                                 \
 @table @command
 
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species. Any column containing a gap in the specified species will be removed. If other species are present in the block, the corresponding character will be removed, whether it is a gap or not. The coordinates of these species will then be discarded.
+A comma-separated, within parentheses, list of species. Any column containing a gap in the specified species will be removed. If other species are present in the block, the corresponding character will be removed, whether it is a gap or not. The coordinates of these species will then be discarded.
 
 @end table
 
@@ -911,7 +911,7 @@ maf.filter=                                 \
 @table @command
 
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
 @item window.size=@{int>0@}
 The width, in bp, of the sliding window.
@@ -981,7 +981,7 @@ maf.filter=                                 \
 @table @command
 
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
 @item window.size=@{int>0@}
 The width, in bp, of the sliding window.
@@ -1044,7 +1044,7 @@ maf.filter=                                 \
 @table @command
 
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
 @item window.size=@{int>0@}
 The width, in bp, of the sliding window.
@@ -1104,7 +1104,7 @@ maf.filter=                                 \
 @table @command
 
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
+A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
 @item window.size=@{int>0@}
 The width, in bp, of the sliding window.
@@ -1154,7 +1154,7 @@ maf.filter=                                 \
 @table @command
 
 @item species=(species1, species2, etc)
-A coma separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only. The corresponding sequences must have a quality score line in the original file.
+A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only. The corresponding sequences must have a quality score line in the original file.
 
 @item window.size=@{int>0@}
 The width, in bp, of the sliding window.
@@ -1268,6 +1268,7 @@ maf.filter=                                 \
             BlockCounts),                   \
         ref_species=species1,               \
         file=data.statistics.csv,           \
+        sep=comma,                          \
         compression=none),                  \
     [...]
 @end example
@@ -1288,6 +1289,9 @@ A file path for the output file.
 
 @item compression=@{none|gzip|zip|bzip2@}
 Compression format for output file.
+
+@item sep=@{comma,tab,@{char@}@}
+Column delimiter. Comma, tab, or any character (do not use the comma character directly, as it would lead to a format error when parsing the file).
 
 @end table
 
