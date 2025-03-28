@@ -1482,10 +1482,10 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Reference sequence", reference);
         
         vector< vector<string> >genotypes = ApplicationTools::getVectorOfVectorsParameter<string>("genotypes", cmdArgs, ',', "");
-	bool allSingles = true;
+      	bool allSingles = true;
         for (size_t i = 0; i < genotypes.size(); ++i) {
           string tmp = "";
-	  if (genotypes[i].size() > 1) allSingles = false;
+	      if (genotypes[i].size() > 1) allSingles = false;
           for (auto g : genotypes[i]) {
             if (tmp != "") tmp += "|";
             tmp += g;
@@ -1496,15 +1496,18 @@ int main(int args, char** argv)
         bool outputAll = ApplicationTools::getBooleanParameter("all", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output non-variable positions", outputAll);
 
+        bool gapAsDel = ApplicationTools::getBooleanParameter("gap_as_deletion", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Consider gaps as a deletion allele", gapAsDel);
+
         shared_ptr<VcfOutputMafIterator> iterator;
         if (genotypes.size() > 0 && allSingles) {
-	  vector<string> simpleGenotypes;
-	  for (auto g : genotypes) simpleGenotypes.push_back(g[0]);
+	        vector<string> simpleGenotypes;
+	        for (auto g : genotypes) simpleGenotypes.push_back(g[0]);
           double outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
           ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
-          iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, simpleGenotypes, outputAll, outputDiploids);
+          iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, simpleGenotypes, outputAll, outputDiploids, gapAsDel);
         } else {
-          iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, genotypes, outputAll);
+          iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, genotypes, outputAll, gapAsDel);
         }
 
         iterator->setLogStream(log);
