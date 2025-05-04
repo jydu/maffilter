@@ -2682,7 +2682,9 @@ maf.filter=                                 \
         input.format=Fasta,                 \
         call=myscript.sh,                   \
         output.file=output.fa,              \
-        output.format=Fasta),               \
+        output.format=Fasta,                \
+        hot=yes,                            \
+        species_to_annotate=),              \
     [...]
 @end example
 @end cartouche
@@ -2707,6 +2709,14 @@ Alignment format for output file.
 
 @item call=@{string@}
 The system call to run external program.
+
+@item hot=@{bool@}
+Whether to perform a heads-or-tails test (align the reversed sequences and compare with the reversed alignment).
+
+@item species_to°annotate=@{string@}
+if hot = yes and the argument is not empty, add position scores as annotations to the given species.
+Use the first sequence for the species in case there are several. Annotations are not stored if no sequence for the species is available.
+
 
 @end table
 

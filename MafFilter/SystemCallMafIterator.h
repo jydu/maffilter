@@ -50,6 +50,7 @@ class SystemCallMafIterator:
     std::string outputFile_;
     std::string call_;
     bool hotTest_;
+    std::string refSeq_; //Sequence where to store alignment scores. If empty, do no store scores.
 
   public:
     SystemCallMafIterator(
@@ -59,37 +60,23 @@ class SystemCallMafIterator:
         std::unique_ptr<IAlignment> alnReader,
         const std::string& outputFile,
         const std::string& callCmd,
-        bool hotTest = false) :
+        bool hotTest = false,
+	const std::string refSeq = "") :
       AbstractFilterMafIterator(iterator),
           alnWriter_(std::move(alnWriter)),
           inputFile_(inputFile),
           alnReader_(std::move(alnReader)),
           outputFile_(outputFile),
           call_(callCmd),
-          hotTest_(hotTest)
+          hotTest_(hotTest),
+	  refSeq_(refSeq)
     {}
 
   private:
-    SystemCallMafIterator(const SystemCallMafIterator& iterator) :
-      AbstractFilterMafIterator(0),
-      alnWriter_(),
-      inputFile_(iterator.inputFile_),
-      alnReader_(),
-      outputFile_(iterator.outputFile_),
-      call_(iterator.call_),
-      hotTest_(iterator.hotTest_)
-    {}
+    SystemCallMafIterator(const SystemCallMafIterator& iterator) = delete;
+          
+    SystemCallMafIterator& operator=(const SystemCallMafIterator& iterator) = delete;
     
-    SystemCallMafIterator& operator=(const SystemCallMafIterator& iterator)
-    {
-      inputFile_ = iterator.inputFile_;
-      outputFile_ = iterator.outputFile_;
-      call_ = iterator.call_;
-      hotTest_ = iterator.hotTest_;
-      return *this;
-    }
-
-
   public:
     std::unique_ptr<MafBlock> analyseCurrentBlock_();
 

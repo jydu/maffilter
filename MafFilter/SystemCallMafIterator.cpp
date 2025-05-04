@@ -27,6 +27,7 @@ along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <Bpp/Seq/Container/VectorSiteContainer.h>
 #include <Bpp/Seq/Container/SiteContainerTools.h>
+#include <Bpp/Seq/SequenceWithQuality.h>
 
 using namespace bpp;
 using namespace std;
@@ -90,11 +91,39 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
 
     // Now build scores:
     //vector<int> cs = SiteContainerTools::getColumnScores(indexTest, indexRef, 0);
-    vector<double> sps = SiteContainerTools::getSumOfPairsScores(indexTest, indexRef, 0);
+    vector<double> sps = SiteContainerTools::getSumOfPairsScores(indexTest, indexRef, -1);
+    double nbPos = 0.;
+    double sumPos = 0.;
+    for (size_t i = 0; i < sps.size(); ++i) {
+      if (sps[i] >= 0.) {
+	nbPos ++;
+	sumPos += sps[i];
+      }
+    }
 
-    // Assign score
-    double s = VectorTools::mean<double, double>(sps);
+    // Assign global score:
+    double s = nbPos > 0 ? sumPos / nbPos : 0.;
     currentBlock_->setScore(s);
+
+    // Record site-specific scores:
+    if (refSeq_ != "" && currentBlock_->hasSequenceForSpecies(refSeq_)) 
+    {
+      auto seqQual = make_shared<SequenceQuality>(sps.size());
+      for (size_t i = 0; i < sps.size(); ++i) {
+	if (sps[i] < 0) {
+	  seqQual->setScore(i, -1);
+	}
+	else if (sps[i] == 1.)
+	{
+	  seqQual->setScore(i, 10);
+	}
+	else
+	{
+	  seqQual->setScore(i, static_cast<int>(floor(sps[i] * 10)));
+	}
+      }
+      currentBlock_->addAnnotationToSequenceForSpecies(refSeq_, seqQual); 
+    }
   }
 
   //Convert and assign the realigned sequences:

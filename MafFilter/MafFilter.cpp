@@ -86,6 +86,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf/OutputAlignmentMafIterator.h>
 #include <Bpp/Seq/Io/Maf/OutputDistanceMatrixMafIterator.h>
 #include <Bpp/Seq/Io/Maf/VcfOutputMafIterator.h>
+#include <Bpp/Seq/Io/Maf/EstSfsOutputMafIterator.h>
 #include <Bpp/Seq/Io/Maf/MsmcOutputMafIterator.h>
 #include <Bpp/Seq/Io/Maf/TableOutputMafIterator.h>
 #include <Bpp/Seq/Io/Maf/SequenceStatisticsMafIterator.h>
@@ -1639,6 +1640,69 @@ int main(int args, char** argv)
 
 
 
+      // +----------------+
+      // | EST-SFS output |
+      // +----------------+
+      else if (cmdName == "EstSfsOutput") {
+        string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
+        compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
+        ApplicationTools::displayResult("-- Output file", outputFile);
+        auto out = make_shared<filtering_ostream>();
+        if (compress == "none") {
+        } else if (compress == "gzip") {
+          out->push(gzip_compressor());
+        } else if (compress == "zip") {
+          out->push(zlib_compressor());
+        } else if (compress == "bzip2") {
+          out->push(bzip2_compressor());
+        } else
+          throw Exception("Bad output compression format: " + compress);
+        out->push(file_sink(outputFile));
+        ostreams.push_back(out);
+        ApplicationTools::displayResult("-- File compression", compress);
+
+        vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", cmdArgs, ',', "");
+        string tmp = "";
+        for (auto sp : ingroup) {
+          if (tmp != "") tmp += "|";
+          tmp += sp;
+        }
+        ApplicationTools::displayResult("-- Ingroup genomes", tmp);
+        
+        vector<string> outgroup1 = ApplicationTools::getVectorParameter<string>("outgroup1", cmdArgs, ',', "");
+        tmp = "";
+        for (auto sp : outgroup1) {
+          if (tmp != "") tmp += "|";
+          tmp += sp;
+        }
+        ApplicationTools::displayResult("-- Outgroup 1 genomes", tmp);
+        
+        vector<string> outgroup2 = ApplicationTools::getVectorParameter<string>("outgroup2", cmdArgs, ',', "");
+        tmp = "";
+        for (auto sp : outgroup2) {
+          if (tmp != "") tmp += "|";
+          tmp += sp;
+        }
+        ApplicationTools::displayResult("-- Outgroup 2 genomes", tmp);
+
+        vector<string> outgroup3 = ApplicationTools::getVectorParameter<string>("outgroup3", cmdArgs, ',', "");
+        tmp = "";
+        for (auto sp : outgroup3) {
+          if (tmp != "") tmp += "|";
+          tmp += sp;
+        }
+        ApplicationTools::displayResult("-- Outgroup 3 genomes", tmp);
+  
+        shared_ptr<EstSfsOutputMafIterator> iterator;
+        iterator = make_shared<EstSfsOutputMafIterator>(currentIterator, out, ingroup, outgroup1, outgroup2, outgroup3);
+
+        iterator->setLogStream(log);
+        iterator->setVerbose(verbose);
+        currentIterator = iterator;
+      }
+
+
+
       // +--------------------+
       // | Coordinates output |
       // +--------------------+
@@ -1829,7 +1893,9 @@ int main(int args, char** argv)
         auto alnReader = bppoReader.read(programOutputFormat);
         
         bool hotTest = ApplicationTools::getBooleanParameter("hot", cmdArgs, false);
+        const string hotSpecies = ApplicationTools::getStringParameter("species_to_annotate", cmdArgs, "");
         ApplicationTools::displayBooleanResult("-- Compute HoT score", hotTest);
+        ApplicationTools::displayResult("-- HoT score annotation to species", hotSpecies == "" ? "(no annotation)" : hotSpecies);
 
         string command = ApplicationTools::getStringParameter("call", cmdArgs, "echo \"TODO: implement wrapper!\"");
         
@@ -1839,7 +1905,7 @@ int main(int args, char** argv)
         auto iterator = make_shared<SystemCallMafIterator>(currentIterator, 
             std::move(alnWriter), programInputFile, 
 	    std::move(alnReader), programOutputFile,
-	    command, hotTest);
+	    command, hotTest, hotSpecies);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
