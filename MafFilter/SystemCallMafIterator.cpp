@@ -55,6 +55,20 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
   //Read the results:
   auto result = alnReader_->readAlignment(outputFile_, AlphabetTools::DNA_ALPHABET);
 
+  //Convert and assign the realigned sequences:
+  vector<unique_ptr<MafSequence>> tmp;
+  for (size_t i = 0; i < currentBlock_->getNumberOfSequences(); ++i) {
+    unique_ptr<MafSequence> mseq(currentBlock_->sequence(i).cloneMeta());
+    //NB: we discard any putative score associated to this sequence.
+    string seqKey = "seq" + TextTools::toString(i);
+    mseq->setContent(dynamic_cast<const Sequence&>(result->sequence(seqKey)).toString()); //NB shall we use getContent here?
+    tmp.push_back(std::move(mseq));
+  }
+  currentBlock_->clear();
+  for (size_t i = 0; i < tmp.size(); ++i) {
+    currentBlock_->addSequence(tmp[i]);
+  }
+
   //Perform a Head-or-Tail test to compute alignment scores (optional):
   if (hotTest_) {
     //Reverse the alignment:
@@ -91,7 +105,7 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
 
     // Now build scores:
     //vector<int> cs = SiteContainerTools::getColumnScores(indexTest, indexRef, 0);
-    vector<double> sps = SiteContainerTools::getSumOfPairsScores(indexTest, indexRef, -1);
+    vector<double> sps = SiteContainerTools::getSumOfPairsScores(indexTest, indexRef, 1);
     double nbPos = 0.;
     double sumPos = 0.;
     for (size_t i = 0; i < sps.size(); ++i) {
@@ -105,7 +119,7 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
     double s = nbPos > 0 ? sumPos / nbPos : 0.;
     currentBlock_->setScore(s);
 
-    // Record site-specific scores:
+    // Record and assign site-specific scores:
     if (refSeq_ != "" && currentBlock_->hasSequenceForSpecies(refSeq_)) 
     {
       auto seqQual = make_shared<SequenceQuality>(sps.size());
@@ -124,20 +138,6 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
       }
       currentBlock_->addAnnotationToSequenceForSpecies(refSeq_, seqQual); 
     }
-  }
-
-  //Convert and assign the realigned sequences:
-  vector<unique_ptr<MafSequence>> tmp;
-  for (size_t i = 0; i < currentBlock_->getNumberOfSequences(); ++i) {
-    unique_ptr<MafSequence> mseq(currentBlock_->sequence(i).cloneMeta());
-    //NB: we discard any putative score associated to this sequence.
-    string seqKey = "seq" + TextTools::toString(i);
-    mseq->setContent(dynamic_cast<const Sequence&>(result->sequence(seqKey)).toString()); //NB shall we use getContent here?
-    tmp.push_back(std::move(mseq));
-  }
-  currentBlock_->clear();
-  for (size_t i = 0; i < tmp.size(); ++i) {
-    currentBlock_->addSequence(tmp[i]);
   }
 
   //Done:
