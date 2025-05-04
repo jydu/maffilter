@@ -104,8 +104,7 @@ unique_ptr<MafBlock> SystemCallMafIterator::analyseCurrentBlock_() {
     SiteContainerTools::getSequencePositions(*result, indexRef);
 
     // Now build scores:
-    //vector<int> cs = SiteContainerTools::getColumnScores(indexTest, indexRef, 0);
-    vector<double> sps = SiteContainerTools::getSumOfPairsScores(indexTest, indexRef, 1);
+    vector<double> sps = SiteContainerTools::getSumOfPairsScores(indexRef, indexTest, 1);
     double nbPos = 0.;
     double sumPos = 0.;
     for (size_t i = 0; i < sps.size(); ++i) {
