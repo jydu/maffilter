@@ -75,6 +75,7 @@ Cleaning alignment blocks
 
 * MinBlockLength::
 * MinBlockSize::
+* MinAlignmentScore::
 * XFullGap::
 * RemoveEmptySequences::
 * AlnFilter::
@@ -758,6 +759,7 @@ In the last case, the windows will have at least the specified size, but might b
 @menu
 * MinBlockLength::
 * MinBlockSize::
+* MinAlignmentScore::
 * XFullGap::
 * RemoveEmptySequences::
 * AlnFilter::
@@ -795,7 +797,7 @@ The minimum length.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node MinBlockSize, XFullGap, MinBlockLength, Cleaning
+@node MinBlockSize, MinAlignmentScore, MinBlockLength, Cleaning
 @subsection Minumum block size
 
 The @command{MinBlockSize} filter discards blocks with less sequences than a given threshold.
@@ -822,7 +824,34 @@ The minimum size.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node XFullGap, RemoveEmptySequences, MinBlockSize, Cleaning
+@node MinAlignmentScore, XFullGap, MinBlockSize, Cleaning
+@subsection Minumum alignment score
+
+The @command{MinAlingmentScore} filter discards blocks with a score lower than a given threshold.
+
+@heading Synopsis:
+
+@cartouche
+@example
+maf.filter=                                 \
+    [...],
+    MinAlignmentScore(min_score=0.9),       \
+    [...]
+@end example
+@end cartouche
+
+@heading Arguments:
+
+@table @command
+
+@item min_score=@{float>0@}
+The minimum alignment score.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node XFullGap, RemoveEmptySequences, MinAlignmentScore, Cleaning
 @subsection Exclude full gap columns
 
 Remove gap-only columns from blocks. This does not modify coordinates and might be necessary after a @command{Subset} filter.

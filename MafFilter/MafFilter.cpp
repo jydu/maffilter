@@ -64,6 +64,7 @@ using namespace boost::iostreams;
 #include <Bpp/Seq/Io/Maf/BlockMergerMafIterator.h>
 #include <Bpp/Seq/Io/Maf/BlockLengthMafIterator.h>
 #include <Bpp/Seq/Io/Maf/BlockSizeMafIterator.h>
+#include <Bpp/Seq/Io/Maf/AlignmentScoreFilterMafIterator.h>
 #include <Bpp/Seq/Io/Maf/ChromosomeMafIterator.h>
 #include <Bpp/Seq/Io/Maf/ChromosomeRenamingMafIterator.h>
 #include <Bpp/Seq/Io/Maf/ConcatenateMafIterator.h>
@@ -729,6 +730,18 @@ int main(int args, char** argv)
         if (minSize > 5)
           ApplicationTools::displayWarning("!! Warning, in previous version of maffilter BlockLength was named BlockSize... Check!");
         auto iterator = make_shared<BlockSizeMafIterator>(currentIterator, minSize);
+        iterator->setLogStream(log);
+        currentIterator = iterator;
+      }
+
+
+      // +---------------------------+
+      // | Alignment score filtering |
+      // +---------------------------+
+      else if (cmdName == "MinAlignmentScore") {
+        double minScore = ApplicationTools::getParameter<double>("min_score", cmdArgs, 0.);
+        ApplicationTools::displayResult("-- Minimum alignment score required", minScore);
+        auto iterator = make_shared<AlignmentScoreFilterMafIterator>(currentIterator, minScore);
         iterator->setLogStream(log);
         currentIterator = iterator;
       }
