@@ -402,10 +402,10 @@ int main(int args, char** argv)
         unsigned int gm = 0;
         double rm = 0;
         if (relative)
-          rm = ApplicationTools::getDoubleParameter("max.gap", cmdArgs, 0);
+          rm = ApplicationTools::getDoubleParameter("max_gap", cmdArgs, 0);
         else
-          gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
-        unsigned int pm = ApplicationTools::getParameter<unsigned int>("max.pos", cmdArgs, 0);
+          gm = ApplicationTools::getParameter<unsigned int>("max_gap", cmdArgs, 0);
+        unsigned int pm = ApplicationTools::getParameter<unsigned int>("max_pos", cmdArgs, 0);
         bool missingAsGap = ApplicationTools::getBooleanParameter("missing_as_gap", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
