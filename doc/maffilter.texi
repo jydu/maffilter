@@ -923,10 +923,10 @@ maf.filter=                                 \
     [...],
     AlnFilter(                              \
         species=(species1,species2,etc),    \
-        window.size=10,                     \
-        window.step=1,                      \
-        max.gap=9,                          \
-        max.ent=0.2,                        \
+        window_size=10,                     \
+        window_step=1,                      \
+        max_gap=9,                          \
+        max_ent=0.2,                        \
         missing_as_gap=yes,                 \
         relative=no,                        \
         file=data.trash_aln.maf.gz,         \
@@ -942,10 +942,10 @@ maf.filter=                                 \
 @item species=(species1, species2, etc)
 A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
-@item window.size=@{int>0@}
+@item window_size=@{int>0@}
 The width, in bp, of the sliding window.
 
-@item window.step=@{int>0@}
+@item window_step=@{int>0@}
 The step by which the window is moved, in bp.
 
 @item relative=@{boolean@}
@@ -954,7 +954,7 @@ Tell if maximum amount of gap is relative (that is, as a proportion of the total
 @item max.gap=@{int>0|1>double>0@}
 The maximum number of gaps allowed in each window (if relative is set to no), or the maximum proportion of gaps (if relative is set to yes)
 
-@item max.ent=@{float@}
+@item max_ent=@{float@}
 The maximum entropy allowed in each window.
 
 @item missing_as_gap=@{yes/no@}
@@ -993,10 +993,10 @@ maf.filter=                                 \
     [...],
     AlnFilter2(                             \
         species=(species1,species2,etc),    \
-        window.size=10,                     \
-        window.step=1,                      \
-        max.gap=1,                          \
-        max.pos=1,                          \
+        window_size=10,                     \
+        window_step=1,                      \
+        max_gap=1,                          \
+        max_pos=1,                          \
         relative=no,                        \
         missing_as_gap=yes,                 \
         file=data.trash_aln.maf.gz,         \
@@ -1012,10 +1012,10 @@ maf.filter=                                 \
 @item species=(species1, species2, etc)
 A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
-@item window.size=@{int>0@}
+@item window_size=@{int>0@}
 The width, in bp, of the sliding window.
 
-@item window.step=@{int>0@}
+@item window_step=@{int>0@}
 The step by which the window is moved, in bp.
 
 @item relative=@{boolean@}
@@ -1056,10 +1056,10 @@ maf.filter=                                 \
     [...],
     EntropyFilter(                          \
         species=(species1,species2,etc),    \
-        window.size=10,                     \
-        window.step=1,                      \
-        max.ent=0.2,                        \
-        max.pos=3,                          \
+        window_size=10,                     \
+        window_step=1,                      \
+        max_ent=0.2,                        \
+        max_pos=3,                          \
         missing_as_gap=yes,                 \
         ignore_gaps=yes,                    \
         file=data.trash_ent.maf.gz,         \
@@ -1075,16 +1075,16 @@ maf.filter=                                 \
 @item species=(species1, species2, etc)
 A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
-@item window.size=@{int>0@}
+@item window_size=@{int>0@}
 The width, in bp, of the sliding window.
 
-@item window.step=@{int>0@}
+@item window_step=@{int>0@}
 The step by which the window is moved, in bp.
 
-@item max.ent=@{float@}
+@item max_ent=@{float@}
 The maximum entropy allowed at each site.
 
-@item max.pos=@{int>0@}
+@item max_pos=@{int>0@}
 The maximum number of positions with an entropy higher than the given threshold.
 
 @item missing_as_gap=@{yes/no@}
@@ -1119,9 +1119,9 @@ maf.filter=                                 \
     [...],
     MaskFilter(                             \
         species=(species1,species2,etc),    \
-        window.size=10,                     \
-        window.step=1,                      \
-        max.masked=2,                       \
+        window_size=10,                     \
+        window_step=1,                      \
+        max_masked=2,                       \
         file=data.trash_msk.maf.gz,         \
         compression=gzip),                  \
     [...]
@@ -1135,13 +1135,13 @@ maf.filter=                                 \
 @item species=(species1, species2, etc)
 A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only.
 
-@item window.size=@{int>0@}
+@item window_size=@{int>0@}
 The width, in bp, of the sliding window.
 
-@item window.step=@{int>0@}
+@item window_step=@{int>0@}
 The step by which the window is moved, in bp.
 
-@item max.masked=@{int>0@}
+@item max_masked=@{int>0@}
 The maximum number of lower-case characters allowed in each window.
 
 @item file=@{none|@{path@}@}
@@ -1169,9 +1169,9 @@ maf.filter=                                 \
     [...],
     QualFilter(                             \
         species=(species1,species2,etc),    \
-        window.size=10,                     \
-        window.step=1,                      \
-        min.qual=0.8,                       \
+        window_size=10,                     \
+        window_step=1,                      \
+        min_qual=0.8,                       \
         file=data.trash_qual.maf.gz,        \
         compression=gzip),                  \
     [...]
@@ -1185,13 +1185,13 @@ maf.filter=                                 \
 @item species=(species1, species2, etc)
 A comma-separated, within parentheses, list of species. All calculations will be performed on the sub-alignment corresponding to these species only. The corresponding sequences must have a quality score line in the original file.
 
-@item window.size=@{int>0@}
+@item window_size=@{int>0@}
 The width, in bp, of the sliding window.
 
-@item window.step=@{int>0@}
+@item window_step=@{int>0@}
 The step by which the window is moved, in bp.
 
-@item min.qual=@{double@}
+@item min_qual=@{double@}
 The minimum average quality allowed for each window.
 
 @item file=@{none|@{path@}@}

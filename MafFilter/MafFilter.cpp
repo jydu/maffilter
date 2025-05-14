@@ -328,8 +328,8 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter'.");
-        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
-        unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
+        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window_size", cmdArgs, 10);
+        unsigned int st = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, 5);
         bool relative   = ApplicationTools::getBooleanParameter("relative", cmdArgs, false);
         unsigned int gm = 0;
         double rm = 0;
@@ -396,8 +396,8 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
-        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
-        unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
+        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window_size", cmdArgs, 10);
+        unsigned int st = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, 5);
         bool relative   = ApplicationTools::getBooleanParameter("relative", cmdArgs, false);
         unsigned int gm = 0;
         double rm = 0;
@@ -465,10 +465,10 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
-        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
-        unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
-        double       em = ApplicationTools::getParameter<double>      ("max.ent", cmdArgs, 0);
-        unsigned int pm = ApplicationTools::getParameter<unsigned int>("max.pos", cmdArgs, 0);
+        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window_size", cmdArgs, 10);
+        unsigned int st = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, 5);
+        double       em = ApplicationTools::getParameter<double>      ("max_ent", cmdArgs, 0);
+        unsigned int pm = ApplicationTools::getParameter<unsigned int>("max_pos", cmdArgs, 0);
         bool missingAsGap = ApplicationTools::getBooleanParameter("missing_as_gap", cmdArgs, false);
         bool ignoreGaps   = ApplicationTools::getBooleanParameter("ignore_gaps", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
@@ -525,9 +525,9 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'MaskFilter'.");
-        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
-        unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
-        unsigned int mm = ApplicationTools::getParameter<unsigned int>("max.masked", cmdArgs, 0);
+        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window_size", cmdArgs, 10);
+        unsigned int st = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, 5);
+        unsigned int mm = ApplicationTools::getParameter<unsigned int>("max_masked", cmdArgs, 0);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
@@ -576,9 +576,9 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'QualFilter'.");
-        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window.size", cmdArgs, 10);
-        unsigned int st = ApplicationTools::getParameter<unsigned int>("window.step", cmdArgs, 5);
-        double       mq = ApplicationTools::getDoubleParameter("min.qual", cmdArgs, 0);
+        unsigned int ws = ApplicationTools::getParameter<unsigned int>("window_size", cmdArgs, 10);
+        unsigned int st = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, 5);
+        double       mq = ApplicationTools::getDoubleParameter("min_qual", cmdArgs, 0);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
