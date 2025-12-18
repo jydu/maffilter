@@ -64,7 +64,7 @@ void FstMafStatistics::compute(const MafBlock& block)
     while(nbPermutations < minNbPermutations_ || (nbTests == 0 && nbPermutations < maxNbPermutations_)) {
       ++nbPermutations;
       if (verbose_) {
-        ApplicationTools::displayGauge(nbPermutations, maxNbPermutations_, '=', "Compute Fst on permutations");
+        ApplicationTools::displayGauge(static_cast<size_t>(nbPermutations), static_cast<size_t>(maxNbPermutations_), '=', "Compute Fst on permutations");
       }
       vector<string> individuals = pop1_;
       individuals.insert(individuals.end(), pop2_.begin(), pop2_.end());

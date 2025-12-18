@@ -1,130 +1,158 @@
-# CMake script for the MafFilter package
-# Author: Julien Dutheil
-# Created: 27/04/2010
+# SPDX-FileCopyrightText: The Bio++ Development Group
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 # Global parameters
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
-PROJECT(maffilter CXX)
+cmake_minimum_required(VERSION 3.10)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-ENDIF()
+project(maffilter CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-std=c++14 -Wall -Weffc++ -Wshadow)
+# Compile options
+add_compile_options(-Wall -Weffc++ -Wshadow -Wconversion)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE
+        RelWithDebInfo
+        CACHE STRING
+        "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+        FORCE
+    )
+endif()
 
 
 #static linkage?
-IF(NOT BUILD_STATIC)
-  SET(BUILD_STATIC FALSE CACHE BOOL
-      "Enable static linkage."
-      FORCE)
-ENDIF()
-IF(BUILD_STATIC)
-  MESSAGE(STATUS "Static linkage requested.")
-  SET (CMAKE_CXX_FLAGS "-static -static-libstdc++ -static-libgcc ${CMAKE_CXX_FLAGS}")
-ENDIF()
+if(NOT BUILD_STATIC)
+    set(BUILD_STATIC FALSE CACHE BOOL "Enable static linkage." FORCE)
+endif()
+if(BUILD_STATIC)
+    message(STATUS "Static linkage requested.")
+endif()
 
 # Check compression program
 # COMPRESS_PROGRAM controls the choice of program
 # COMPRESS_EXT can be used to override the file extension
-if (NOT COMPRESS_PROGRAM)
-  set (COMPRESS_PROGRAM gzip CACHE STRING "Set program for compressing documentation" FORCE)
-endif ()
-find_program (COMPRESS_BIN NAMES ${COMPRESS_PROGRAM} DOC "${COMPRESS_PROGRAM} compression program")
-if (NOT COMPRESS_BIN)
-  message (STATUS "${COMPRESS_PROGRAM} program not found, text doc will not be compressed")
-else ()
-  # Deduce COMPRESS_EXT for known compression programs if not set
-  if (NOT COMPRESS_EXT)
-    if (${COMPRESS_PROGRAM} STREQUAL "gzip")
-      set (COMPRESS_EXT "gz")
-    elseif (${COMPRESS_PROGRAM} STREQUAL "bzip2")
-      set (COMPRESS_EXT "bz2")
-    else ()
-      set (COMPRESS_EXT "${COMPRESS_PROGRAM}") # Default: program name (works for xz/lzma)
-    endif ()
-  endif ()
-  # Generate command line args (always add -c to output compressed file to stdout)
-  if (${COMPRESS_PROGRAM} STREQUAL "gzip")
-    # -n for no timestamp in files (reproducible builds)
-    # -9 for maximum compression (lintian error)
-    set (COMPRESS_ARGS -c -n -9)
-  else ()
-    set (COMPRESS_ARGS -c)
-  endif ()
-  message (STATUS "Found ${COMPRESS_BIN} compression program, using file extension .${COMPRESS_EXT}")
-endif ()
+if(NOT COMPRESS_PROGRAM)
+    set(COMPRESS_PROGRAM
+        gzip
+        CACHE STRING
+        "Set program for compressing documentation"
+        FORCE
+    )
+endif()
+find_program(
+    COMPRESS_BIN
+    NAMES ${COMPRESS_PROGRAM}
+    DOC "${COMPRESS_PROGRAM} compression program"
+)
+if(NOT COMPRESS_BIN)
+    message(
+        STATUS
+        "${COMPRESS_PROGRAM} program not found, text doc will not be compressed"
+    )
+else()
+    # Deduce COMPRESS_EXT for known compression programs if not set
+    if(NOT COMPRESS_EXT)
+        if(${COMPRESS_PROGRAM} STREQUAL "gzip")
+            set(COMPRESS_EXT "gz")
+        elseif(${COMPRESS_PROGRAM} STREQUAL "bzip2")
+            set(COMPRESS_EXT "bz2")
+        else()
+            set(COMPRESS_EXT "${COMPRESS_PROGRAM}") # Default: program name (works for xz/lzma)
+        endif()
+    endif()
+    # Generate command line args (always add -c to output compressed file to stdout)
+    if(${COMPRESS_PROGRAM} STREQUAL "gzip")
+        # -n for no timestamp in files (reproducible builds)
+        # -9 for maximum compression (lintian error)
+        set(COMPRESS_ARGS -c -n -9)
+    else()
+        set(COMPRESS_ARGS -c)
+    endif()
+    message(
+        STATUS
+        "Found ${COMPRESS_BIN} compression program, using file extension .${COMPRESS_EXT}"
+    )
+endif()
 
 # Find dependencies (add install directory to search)
-if (CMAKE_INSTALL_PREFIX)
-  set (CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
-endif (CMAKE_INSTALL_PREFIX)
+if(CMAKE_INSTALL_PREFIX)
+    set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
+endif(CMAKE_INSTALL_PREFIX)
 
-include (GNUInstallDirs)
-find_package (bpp-phyl-omics3 1.0.0 REQUIRED)
-find_package (bpp-popgen3 1.0.0 REQUIRED)
+include(GNUInstallDirs)
+find_package(bpp-phyl-omics 3.0.0 REQUIRED)
+find_package(bpp-popgen 3.0.0 REQUIRED)
 
 #Find boost libraries
-SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
-SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE( Boost 1.34.0 COMPONENTS iostreams )
+set(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost CONFIG REQUIRED)
+#find_package(Boost 1.34.0 COMPONENTS iostreams)
 
-IF(Boost_FOUND)
-  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-  SET(LIBS ${LIBS} ${Boost_LIBRARIES})
-  MESSAGE("-- Boost libraries found here:")
-  MESSAGE("   includes: ${Boost_INCLUDE_DIRS}")
-  MESSAGE("   libraries: ${Boost_LIBRARIES}")
-ENDIF()
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    set(LIBS ${LIBS} ${Boost_LIBRARIES})
+    message("-- Boost libraries found here:")
+    message("   includes: ${Boost_INCLUDE_DIRS}")
+    message("   libraries: ${Boost_LIBRARIES}")
+endif()
 
-find_package (Eigen3 3.3 REQUIRED PATHS /usr/lib NO_MODULE)
+find_package(Eigen3 3.3 REQUIRED PATHS /usr/lib NO_MODULE)
 
 #here is a useful function:
-MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
-  #start:
-  FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
-  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
+macro(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
+    #start:
+    find_path(${lib_name}_INCLUDE_DIR ${include_to_find})
+    include_directories(${${lib_name}_INCLUDE_DIR})
 
-  IF(BUILD_STATIC)
-    SET(${lib_name}_STATIC_NAMES lib${lib_name}.a)
-    FIND_LIBRARY(${lib_name}_STATIC_LIBRARY NAMES ${${lib_name}_STATIC_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
-    IF(${lib_name}_STATIC_LIBRARY)
-      MESSAGE("-- Library ${lib_name} found here:")
-      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
-      MESSAGE("   static libraries: ${${lib_name}_STATIC_LIBRARY}")
-    ELSE()
-      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
-    ENDIF()
-    #add the dependency:
-    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_STATIC_LIBRARY})
-  ELSE()
-    SET(${lib_name}_NAMES ${lib_name} ${lib_name}.lib ${lib_name}.dll)
-    FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
-    IF(${lib_name}_LIBRARY)
-      MESSAGE("-- Library ${lib_name} found here:")
-      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
-      MESSAGE("   dynamic libraries: ${${lib_name}_LIBRARY}")
-    ELSE()
-      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
-    ENDIF()
-    #add the dependency:
-    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
-  ENDIF()
-  
-ENDMACRO(IMPROVED_FIND_LIBRARY)
+    if(BUILD_STATIC)
+        set(${lib_name}_STATIC_NAMES lib${lib_name}.a)
+        find_library(
+            ${lib_name}_STATIC_LIBRARY
+            NAMES ${${lib_name}_STATIC_NAMES}
+            PATH_SUFFIXES lib${LIB_SUFFIX}
+        )
+        if(${lib_name}_STATIC_LIBRARY)
+            message("-- Library ${lib_name} found here:")
+            message("   includes: ${${lib_name}_INCLUDE_DIR}")
+            message("   static libraries: ${${lib_name}_STATIC_LIBRARY}")
+        else()
+            message(FATAL_ERROR "${lib_name} required but not found.")
+        endif()
+        #add the dependency:
+        set(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_STATIC_LIBRARY})
+    else()
+        set(${lib_name}_NAMES ${lib_name} ${lib_name}.lib ${lib_name}.dll)
+        find_library(
+            ${lib_name}_LIBRARY
+            NAMES ${${lib_name}_NAMES}
+            PATH_SUFFIXES lib${LIB_SUFFIX}
+        )
+        if(${lib_name}_LIBRARY)
+            message("-- Library ${lib_name} found here:")
+            message("   includes: ${${lib_name}_INCLUDE_DIR}")
+            message("   dynamic libraries: ${${lib_name}_LIBRARY}")
+        else()
+            message(FATAL_ERROR "${lib_name} required but not found.")
+        endif()
+        #add the dependency:
+        set(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
+    endif()
+endmacro(IMPROVED_FIND_LIBRARY)
 
 # Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
 # standard install location
-IF(CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
-ENDIF(CMAKE_INSTALL_PREFIX)
-
+if(CMAKE_INSTALL_PREFIX)
+    set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
+endif(CMAKE_INSTALL_PREFIX)
 
 # Find the zlib installation
-IMPROVED_FIND_LIBRARY(LIBS z zlib.h)
+improved_find_library(LIBS z zlib.h)
 #This does not work with static linkage!!!
 #FIND_PACKAGE(ZLIB REQUIRED)
 #IF(ZLIB_FOUND)
@@ -136,7 +164,7 @@ IMPROVED_FIND_LIBRARY(LIBS z zlib.h)
 #ENDIF()
 
 # Find the bz2 installation
-IMPROVED_FIND_LIBRARY(LIBS bz2 bzlib.h)
+improved_find_library(LIBS bz2 bzlib.h)
 #This does not work with static linkage!!!
 #FIND_PACKAGE(BZip2 REQUIRED)
 #IF(BZIP2_FOUND)
@@ -148,43 +176,46 @@ IMPROVED_FIND_LIBRARY(LIBS bz2 bzlib.h)
 #ENDIF()
 
 # Subdirectories
-ADD_SUBDIRECTORY(MafFilter)
-ADD_SUBDIRECTORY(doc)
-ADD_SUBDIRECTORY(man)
+add_subdirectory(MafFilter)
+add_subdirectory(doc)
+add_subdirectory(man)
 
 # Packager
-SET(CPACK_PACKAGE_NAME "maffilter")
-SET(CPACK_PACKAGE_VENDOR "Julien Y. Dutheil")
-SET(CPACK_PACKAGE_VERSION "1.3.1")
-SET(CPACK_PACKAGE_VERSION_MAJOR "1")
-SET(CPACK_PACKAGE_VERSION_MINOR "3")
-SET(CPACK_PACKAGE_VERSION_PATCH "1")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Filtering of genome alignment in the Multiple Alignment Format (MAF)")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS")
-SET(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL")
-SET(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_PACKAGE_NAME "maffilter")
+set(CPACK_PACKAGE_VENDOR "Julien Y. Dutheil")
+set(CPACK_PACKAGE_VERSION "1.4.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "4")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+    "Filtering of genome alignment in the Multiple Alignment Format (MAF)"
+)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS")
+set(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL")
+set(CPACK_SOURCE_GENERATOR "TGZ")
 # /!\ This assumes that an external build is used
-SET(CPACK_SOURCE_IGNORE_FILES 
-       "/build/" 
-       "/examples/" 
-       "/\\\\.git/" 
-       "/\\\\.gitignore" 
-       ${CPACK_SOURCE_IGNORE_FILES}
-       )
+set(CPACK_SOURCE_IGNORE_FILES
+    "/build/"
+    "/examples/"
+    "/\\\\.git/"
+    "/\\\\.gitignore"
+    ${CPACK_SOURCE_IGNORE_FILES}
+)
 
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-SET(CPACK_DEBSOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}.orig")
-INCLUDE(CPack)
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+    "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
+)
+set(CPACK_DEBSOURCE_PACKAGE_FILE_NAME
+    "${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}.orig"
+)
+include(CPack)
 
 #This adds the 'dist' target
-ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-IF (UNIX)
-
-#This creates rpm packages:
-ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
-ADD_DEPENDENCIES(rpm dist)
-
-ENDIF(UNIX)
-
+if(UNIX)
+    #This creates rpm packages:
+    add_custom_target(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
+    add_dependencies(rpm dist)
+endif(UNIX)

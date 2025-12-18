@@ -1,23 +1,33 @@
-# CMake script for MafFilter package
-# Author: Julien Dutheil
-# Created: 27/04/2010
+# SPDX-FileCopyrightText: The Bio++ Development Group
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 
-ADD_EXECUTABLE(maffilter MafFilter.cpp OutputAsFeaturesMafIterator.cpp SystemCallMafIterator.cpp TreeBuildingSystemCallMafIterator.cpp PopGenMafStatistics.cpp)
-set (maffilter-targets
-  maffilter
-  )
+add_executable(
+    maffilter
+    MafFilter.cpp
+    OutputAsFeaturesMafIterator.cpp
+    SystemCallMafIterator.cpp
+    TreeBuildingSystemCallMafIterator.cpp
+    PopGenMafStatistics.cpp
+)
+set(maffilter-targets maffilter)
 
-foreach (target ${maffilter-targets})
-  # Link (static or shared)
-  if (BUILD_STATIC)
-    target_link_libraries (${target} ${BPP_LIBS_STATIC})
-    target_link_libraries (${target} ${LIBS})
-    set_target_properties (${target} PROPERTIES LINK_SEARCH_END_STATIC TRUE)
-  else (BUILD_STATIC)
-    target_link_libraries (${target} ${BPP_LIBS_SHARED})
-    target_link_libraries (${target} ${LIBS})
-    set_target_properties (${target} PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-  endif (BUILD_STATIC)
-endforeach (target)
+foreach(target ${maffilter-targets})
+    # Link (static or shared)
+    if(BUILD_STATIC)
+        target_link_libraries(${target} ${BPP_LIBS_STATIC})
+        target_link_libraries(${target} ${LIBS})
+        set_target_properties(${target} PROPERTIES LINK_SEARCH_END_STATIC TRUE)
+	target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
+    else(BUILD_STATIC)
+        target_link_libraries(${target} ${BPP_LIBS_SHARED})
+        target_link_libraries(${target} ${LIBS})
+        set_target_properties(
+            ${target}
+            PROPERTIES
+                INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+        )
+    endif(BUILD_STATIC)
+endforeach(target)
 
-install (TARGETS ${maffilter-targets} DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS ${maffilter-targets} DESTINATION ${CMAKE_INSTALL_BINDIR})

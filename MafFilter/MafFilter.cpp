@@ -132,9 +132,9 @@ void help()
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
-  cout << "*                  MAF Filter, version 1.3.1                     *" << endl;
+  cout << "*                  MAF Filter, version 1.4.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 18/08/18 *" << endl;
+  cout << "*                                           Last Modif. 17/12/25 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
