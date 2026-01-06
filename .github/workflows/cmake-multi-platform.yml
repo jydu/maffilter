@@ -85,6 +85,24 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=~/.local .. &&
         make install
 
+    - if: steps.cache-deps.outputs.cache-hit != 'true'
+      # No cache is present; we create one
+      name: Install bpp-seq-omics
+      run: |
+        cd ~/Sources/bpp-seq-omics && 
+        mkdir build && cd build && 
+        cmake -DCMAKE_INSTALL_PREFIX=~/.local .. &&
+        make install
+
+    - if: steps.cache-deps.outputs.cache-hit != 'true'
+      # No cache is present; we create one
+      name: Install bpp-phyl-omics
+      run: |
+        cd ~/Sources/bpp-phyl-omics && 
+        mkdir build && cd build && 
+        cmake -DCMAKE_INSTALL_PREFIX=~/.local .. &&
+        make install
+
     - name: Install eigen3
       run: sudo apt-get install libeigen3-dev
 
