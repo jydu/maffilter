@@ -63,6 +63,11 @@ jobs:
         mkdir -p ~/Sources && cd ~/Sources &&
         git clone https://github.com/BioPP/bpp-phyl.git
  
+    - name: Retrieve latest bpp-popgen
+      run: |
+        mkdir -p ~/Sources && cd ~/Sources &&
+        git clone https://github.com/BioPP/bpp-popgen.git
+ 
     - name: Retrieve latest bpp-seq-omics
       run: |
         mkdir -p ~/Sources && cd ~/Sources &&
@@ -111,6 +116,15 @@ jobs:
       name: Install bpp-phyl
       run: |
         cd ~/Sources/bpp-phyl && 
+        mkdir build && cd build && 
+        cmake -DCMAKE_INSTALL_PREFIX=~/.local .. &&
+        make install
+
+    - if: steps.cache-deps.outputs.cache-hit != 'true'
+      # No cache is present; we create one
+      name: Install bpp-popgen
+      run: |
+        cd ~/Sources/bpp-popgen && 
         mkdir build && cd build && 
         cmake -DCMAKE_INSTALL_PREFIX=~/.local .. &&
         make install
