@@ -2,4 +2,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-theme: jekyll-theme-tactile
+repos:
+-   repo: https://github.com/fsfe/reuse-tool
+    rev: v1.0.0
+    hooks:
+    - id: reuse

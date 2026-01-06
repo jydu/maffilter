@@ -1,7 +1,11 @@
+# SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename maffilter.info
-@settitle MafFilter Manual 1.3.1
+@settitle MafFilter Manual 1.4.0
 @c @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
@@ -12,9 +16,9 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.3.1.
+This is the manual of MafFilter, version 1.4.0.
 
-Copyright @copyright{} 2018 Julien Y. Dutheil
+Copyright @copyright{} 2026 Julien Y. Dutheil
 @end copying
 
 @titlepage
@@ -2389,6 +2393,10 @@ If set to 'yes', also output non-variable positions in the VCF file.
 If set to 'yes', 'artificial' homozygous diploids are written instead of haploid genotypes.
 This option might be useful for downstream software that do not properly accomodate haploid data.
 It only work when species are not already grouped in polyploids.
+
+@item gap_as_deletion=@{boolean@}
+Gap characters are considered as a real genotype (deletion), rather than missing data.
+This is currently done on a single-nucleotide basis, so that indels of length > 1 are recorded as multiple entries.
 
 @end table
 

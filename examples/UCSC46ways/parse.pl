@@ -1,4 +1,9 @@
 #!/usr/bin/perl -w
+
+# SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 use strict;
 use IO::Uncompress::Gunzip;
 use Bio::AlignIO;

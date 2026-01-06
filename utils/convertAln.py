@@ -1,5 +1,9 @@
 #! /usr/bin/python
 
+# SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Convert an alignment into a single-block MAF file.
 import sys
 from Bio import AlignIO

@@ -1,4 +1,10 @@
-**MafFilter** is a program dedicated to the analysis of genome alignments. It parses and manipulates [MAF files](https://genome.ucsc.edu/FAQ/FAQformat.html#format5) as well as more simple fasta files. Despite various filtering options and format conversion tools, **MafFilter** can compute a wide range of statistics (phylogenetic trees, nucleotide diversity, inferrence of selection, etc.). Current version is 1.3.0.
+<!--
+SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+**MafFilter** is a program dedicated to the analysis of genome alignments. It parses and manipulates [MAF files](https://genome.ucsc.edu/FAQ/FAQformat.html#format5) as well as more simple fasta files. Despite various filtering options and format conversion tools, **MafFilter** can compute a wide range of statistics (phylogenetic trees, nucleotide diversity, inferrence of selection, etc.). Current version is 1.4.0.
 
 
 ## What can MafFilter do?
@@ -22,8 +28,8 @@ For compiling the programs yourself, from the downloaded sources or from the git
 
 Several example data sets are distributed along with the source code of the package.
 PDF and HTML documentation can be generated from the source distribution using `make pdf` and `make html`, respectively.
-The HTML reference manual is also browsable as [here](maffilter.html) (single page) and [here](Manual/index.html) (multi-pages).
-Questions can be posted on the dedicated forum: [here](https://groups.google.com/forum/?hl=en#!forum/maffilter).
+The HTML reference manual is also browsable as [here](maffilter.html).
+Questions can be posted on the GitHub page: [here](https://github.com/jydu/maffilter/issues).
 
 ## References
 

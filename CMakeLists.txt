@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
 # SPDX-FileCopyrightText: The Bio++ Development Group
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -92,7 +93,7 @@ find_package(bpp-popgen 3.0.0 REQUIRED)
 set(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost CONFIG REQUIRED)
-#find_package(Boost 1.34.0 COMPONENTS iostreams)
+find_package(Boost 1.34.0 COMPONENTS iostreams)
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -190,9 +191,9 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "Filtering of genome alignment in the Multiple Alignment Format (MAF)"
 )
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS")
-set(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSES/GPL-3.0-or-later.txt")
+set(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS.txt")
+set(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL.txt")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 # /!\ This assumes that an external build is used
 set(CPACK_SOURCE_IGNORE_FILES

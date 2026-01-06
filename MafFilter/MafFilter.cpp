@@ -4,24 +4,10 @@
 // Created on: Jul 21 2010
 //
 
-/*
-Copyright or © or Copr. Julien Y. Dutheil, (2010)
-
-This file is part of MafFilter.
-
-MafFilter is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-MafFilter is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with MafFilter.  If not, see <https://www.gnu.org/licenses/>.
-*/
+// Copyright or © or Copr. Julien Y. Dutheil, (2010)
+// SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 // From the STL:
 #include <iostream>
@@ -836,7 +822,7 @@ int main(int args, char** argv)
       // | Empty sequences filtering |
       // +---------------------------+
       else if (cmdName == "RemoveEmptySequences") {
-        bool unresolvedAsGaps = ApplicationTools::getBooleanParameter("unresolved_as_gaps", cmdArgs, "");
+        bool unresolvedAsGaps = ApplicationTools::getBooleanParameter("unresolved_as_gaps", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGaps);
         auto iterator = make_shared<RemoveEmptySequencesMafIterator>(currentIterator, unresolvedAsGaps);
         iterator->setLogStream(log);
@@ -1160,7 +1146,7 @@ int main(int args, char** argv)
             throw Exception("Unrecognized gap option, should be either 'all', 'no_full_gap', 'no_double_gap' or 'no_gap'.");
           }
           ApplicationTools::displayResult("-- Gap option", gapOption);
-          bool unresolvedAsGap = ApplicationTools::getBooleanParameter("unresolved_as_gap", cmdArgs, "no");
+          bool unresolvedAsGap = ApplicationTools::getBooleanParameter("unresolved_as_gap", cmdArgs, false);
           ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGap);
           bool extendedSeqNames = ApplicationTools::getBooleanParameter("extended_names", cmdArgs, true);
           ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
@@ -1517,7 +1503,7 @@ int main(int args, char** argv)
         if (genotypes.size() > 0 && allSingles) {
 	        vector<string> simpleGenotypes;
 	        for (auto g : genotypes) simpleGenotypes.push_back(g[0]);
-          double outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
+          bool outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
           ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
           iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, simpleGenotypes, outputAll, outputDiploids, gapAsDel);
         } else {

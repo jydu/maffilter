@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 %define _prefix /usr
 
 URL: http://bioweb.me/maffilter

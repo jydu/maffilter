@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: The Bio++ Development Group
+# SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,13 +15,11 @@ set(maffilter-targets maffilter)
 foreach(target ${maffilter-targets})
     # Link (static or shared)
     if(BUILD_STATIC)
-        target_link_libraries(${target} ${BPP_LIBS_STATIC})
-        target_link_libraries(${target} ${LIBS})
+	    target_link_libraries(${target} ${BPP_LIBS_STATIC} ${LIBS})
         set_target_properties(${target} PROPERTIES LINK_SEARCH_END_STATIC TRUE)
 	target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
     else(BUILD_STATIC)
-        target_link_libraries(${target} ${BPP_LIBS_SHARED})
-        target_link_libraries(${target} ${LIBS})
+	    target_link_libraries(${target} ${BPP_LIBS_SHARED} ${LIBS})
         set_target_properties(
             ${target}
             PROPERTIES
