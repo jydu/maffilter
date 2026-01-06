@@ -83,7 +83,13 @@ jobs:
 
     - name: Install boost
       run: sudo apt-get install libboost-iostreams-dev
-
+    
+    - name: Install zlib
+      run: sudo apt-get install zlib1g-dev
+      
+    - name: Install bzip2
+      run: sudo apt-get install libbz2-dev
+    
     - name: Cache
       id: cache-deps
       uses: actions/cache@v4
