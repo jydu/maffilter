@@ -1,10 +1,3 @@
-//
-// File: MafFilter.cpp
-// Created by: Julien Dutheil
-// Created on: Jul 21 2010
-//
-
-// Copyright or © or Copr. Julien Y. Dutheil, (2010)
 // SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -21,7 +14,7 @@ using namespace std;
 #include "TreeBuildingSystemCallMafIterator.h"
 #include "PopGenMafStatistics.h"
 
-//From boost:
+// From boost:
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -120,7 +113,7 @@ int main(int args, char** argv)
   cout << "******************************************************************" << endl;
   cout << "*                  MAF Filter, version 1.4.0                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 17/12/25 *" << endl;
+  cout << "*                                           Last Modif. 29/01/26 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -129,7 +122,7 @@ int main(int args, char** argv)
     help();
     exit(0);
   }
-  
+
   try
   {
     BppApplication maffilter(args, argv, "MafFilter");
@@ -141,31 +134,43 @@ int main(int args, char** argv)
     string inputDot = ApplicationTools::getStringParameter("input.dots", maffilter.getParams(), "error", "", true, false);
 
     auto stream = make_shared<filtering_istream> ();
-    if (compress == "none") {
-    } else if (compress == "gzip") {
+    if (compress == "none")
+    {}
+    else if (compress == "gzip")
+    {
       stream->push(gzip_decompressor());
-    } else if (compress == "zip") {
+    }
+    else if (compress == "zip")
+    {
       stream->push(zlib_decompressor());
-    } else if (compress == "bzip2") {
+    }
+    else if (compress == "bzip2")
+    {
       stream->push(bzip2_decompressor());
-    } else
+    }
+    else
       throw Exception("Bad input incompression format: " + compress);
     stream->push(file_source(inputFile));
-    
+
     string logFile = ApplicationTools::getAFilePath("output.log", maffilter.getParams(), false, false);
     shared_ptr<StlOutputStream> log = nullptr;
-    if (logFile != "none") {
+    if (logFile != "none")
+    {
       log = make_shared<StlOutputStream>(make_unique<ofstream>(logFile.c_str(), ios::out));
     }
 
     shared_ptr<MafIteratorInterface> currentIterator;
 
-    if (inputFormat == "Maf") {
+    if (inputFormat == "Maf")
+    {
       short dotOption = MafParser::DOT_ERROR;
-      if (inputDot == "as_gaps") {
+      if (inputDot == "as_gaps")
+      {
         ApplicationTools::displayResult("Maf 'dotted' alignment input", string("converted to gaps"));
         dotOption = MafParser::DOT_ASGAP;
-      } else if (inputDot == "as_unresolved") {
+      }
+      else if (inputDot == "as_unresolved")
+      {
         ApplicationTools::displayResult("Maf 'dotted' alignment input", string("converted to unresolved"));
         dotOption = MafParser::DOT_ASUNRES;
       }
@@ -174,40 +179,46 @@ int main(int args, char** argv)
       if (!checkSize)
         ApplicationTools::displayBooleanResult("Check size of sequences", false);
       currentIterator = make_shared<MafParser>(stream, true, checkSize, dotOption);
-    } else {
-      if (inputDot == "as_gaps") throw Exception("'dot_as_gaps' option only available with Maf input.");
+    }
+    else
+    {
+      if (inputDot == "as_gaps")
+        throw Exception("'dot_as_gaps' option only available with Maf input.");
       BppOSequenceStreamReaderFormat reader;
       auto seqStream = reader.read(inputFormat);
       map<string, string> cmdArgs(reader.getUnparsedArguments());
       bool zeroBased = ApplicationTools::getBooleanParameter("zero_based", cmdArgs, true);
       currentIterator = make_shared<SequenceStreamToMafIterator>(std::move(seqStream), stream, false, zeroBased);
     }
-    
+
     ApplicationTools::displayResult("Reading file", inputFile + " as " + inputFormat + (compress == "none" ? "" : "(" + compress + ")"));
     ApplicationTools::displayResult("Output log file", logFile);
 
 
     vector<string> actions = ApplicationTools::getVectorParameter<string>("maf.filter", maffilter.getParams(), ',', "", "", false, false);
     vector<shared_ptr<filtering_ostream>> ostreams;
-    for (size_t a = 0; a < actions.size(); a++) {
+    for (size_t a = 0; a < actions.size(); a++)
+    {
       string cmdName;
       map<string, string> cmdArgs;
       KeyvalTools::parseProcedure(actions[a], cmdName, cmdArgs);
       (*ApplicationTools::message << "-------------------------------------------------------------------").endLine();
       ApplicationTools::displayResult("Adding filter", cmdName);
-      
+
       bool verbose = ApplicationTools::getBooleanParameter("verbose", cmdArgs, true, "", true, false);
       ApplicationTools::displayBooleanResult("-- Verbose", verbose);
 
       // +-----------------+
       // | Sequence subset |
       // +-----------------+
-      if (cmdName == "Subset") {
+      if (cmdName == "Subset")
+      {
         bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
         bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Sequences not in the list will be kept", keep);
-        if (cmdArgs.find("rm.duplicates") != cmdArgs.end()) {
+        if (cmdArgs.find("rm.duplicates") != cmdArgs.end())
+        {
           throw Exception("rm.duplicates argument in Subset is deprecated: use remove_duplicates instead.");
         }
         bool rmdupl = ApplicationTools::getBooleanParameter("remove_duplicates", cmdArgs, false);
@@ -225,7 +236,8 @@ int main(int args, char** argv)
       // +---------------------------+
       // | Sequence orphan selection |
       // +---------------------------+
-      else if (cmdName == "SelectOrphans") {
+      else if (cmdName == "SelectOrphans")
+      {
         bool strict = ApplicationTools::getBooleanParameter("strict", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- All species should be in output blocks", strict);
         bool keep = ApplicationTools::getBooleanParameter("keep", cmdArgs, false);
@@ -245,12 +257,14 @@ int main(int args, char** argv)
       // +---------------+
       // | Block merging |
       // +---------------+
-      else if (cmdName == "Merge") {
+      else if (cmdName == "Merge")
+      {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Merge'.");
 
-        if (cmdArgs.find("dist.max") != cmdArgs.end()) {
+        if (cmdArgs.find("dist.max") != cmdArgs.end())
+        {
           throw Exception("dist.max argument in Merge is deprecated: use dist_max instead.");
         }
         unsigned int distMax = ApplicationTools::getParameter<unsigned int>("dist_max", cmdArgs, 0);
@@ -260,16 +274,21 @@ int main(int args, char** argv)
         auto iterator = make_shared<BlockMergerMafIterator>(currentIterator, species, distMax, renameChimeras);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
-        if (cmdArgs.find("ignore.chr") != cmdArgs.end()) {
+        if (cmdArgs.find("ignore.chr") != cmdArgs.end())
+        {
           throw Exception("ignore.chr argument in Merge is deprecated: use ignore_chr instead.");
         }
         string ignoreChrList = ApplicationTools::getStringParameter("ignore_chr", cmdArgs, "none");
-        if (ignoreChrList != "none") {
-          if (ignoreChrList[0] == '(') {
+        if (ignoreChrList != "none")
+        {
+          if (ignoreChrList[0] == '(')
+          {
             StringTokenizer st(ignoreChrList.substr(1, ignoreChrList.size() - 2), ",");
             while (st.hasMoreToken())
               iterator->ignoreChromosome(st.nextToken());
-          } else {
+          }
+          else
+          {
             iterator->ignoreChromosome(ignoreChrList);
           }
         }
@@ -280,7 +299,8 @@ int main(int args, char** argv)
       // +---------------------+
       // | Block concatenation |
       // +---------------------+
-      else if (cmdName == "Concatenate") {
+      else if (cmdName == "Concatenate")
+      {
         unsigned int minimumSize = ApplicationTools::getParameter<unsigned int>("minimum_size", cmdArgs, 0);
         string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "", "", true, 2);
         ApplicationTools::displayResult("-- Minimum final block size", minimumSize);
@@ -296,7 +316,8 @@ int main(int args, char** argv)
       // +--------------------+
       // | Full gap filtering |
       // +--------------------+
-      else if (cmdName == "XFullGap") {
+      else if (cmdName == "XFullGap")
+      {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'XFullGap'.");
@@ -310,7 +331,8 @@ int main(int args, char** argv)
       // +---------------------+
       // | Alignment filtering |
       // +---------------------+
-      else if (cmdName == "AlnFilter") {
+      else if (cmdName == "AlnFilter")
+      {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter'.");
@@ -323,7 +345,7 @@ int main(int args, char** argv)
           rm = ApplicationTools::getDoubleParameter("max.gap", cmdArgs, 0);
         else
           gm = ApplicationTools::getParameter<unsigned int>("max.gap", cmdArgs, 0);
-        double em         = ApplicationTools::getParameter<double>("max.ent", cmdArgs, 0); //Default means no entropy threshold
+        double em         = ApplicationTools::getParameter<double>("max.ent", cmdArgs, 0); // Default means no entropy threshold
         bool missingAsGap = ApplicationTools::getBooleanParameter("missing_as_gap", cmdArgs, false);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
@@ -331,7 +353,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Window step", st);
         if (relative)
           ApplicationTools::displayResult("-- Max. gaps allowed in Window", TextTools::toString(rm * 100) + "%");
-        else 
+        else
           ApplicationTools::displayResult("-- Max. gaps allowed in Window", gm);
         ApplicationTools::displayResult("-- Max. total entropy in Window", em);
         ApplicationTools::displayBooleanResult("-- Missing sequence replaced by gaps", missingAsGap);
@@ -344,32 +366,42 @@ int main(int args, char** argv)
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
 
-        if (!trash) {
+        if (!trash)
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
-          //Now build an adaptor for retrieving the trashed blocks:
+          // Now build an adaptor for retrieving the trashed blocks:
           auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
-          //Add an output iterator:
+          // Add an output iterator:
           auto outIt = make_shared<OutputMafIterator>(trashIt, out);
-          //And then synchronize the two iterators:
+          // And then synchronize the two iterators:
           auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
-          //Returns last iterator:
+          // Returns last iterator:
           currentIterator = syncIt;
-        } else {
-          //We only get the remaining blocks here:
+        }
+        else
+        {
+          // We only get the remaining blocks here:
           currentIterator = iterator;
         }
       }
@@ -378,7 +410,8 @@ int main(int args, char** argv)
       // +-----------------------+
       // | Alignment filtering 2 |
       // +-----------------------+
-      else if (cmdName == "AlnFilter2") {
+      else if (cmdName == "AlnFilter2")
+      {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
@@ -399,7 +432,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Window step", st);
         if (relative)
           ApplicationTools::displayResult("-- Max. gaps allowed per position", TextTools::toString(rm * 100) + "%");
-        else 
+        else
           ApplicationTools::displayResult("-- Max. gaps allowed per position", gm);
         ApplicationTools::displayResult("-- Max. gap positions allowed", pm);
         ApplicationTools::displayBooleanResult("-- Missing sequence replaced by gaps", missingAsGap);
@@ -412,48 +445,58 @@ int main(int args, char** argv)
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
 
-        if (!trash) {
+        if (!trash)
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
-          //Now build an adaptor for retrieving the trashed blocks:
+          // Now build an adaptor for retrieving the trashed blocks:
           auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
-          //Add an output iterator:
+          // Add an output iterator:
           auto outIt = make_shared<OutputMafIterator>(trashIt, out);
-          //And then synchronize the two iterators:
+          // And then synchronize the two iterators:
           auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
-          //Returns last iterator:
+          // Returns last iterator:
           currentIterator = syncIt;
-        } else {
-          //We only get the remaining blocks here:
+        }
+        else
+        {
+          // We only get the remaining blocks here:
           currentIterator = iterator;
         }
       }
 
 
-
       // +-------------------+
       // | Entropy filtering |
       // +-------------------+
-      else if (cmdName == "EntropyFilter") {
+      else if (cmdName == "EntropyFilter")
+      {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'AlnFilter2'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window_size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, 5);
-        double       em = ApplicationTools::getParameter<double>      ("max_ent", cmdArgs, 0);
+        double em = ApplicationTools::getParameter<double>("max_ent", cmdArgs, 0);
         unsigned int pm = ApplicationTools::getParameter<unsigned int>("max_pos", cmdArgs, 0);
         bool missingAsGap = ApplicationTools::getBooleanParameter("missing_as_gap", cmdArgs, false);
         bool ignoreGaps   = ApplicationTools::getBooleanParameter("ignore_gaps", cmdArgs, false);
@@ -472,42 +515,52 @@ int main(int args, char** argv)
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
 
-        if (!trash) {
+        if (!trash)
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
-          //Now build an adaptor for retrieving the trashed blocks:
+          // Now build an adaptor for retrieving the trashed blocks:
           auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
-          //Add an output iterator:
+          // Add an output iterator:
           auto outIt = make_shared<OutputMafIterator>(trashIt, out);
-          //And then synchronize the two iterators:
+          // And then synchronize the two iterators:
           auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
-          //Returns last iterator:
+          // Returns last iterator:
           currentIterator = syncIt;
-        } else {
-          //We only get the remaining blocks here:
+        }
+        else
+        {
+          // We only get the remaining blocks here:
           currentIterator = iterator;
         }
       }
 
 
-
       // +----------------+
       // | Mask filtering |
       // +----------------+
-      else if (cmdName == "MaskFilter") {
+      else if (cmdName == "MaskFilter")
+      {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'MaskFilter'.");
@@ -524,32 +577,42 @@ int main(int args, char** argv)
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
 
-        if (!trash) {
+        if (!trash)
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
-          //Now build an adaptor for retrieving the trashed blocks:
+          // Now build an adaptor for retrieving the trashed blocks:
           auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
-          //Add an output iterator:
+          // Add an output iterator:
           auto outIt = make_shared<OutputMafIterator>(trashIt, out);
-          //And then synchronize the two iterators:
+          // And then synchronize the two iterators:
           auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
-          //Returns last iterator:
+          // Returns last iterator:
           currentIterator = syncIt;
-        } else {
-          //We only get the remaining blocks here:
+        }
+        else
+        {
+          // We only get the remaining blocks here:
           currentIterator = iterator;
         }
       }
@@ -558,13 +621,14 @@ int main(int args, char** argv)
       // +-------------------+
       // | Quality filtering |
       // +-------------------+
-      else if (cmdName == "QualFilter") {
+      else if (cmdName == "QualFilter")
+      {
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'QualFilter'.");
         unsigned int ws = ApplicationTools::getParameter<unsigned int>("window_size", cmdArgs, 10);
         unsigned int st = ApplicationTools::getParameter<unsigned int>("window_step", cmdArgs, 5);
-        double       mq = ApplicationTools::getDoubleParameter("min_qual", cmdArgs, 0);
+        double mq = ApplicationTools::getDoubleParameter("min_qual", cmdArgs, 0);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
         ApplicationTools::displayResult("-- Window size", ws);
@@ -575,42 +639,52 @@ int main(int args, char** argv)
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
 
-        if (!trash) {
+        if (!trash)
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
-          //Now build an adaptor for retrieving the trashed blocks:
+          // Now build an adaptor for retrieving the trashed blocks:
           auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
-          //Add an output iterator:
+          // Add an output iterator:
           auto outIt = make_shared<OutputMafIterator>(trashIt, out);
-          //And then synchronize the two iterators:
+          // And then synchronize the two iterators:
           auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
-          //Returns last iterator:
+          // Returns last iterator:
           currentIterator = syncIt;
-        } else {
-          //We only get the remaining blocks here:
+        }
+        else
+        {
+          // We only get the remaining blocks here:
           currentIterator = iterator;
         }
       }
 
 
-      
       // +-------------------------+
       // | Feature-based filtering |
       // +-------------------------+
-      else if (cmdName == "FeatureFilter") {
+      else if (cmdName == "FeatureFilter")
+      {
         string refSpecies = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string featureFile = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
         string featureFormat = ApplicationTools::getStringParameter("feature.format", cmdArgs, "GFF");
@@ -624,30 +698,45 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output removed blocks", !trash);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           featureStream.push(gzip_decompressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           featureStream.push(zlib_decompressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           featureStream.push(bzip2_decompressor());
-        } else
+        }
+        else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
         unique_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
-        if (featureFormat == "GFF") {
+        if (featureFormat == "GFF")
+        {
           ftReader.reset(new GffFeatureReader(featureStream));
-        } else if (featureFormat == "GTF") {
+        }
+        else if (featureFormat == "GTF")
+        {
           ftReader.reset(new GtfFeatureReader(featureStream));
-        } else if (featureFormat == "BedGraph") {
+        }
+        else if (featureFormat == "BedGraph")
+        {
           ftReader.reset(new BedGraphFeatureReader(featureStream));
-         } else
+        }
+        else
           throw Exception("Unsupported feature format: " + featureFormat);
         if (featureType.size() == 1 && featureType[0] == "all")
           ftReader->getAllFeatures(featuresSet);
-        else {
-          for (size_t i = 0; i < featureType.size(); ++i) {
+        else
+        {
+          for (size_t i = 0; i < featureType.size(); ++i)
+          {
             ApplicationTools::displayResult("-- Filter features of type", featureType[i]);
             ftReader->getFeaturesOfType(featureType[i], featuresSet);
           }
@@ -657,43 +746,54 @@ int main(int args, char** argv)
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
 
-        if (!trash) {
+        if (!trash)
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
-          //Now build an adaptor for retrieving the trashed blocks:
+          // Now build an adaptor for retrieving the trashed blocks:
           auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
-          //Add an output iterator:
+          // Add an output iterator:
           auto outIt = make_shared<OutputMafIterator>(trashIt, out);
-          //And then synchronize the two iterators:
+          // And then synchronize the two iterators:
           auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
-          //Returns last iterator:
+          // Returns last iterator:
           currentIterator = syncIt;
-        } else {
-          //We only get the remaining blocks here:
+        }
+        else
+        {
+          // We only get the remaining blocks here:
           currentIterator = iterator;
         }
       }
 
 
-
       // +------------------------+
       // | Block length filtering |
       // +------------------------+
-      else if (cmdName == "MinBlockLength") {
-        if (cmdArgs.find("min.length") != cmdArgs.end()) {
+      else if (cmdName == "MinBlockLength")
+      {
+        if (cmdArgs.find("min.length") != cmdArgs.end())
+        {
           throw Exception("min.length argument in MinBlockLength is deprecated: use min_length instead.");
         }
         unsigned int minLength = ApplicationTools::getParameter<unsigned int>("min_length", cmdArgs, 0);
@@ -707,8 +807,10 @@ int main(int args, char** argv)
       // +----------------------+
       // | Block size filtering |
       // +----------------------+
-      else if (cmdName == "MinBlockSize") {
-        if (cmdArgs.find("min.size") != cmdArgs.end()) {
+      else if (cmdName == "MinBlockSize")
+      {
+        if (cmdArgs.find("min.size") != cmdArgs.end())
+        {
           throw Exception("min.size argument in MinBlockSize is deprecated: use min_size instead.");
         }
         unsigned int minSize = ApplicationTools::getParameter<unsigned int>("min_size", cmdArgs, 0);
@@ -724,7 +826,8 @@ int main(int args, char** argv)
       // +---------------------------+
       // | Alignment score filtering |
       // +---------------------------+
-      else if (cmdName == "MinAlignmentScore") {
+      else if (cmdName == "MinAlignmentScore")
+      {
         double minScore = ApplicationTools::getParameter<double>("min_score", cmdArgs, 0.);
         ApplicationTools::displayResult("-- Minimum alignment score required", minScore);
         auto iterator = make_shared<AlignmentScoreFilterMafIterator>(currentIterator, minScore);
@@ -736,18 +839,21 @@ int main(int args, char** argv)
       // +----------------------+
       // | Chromosome filtering |
       // +----------------------+
-      else if (cmdName == "SelectChr") {
-        if (cmdArgs.find("reference") != cmdArgs.end()) {
+      else if (cmdName == "SelectChr")
+      {
+        if (cmdArgs.find("reference") != cmdArgs.end())
+        {
           throw Exception("reference argument in SelectChr is deprecated: use ref_species instead.");
         }
         string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
         vector<string> chr = ApplicationTools::getVectorParameter<string>("chromosome", cmdArgs, ',', "", "", false, true);
-	set<string> chrSet(chr.begin(), chr.end());
-	string text = "";
-	if (chrSet.size() > 0) {
-	  text = " +" + TextTools::toString(chrSet.size()) + " chromosomes.";
-	}
+        set<string> chrSet(chr.begin(), chr.end());
+        string text = "";
+        if (chrSet.size() > 0)
+        {
+          text = " +" + TextTools::toString(chrSet.size()) + " chromosomes.";
+        }
         ApplicationTools::displayResult("-- Chromosome(s):", chr[0] + text);
         auto iterator = make_shared<ChromosomeMafIterator>(currentIterator, ref, chrSet);
         iterator->setLogStream(log);
@@ -759,16 +865,18 @@ int main(int args, char** argv)
       // +---------------------+
       // | Chromosome renaming |
       // +---------------------+
-      else if (cmdName == "RenameChr") {
+      else if (cmdName == "RenameChr")
+      {
         string tlnFile = ApplicationTools::getAFilePath("translation_file", cmdArgs, true, true);
-	ifstream tlnInput(tlnFile, ios::in);
-	unique_ptr<DataTable> tlnTable(DataTable::read(tlnInput, ",", false));
+        ifstream tlnInput(tlnFile, ios::in);
+        unique_ptr<DataTable> tlnTable(DataTable::read(tlnInput, ",", false));
         ApplicationTools::displayResult("-- Chromosome translation table in:", tlnFile);
-	map<string, string> tln;
-	for (size_t i = 0; i < tlnTable->getNumberOfRows(); ++i) {
-	  tln[(*tlnTable)(i, 0)] = (*tlnTable)(i, 1);
+        map<string, string> tln;
+        for (size_t i = 0; i < tlnTable->getNumberOfRows(); ++i)
+        {
+          tln[(*tlnTable)(i, 0)] = (*tlnTable)(i, 1);
           ApplicationTools::displayResult("-- Translating " + (*tlnTable)(i, 0) + " to", (*tlnTable)(i, 1));
-	}
+        }
         auto iterator = make_shared<ChromosomeRenamingMafIterator>(currentIterator, tln);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
@@ -776,13 +884,13 @@ int main(int args, char** argv)
       }
 
 
-
       // +---------------------+
       // | Duplicate filtering |
       // +---------------------+
-      //Nb: this is kind of deprecated, should be done better by looking at partial overlap.
-      //could be useful for debugging though. We do not report it in the documentation for now.
-      else if (cmdName == "DuplicateFilter") {
+      // Nb: this is kind of deprecated, should be done better by looking at partial overlap.
+      // could be useful for debugging though. We do not report it in the documentation for now.
+      else if (cmdName == "DuplicateFilter")
+      {
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
         auto iterator = make_shared<DuplicateFilterMafIterator>(currentIterator, ref);
@@ -795,7 +903,8 @@ int main(int args, char** argv)
       // +-----------------+
       // | Order filtering |
       // +-----------------+
-      else if (cmdName == "OrderFilter") {
+      else if (cmdName == "OrderFilter")
+      {
         string ref = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         ApplicationTools::displayResult("-- Reference species", ref);
 
@@ -821,7 +930,8 @@ int main(int args, char** argv)
       // +---------------------------+
       // | Empty sequences filtering |
       // +---------------------------+
-      else if (cmdName == "RemoveEmptySequences") {
+      else if (cmdName == "RemoveEmptySequences")
+      {
         bool unresolvedAsGaps = ApplicationTools::getBooleanParameter("unresolved_as_gaps", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Unresolved as gaps", unresolvedAsGaps);
         auto iterator = make_shared<RemoveEmptySequencesMafIterator>(currentIterator, unresolvedAsGaps);
@@ -830,14 +940,15 @@ int main(int args, char** argv)
         currentIterator = iterator;
       }
 
-      
+
       // +----------------+
       // | Tree filtering |
       // +----------------+
-      else if (cmdName == "TreeFilter") {
+      else if (cmdName == "TreeFilter")
+      {
         string treeProperty = ApplicationTools::getStringParameter("tree", cmdArgs, "none");
         double maxBrLen = ApplicationTools::getDoubleParameter("max_brlen", cmdArgs, 0.1);
-        
+
         ApplicationTools::displayResult("-- Max. branch length", maxBrLen);
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, false, false);
         bool trash = outputFile == "none";
@@ -845,79 +956,103 @@ int main(int args, char** argv)
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
 
-        if (!trash) {
+        if (!trash)
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression for removed blocks", compress);
 
-          //Now build an adaptor for retrieving the trashed blocks:
+          // Now build an adaptor for retrieving the trashed blocks:
           auto trashIt = make_shared<TrashIteratorAdapter>(iterator);
-          //Add an output iterator:
+          // Add an output iterator:
           auto outIt = make_shared<OutputMafIterator>(trashIt, out);
-          //And then synchronize the two iterators:
+          // And then synchronize the two iterators:
           auto syncIt = make_shared<MafIteratorSynchronizer>(iterator, outIt);
-          //Returns last iterator:
+          // Returns last iterator:
           currentIterator = syncIt;
-        } else {
-          //We only get the remaining blocks here:
+        }
+        else
+        {
+          // We only get the remaining blocks here:
           currentIterator = iterator;
         }
       }
 
 
-
-
-
       // +---------------------+
       // | Sequence statistics |
       // +---------------------+
-      else if (cmdName == "SequenceStatistics") {
+      else if (cmdName == "SequenceStatistics")
+      {
         vector<string> statisticsDesc = ApplicationTools::getVectorParameter<string>("statistics", cmdArgs, ',', "", "", false, true);
-        
-        //Parse all statistics:
+
+        // Parse all statistics:
         vector<shared_ptr<MafStatisticsInterface>> statistics;
-        for (size_t i = 0; i < statisticsDesc.size(); ++i) {
+        for (size_t i = 0; i < statisticsDesc.size(); ++i)
+        {
           string statName;
           map<string, string> statArgs;
           KeyvalTools::parseProcedure(statisticsDesc[i], statName, statArgs);
           shared_ptr<MafStatisticsInterface> mafStat = nullptr;
           string statDesc = "";
-          if (statName == "BlockSize") {
+          if (statName == "BlockSize")
+          {
             mafStat = make_shared<BlockSizeMafStatistics>();
-          } else if (statName == "BlockLength") {
+          }
+          else if (statName == "BlockLength")
+          {
             mafStat = make_shared<BlockLengthMafStatistics>();
-          } else if (statName == "SequenceLength") {
+          }
+          else if (statName == "SequenceLength")
+          {
             string sp = ApplicationTools::getStringParameter("species", statArgs, "");
             mafStat = make_shared<SequenceLengthMafStatistics>(sp);
-          } else if (statName == "AlnScore") {
+          }
+          else if (statName == "AlnScore")
+          {
             mafStat = make_shared<AlignmentScoreMafStatistics>();
-          } else if (statName == "BlockCounts") {
+          }
+          else if (statName == "BlockCounts")
+          {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
             string suffix = ApplicationTools::getStringParameter("suffix", statArgs, "");
             mafStat = make_shared<CharacterCountsMafStatistics>(AlphabetTools::DNA_ALPHABET, species, suffix);
-          } else if (statName == "PairwiseDivergence") {
+          }
+          else if (statName == "PairwiseDivergence")
+          {
             string sp1 = ApplicationTools::getStringParameter("species1", statArgs, "");
             string sp2 = ApplicationTools::getStringParameter("species2", statArgs, "");
             mafStat = make_shared<PairwiseDivergenceMafStatistics>(sp1, sp2);
-          } else if (statName == "SiteFrequencySpectrum") {
+          }
+          else if (statName == "SiteFrequencySpectrum")
+          {
             vector<double> bounds  = ApplicationTools::getVectorParameter<double>("bounds", statArgs, ',', "", "", false, true);
             vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
             if (ingroup.size() < 2)
               throw Exception("ERROR: at least two ingroup sequences are required to compute the site frequency spectrum.");
             string outgroup        = ApplicationTools::getStringParameter("outgroup", statArgs, "", "", false, true);
-            mafStat = make_shared<SiteFrequencySpectrumMafStatistics>(AlphabetTools::DNA_ALPHABET, bounds, ingroup, outgroup); 
-          } else if (statName == "FourSpeciesSitePatternCounts") {
+            mafStat = make_shared<SiteFrequencySpectrumMafStatistics>(AlphabetTools::DNA_ALPHABET, bounds, ingroup, outgroup);
+          }
+          else if (statName == "FourSpeciesSitePatternCounts")
+          {
             string species1 = ApplicationTools::getStringParameter("species1", statArgs, "sp1", "", false, true);
             string species2 = ApplicationTools::getStringParameter("species2", statArgs, "sp2", "", false, true);
             string species3 = ApplicationTools::getStringParameter("species3", statArgs, "sp3", "", false, true);
@@ -927,49 +1062,63 @@ int main(int args, char** argv)
             species.push_back(species2);
             species.push_back(species3);
             species.push_back(species4);
-            mafStat = make_shared<FourSpeciesPatternCountsMafStatistics>(AlphabetTools::DNA_ALPHABET, species); 
-          } else if (statName == "SiteStatistics") {
+            mafStat = make_shared<FourSpeciesPatternCountsMafStatistics>(AlphabetTools::DNA_ALPHABET, species);
+          }
+          else if (statName == "SiteStatistics")
+          {
             vector<string> species = ApplicationTools::getVectorParameter<string>("species", statArgs, ',', "", "", false, true);
-            mafStat = make_shared<SiteMafStatistics>(species); 
-          } else if (statName == "PolymorphismStatistics") {
+            mafStat = make_shared<SiteMafStatistics>(species);
+          }
+          else if (statName == "PolymorphismStatistics")
+          {
             vector<string> species1 = ApplicationTools::getVectorParameter<string>("species1", statArgs, ',', "", "", false, true);
             vector<string> species2 = ApplicationTools::getVectorParameter<string>("species2", statArgs, ',', "", "", false, true);
-            vector< vector<string> > species;
+            vector<vector<string>> species;
             species.push_back(species1);
             species.push_back(species2);
-            mafStat = make_shared<PolymorphismMafStatistics>(species); 
-          } else if (statName == "DiversityStatistics") {
+            mafStat = make_shared<PolymorphismMafStatistics>(species);
+          }
+          else if (statName == "DiversityStatistics")
+          {
             vector<string> species = ApplicationTools::getVectorParameter<string>("ingroup", statArgs, ',', "", "", false, true);
             if (species.size() < 2)
               throw Exception("ERROR: at least two sequences are required to compute diversity estimators.");
-            mafStat = make_shared<SequenceDiversityMafStatistics>(species); 
-          } else if (statName == "FstStatistics") {
+            mafStat = make_shared<SequenceDiversityMafStatistics>(species);
+          }
+          else if (statName == "FstStatistics")
+          {
             vector<string> species1 = ApplicationTools::getVectorParameter<string>("species1", statArgs, ',', "", "", false, true);
             vector<string> species2 = ApplicationTools::getVectorParameter<string>("species2", statArgs, ',', "", "", false, true);
             unsigned int minNbPermutations = ApplicationTools::getParameter<unsigned int>("min_permutation_number", statArgs, 0, "", false, true);
             unsigned int maxNbPermutations = ApplicationTools::getParameter<unsigned int>("max_permutation_number", statArgs, 0, "", false, true);
             bool verboseStat = ApplicationTools::getBooleanParameter("verbose", statArgs, true, "", false, true);
-            if (minNbPermutations > 0 || maxNbPermutations > 0) {
+            if (minNbPermutations > 0 || maxNbPermutations > 0)
+            {
               ApplicationTools::displayResult("-- Min. Nb. permutations", minNbPermutations);
               ApplicationTools::displayResult("-- Max. Nb. permutations", maxNbPermutations);
             }
-            mafStat = make_shared<FstMafStatistics>(species1, species2, minNbPermutations, maxNbPermutations, verboseStat); 
-          } else if (statName == "CountClusters") {
+            mafStat = make_shared<FstMafStatistics>(species1, species2, minNbPermutations, maxNbPermutations, verboseStat);
+          }
+          else if (statName == "CountClusters")
+          {
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             double threshold = ApplicationTools::getDoubleParameter("threshold", statArgs, 0);
             mafStat = make_shared<CountClustersMafStatistics>(treeProperty, threshold);
             statDesc = " / " + treeProperty;
-          } else if (statName == "ModelFit") {
-	          shared_ptr<AutonomousSubstitutionProcessInterface> process;
-	          vector<shared_ptr<PhyloTree>> vTree;
-	          vTree.push_back(nullptr);
+          }
+          else if (statName == "ModelFit")
+          {
+            shared_ptr<AutonomousSubstitutionProcessInterface> process;
+            vector<shared_ptr<PhyloTree>> vTree;
+            vTree.push_back(nullptr);
             process = PhylogeneticsApplicationTools::getSubstitutionProcess(AlphabetTools::DNA_ALPHABET, 0, nullptr, vTree, statArgs, "", true, true, 1);
 
             string treeProperty = ApplicationTools::getStringParameter("tree", statArgs, "none");
             vector<string> parametersOutput = ApplicationTools::getVectorParameter<string>("parameters_output", statArgs, ',', "");
             vector<string> fixedParametersNames = ApplicationTools::getVectorParameter<string>("fixed_parameters", statArgs, ',', "");
             ParameterList fixedParameters;
-            if (fixedParametersNames.size() > 0) {
+            if (fixedParametersNames.size() > 0)
+            {
               ParameterList parameters = process->getParameters();
               fixedParameters = parameters.createSubList(fixedParametersNames);
             }
@@ -983,62 +1132,78 @@ int main(int args, char** argv)
             ApplicationTools::displayBooleanResult("-- Use a global molecular clock", useClock);
             bool reparametrize = ApplicationTools::getBooleanParameter("reparametrize", statArgs, false);
             ApplicationTools::displayBooleanResult("-- Reparametrization", reparametrize);
-            if (treeProperty == "none") {
+            if (treeProperty == "none")
+            {
               auto tree = PhylogeneticsApplicationTools::getTree(statArgs, "", "", true, false);
-	          auto treeTpl = make_shared<TreeTemplate<Node>>(*tree);
+              auto treeTpl = make_shared<TreeTemplate<Node>>(*tree);
               mafStat = make_shared<MaximumLikelihoodModelFitMafStatistics>(process, treeTpl, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
-            } else {
+            }
+            else
+            {
               mafStat = make_shared<MaximumLikelihoodModelFitMafStatistics>(process, treeProperty, parametersOutput,
                   fixedParameters, reestimateBrLen, propGapsToKeep, gapsAsUnresolved, useClock, reparametrize);
             }
-          } else {
+          }
+          else
+          {
             throw Exception("Unknown statistic: " + statName);
           }
           statistics.push_back(mafStat);
           ApplicationTools::displayResult("-- Adding statistic", mafStat->getFullName() + " <" + mafStat->getShortName() + ">" + statDesc);
         }
 
-        //Get output file:
+        // Get output file:
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
         auto out = make_unique<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ApplicationTools::displayResult("-- File compression", compress);
         auto output = make_shared<StlOutputStream>(std::move(out));
 
         auto iterator = make_shared<SequenceStatisticsMafIterator>(currentIterator, statistics);
-        
-        if (cmdArgs.find("reference") != cmdArgs.end()) {
+
+        if (cmdArgs.find("reference") != cmdArgs.end())
+        {
           throw Exception("reference argument in SequenceStatistics is deprecated: use ref_species instead.");
         }
         string ref = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string sep = ApplicationTools::getStringParameter("sep", cmdArgs, "tab");
-	if (sep == "comma") sep = ",";
-	if (sep == "tab") sep = "\t";
+        if (sep == "comma")
+          sep = ",";
+        if (sep == "tab")
+          sep = "\t";
         ApplicationTools::displayResult("-- Reference species", ref);
         auto listener = make_unique<CsvStatisticsOutputIterationListener>(iterator, ref, output, sep);
-        
+
         iterator->addIterationListener(std::move(listener));
         currentIterator = iterator;
         iterator->setVerbose(verbose);
       }
 
-      
+
       // +--------------------+
       // | Feature extraction |
       // +--------------------+
-      else if (cmdName == "ExtractFeature") {
+      else if (cmdName == "ExtractFeature")
+      {
         bool ignoreStrand    = ApplicationTools::getBooleanParameter("ignore_strand", cmdArgs, false);
         bool completeOnly    = ApplicationTools::getBooleanParameter("complete", cmdArgs, false);
         string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
@@ -1053,30 +1218,45 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Extract incomplete features", !completeOnly);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           featureStream.push(gzip_decompressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           featureStream.push(zlib_decompressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           featureStream.push(bzip2_decompressor());
-        } else
+        }
+        else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
         unique_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
-        if (featureFormat == "GFF") {
+        if (featureFormat == "GFF")
+        {
           ftReader.reset(new GffFeatureReader(featureStream));
-        } else if (featureFormat == "GTF") {
+        }
+        else if (featureFormat == "GTF")
+        {
           ftReader.reset(new GtfFeatureReader(featureStream));
-        } else if (featureFormat == "BedGraph") {
+        }
+        else if (featureFormat == "BedGraph")
+        {
           ftReader.reset(new BedGraphFeatureReader(featureStream));
-         } else
+        }
+        else
           throw Exception("Unsupported feature format: " + featureFormat);
         if (featureType.size() == 1 && featureType[0] == "all")
           ftReader->getAllFeatures(featuresSet);
-        else {
-          for (size_t i = 0; i < featureType.size(); ++i) {
+        else
+        {
+          for (size_t i = 0; i < featureType.size(); ++i)
+          {
             ApplicationTools::displayResult("-- Extract features of type", featureType[i]);
             ftReader->getFeaturesOfType(featureType[i], featuresSet);
           }
@@ -1090,12 +1270,13 @@ int main(int args, char** argv)
       }
 
 
-
       // +------------------+
       // | Window splitting |
       // +------------------+
-      else if (cmdName == "WindowSplit") {
-        if (cmdArgs.find("preferred.size") != cmdArgs.end()) {
+      else if (cmdName == "WindowSplit")
+      {
+        if (cmdArgs.find("preferred.size") != cmdArgs.end())
+        {
           throw Exception("preferred.size argument in WindowSplit is deprecated: use preferred_size instead.");
         }
         unsigned int preferredSize = ApplicationTools::getParameter<unsigned int>("preferred_size", cmdArgs, 0);
@@ -1113,7 +1294,8 @@ int main(int args, char** argv)
           splitOption = WindowSplitMafIterator::CENTER;
         else if (splitOptionStr == "adjust")
           splitOption = WindowSplitMafIterator::ADJUST;
-        else throw Exception("Unvalid alignment option for WindowSplit: " + splitOptionStr);
+        else
+          throw Exception("Unvalid alignment option for WindowSplit: " + splitOptionStr);
         ApplicationTools::displayResult("-- Alignment option", splitOptionStr);
         bool keepSmallBlocks = ApplicationTools::getBooleanParameter("keep_small_blocks", cmdArgs, false);
         if (splitOptionStr == "adjust")
@@ -1125,24 +1307,34 @@ int main(int args, char** argv)
       }
 
 
-
       // +---------------------+
       // | Distance estimation |
       // +---------------------+
-      else if (cmdName == "DistanceEstimation") {
+      else if (cmdName == "DistanceEstimation")
+      {
         string distMethod = ApplicationTools::getStringParameter("method", cmdArgs, "count");
         ApplicationTools::displayResult("-- Method", distMethod);
-        if (distMethod == "count") {
+        if (distMethod == "count")
+        {
           string gapOption = ApplicationTools::getStringParameter("gap_option", cmdArgs, "no_gap");
-          if (gapOption == "all") {
+          if (gapOption == "all")
+          {
             gapOption = SiteContainerTools::SIMILARITY_ALL;
-          } else if (gapOption == "no_gap") {
+          }
+          else if (gapOption == "no_gap")
+          {
             gapOption = SiteContainerTools::SIMILARITY_NOGAP;
-          } else if (gapOption == "no_full_gap") {
+          }
+          else if (gapOption == "no_full_gap")
+          {
             gapOption = SiteContainerTools::SIMILARITY_NOFULLGAP;
-          } else if (gapOption == "no_double_gap") {
+          }
+          else if (gapOption == "no_double_gap")
+          {
             gapOption = SiteContainerTools::SIMILARITY_NODOUBLEGAP;
-          } else {
+          }
+          else
+          {
             throw Exception("Unrecognized gap option, should be either 'all', 'no_full_gap', 'no_double_gap' or 'no_gap'.");
           }
           ApplicationTools::displayResult("-- Gap option", gapOption);
@@ -1155,38 +1347,45 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- Block-wise matrices are registered as", iterator->getPropertyName());
           iterator->setLogStream(log);
           currentIterator = iterator;
-        } else if (distMethod == "ml") {
+        }
+        else if (distMethod == "ml")
+        {
           string rdistDesc = ApplicationTools::getStringParameter("rate", cmdArgs, "Constant()");
           string paramOpt  = ApplicationTools::getStringParameter("parameter_estimation", cmdArgs, "initial");
-          if (paramOpt == "initial") {
+          if (paramOpt == "initial")
+          {
             paramOpt = OptimizationTools::DISTANCEMETHOD_INIT;
-          } else if (paramOpt == "pairwise") {
+          }
+          else if (paramOpt == "pairwise")
+          {
             paramOpt = OptimizationTools::DISTANCEMETHOD_PAIRWISE;
-          } else {
+          }
+          else
+          {
             throw Exception("Unrecognized parameter option, should be either 'initial', 'pairwise'.");
           }
           string prPath = ApplicationTools::getAFilePath("profiler", cmdArgs, false, false);
           string mhPath = ApplicationTools::getAFilePath("message_handler", cmdArgs, false, false);
           double propGapsToKeep = ApplicationTools::getDoubleParameter("max_freq_gaps", cmdArgs, 0.);
           bool gapsAsUnresolved = ApplicationTools::getBooleanParameter("gaps_as_unresolved", cmdArgs, true);
-          
+
           ApplicationTools::displayResult("-- Max. frequency of gaps", propGapsToKeep);
           ApplicationTools::displayBooleanResult("-- Gaps as unresolved", gapsAsUnresolved);
-          
+
           bool extendedSeqNames = ApplicationTools::getBooleanParameter("extended_names", cmdArgs, true);
           ApplicationTools::displayBooleanResult("-- Use extended names in matrix", extendedSeqNames);
-          
+
           BppORateDistributionFormat rdistReader(true);
           auto rdist = rdistReader.readDiscreteDistribution(rdistDesc, true);
-	  map<string, string> unparsedparams;
-	  auto model = PhylogeneticsApplicationTools::getBranchModel(AlphabetTools::DNA_ALPHABET, nullptr, nullptr, cmdArgs, unparsedparams);
+          map<string, string> unparsedparams;
+          auto model = PhylogeneticsApplicationTools::getBranchModel(AlphabetTools::DNA_ALPHABET, nullptr, nullptr, cmdArgs, unparsedparams);
 
           auto distEst = make_unique<DistanceEstimation>(std::move(model), std::move(rdist));
-          
+
           auto profiler =
             (prPath == "none") ? 0 :
-              (prPath == "std") ? ApplicationTools::message :
-              make_shared<StlOutputStream>(make_unique<fstream>(prPath.c_str(), ios::out));
+            (prPath == "std") ? ApplicationTools::message :
+            make_shared<StlOutputStream>(make_unique<fstream>(prPath.c_str(), ios::out));
           if (profiler)
             profiler->setPrecision(20);
           if (verbose)
@@ -1195,8 +1394,8 @@ int main(int args, char** argv)
 
           auto messenger =
             (mhPath == "none") ? nullptr :
-              (mhPath == "std") ? ApplicationTools::message :
-              make_shared<StlOutputStream>(make_unique<ofstream>(mhPath.c_str(), ios::out));
+            (mhPath == "std") ? ApplicationTools::message :
+            make_shared<StlOutputStream>(make_unique<ofstream>(mhPath.c_str(), ios::out));
           if (messenger)
             messenger->setPrecision(20);
           if (verbose)
@@ -1209,30 +1408,41 @@ int main(int args, char** argv)
           iterator->setLogStream(log);
           iterator->setVerbose(verbose);
           currentIterator = iterator;
-        } else {
+        }
+        else
+        {
           throw Exception("Unknown distance method: " + distMethod);
         }
       }
 
 
-
       // +--------------------------+
       // | Phylogeny reconstruction |
       // +--------------------------+
-      else if (cmdName == "DistanceBasedPhylogeny") {
+      else if (cmdName == "DistanceBasedPhylogeny")
+      {
         string distMethodName = ApplicationTools::getStringParameter("method", cmdArgs, "bionj");
         string distProperty = ApplicationTools::getStringParameter("dist_mat", cmdArgs, "none");
         unique_ptr<DistanceMethodInterface> distMethod = nullptr;
-        if (distMethodName == "upgma") {
+        if (distMethodName == "upgma")
+        {
           distMethod = make_unique<PGMA>(false);
-        } else if (distMethodName == "wpgma") {
+        }
+        else if (distMethodName == "wpgma")
+        {
           distMethod = make_unique<PGMA>(true);
-        } else if (distMethodName == "nj") {
+        }
+        else if (distMethodName == "nj")
+        {
           distMethod = make_unique<NeighborJoining>(false, false);
-        } else if (distMethodName == "bionj") {
+        }
+        else if (distMethodName == "bionj")
+        {
           distMethod = make_unique<BioNJ>(false, false);
-        } else {
-          throw Exception("Unknown distance-based phylogenetic method: " + distMethodName); 
+        }
+        else
+        {
+          throw Exception("Unknown distance-based phylogenetic method: " + distMethodName);
         }
         distMethod->setVerbose(false);
         ApplicationTools::displayResult("-- Reading distance matrix from", distProperty);
@@ -1245,13 +1455,13 @@ int main(int args, char** argv)
       }
 
 
-
       // +-----------------------------------+
       // | External phylogeny reconstruction |
       // +-----------------------------------+
-      else if (cmdName == "ExternalTreeBuilding") {
+      else if (cmdName == "ExternalTreeBuilding")
+      {
         string name = ApplicationTools::getStringParameter("name", cmdArgs, "external");
-        
+
         string programInputFile = ApplicationTools::getAFilePath("input.file", cmdArgs, true, false);
         string programInputFormat = ApplicationTools::getStringParameter("input.format", cmdArgs, "Fasta");
         BppOAlignmentWriterFormat bppoWriter(1);
@@ -1266,26 +1476,25 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Registering block-wise trees to", propertyName);
 
         string command = ApplicationTools::getStringParameter("call", cmdArgs, "echo \"TODO: implement wrapper!\"");
-        
+
         ApplicationTools::displayResult("-- External call (tree building)", name);
         ApplicationTools::displayResult("   Command", command);
 
         auto iterator = make_shared<TreeBuildingSystemCallMafIterator>(currentIterator,
             std::move(alnWriter), programInputFile,
-	    std::move(treeReader), programOutputFile,
-	    command, propertyName);
+            std::move(treeReader), programOutputFile,
+            command, propertyName);
 
         iterator->setLogStream(log);
         currentIterator = iterator;
       }
 
 
-
-
       // +-------------------+
       // | Phylogeny rooting |
       // +-------------------+
-      else if (cmdName == "NewOutgroup") {
+      else if (cmdName == "NewOutgroup")
+      {
         string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
         string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
         string outgroup = ApplicationTools::getStringParameter("outgroup", cmdArgs, "none");
@@ -1298,11 +1507,11 @@ int main(int args, char** argv)
       }
 
 
-
       // +------------------------+
       // | Phylogeny drop species |
       // +------------------------+
-      else if (cmdName == "DropSpecies") {
+      else if (cmdName == "DropSpecies")
+      {
         string treePropertyInput = ApplicationTools::getStringParameter("tree_input", cmdArgs, "none");
         string treePropertyOutput = ApplicationTools::getStringParameter("tree_output", cmdArgs, "none");
         string species = ApplicationTools::getStringParameter("species", cmdArgs, "none");
@@ -1315,23 +1524,30 @@ int main(int args, char** argv)
       }
 
 
-
       // +--------+
       // | Output |
       // +--------+
-      else if (cmdName == "Output") {
+      else if (cmdName == "Output")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1343,11 +1559,11 @@ int main(int args, char** argv)
       }
 
 
-
       // +-------------------+
       // | Output alignments |
       // +-------------------+
-      else if (cmdName == "OutputAlignments") {
+      else if (cmdName == "OutputAlignments")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         bool multipleFiles = (outputFile.find("%i") != string::npos);
         ApplicationTools::displayResult("-- Output alignment file" + string(multipleFiles ? "s" : ""), outputFile);
@@ -1357,56 +1573,73 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Output coordinates", coords);
         bool header = ApplicationTools::getBooleanParameter("ldhat_header", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output header line", header);
-         string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "", "", true, 1);
+        string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "", "", true, 1);
         if (reference != "")
           ApplicationTools::displayResult("-- Reference species", reference);
-        
-        shared_ptr<OutputAlignmentMafIterator> iterator; 
+
+        shared_ptr<OutputAlignmentMafIterator> iterator;
         BppOAlignmentWriterFormat bppoWriter(1);
         string description = ApplicationTools::getStringParameter("format", cmdArgs, "Clustal");
         auto oAln = bppoWriter.read(description);
-        if (multipleFiles) {
+        if (multipleFiles)
+        {
           iterator = make_shared<OutputAlignmentMafIterator>(currentIterator,
-			 outputFile, std::move(oAln), mask, coords, header, reference);
-        } else {
+              outputFile, std::move(oAln), mask, coords, header, reference);
+        }
+        else
+        {
           compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
           auto out = make_shared<filtering_ostream>();
-          if (compress == "none") {
-          } else if (compress == "gzip") {
+          if (compress == "none")
+          {}
+          else if (compress == "gzip")
+          {
             out->push(gzip_compressor());
-          } else if (compress == "zip") {
+          }
+          else if (compress == "zip")
+          {
             out->push(zlib_compressor());
-          } else if (compress == "bzip2") {
+          }
+          else if (compress == "bzip2")
+          {
             out->push(bzip2_compressor());
-          } else
+          }
+          else
             throw Exception("Bad output compression format: " + compress);
           out->push(file_sink(outputFile));
           ostreams.push_back(out);
           ApplicationTools::displayResult("-- File compression", compress);
           iterator = make_shared<OutputAlignmentMafIterator>(currentIterator,
-			 out, std::move(oAln), mask, coords, header, reference);
+              out, std::move(oAln), mask, coords, header, reference);
         }
         currentIterator = iterator;
       }
 
 
-
       // +--------------------+
       // | Output as features |
       // +--------------------+
-      else if (cmdName == "OutputAsFeatures") {
+      else if (cmdName == "OutputAsFeatures")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output feature file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1421,31 +1654,38 @@ int main(int args, char** argv)
       }
 
 
-
       // +-----------------+
       // | Output as table |
       // +-----------------+
-      else if (cmdName == "OutputAsTable") {
+      else if (cmdName == "OutputAsTable")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output table file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
         ApplicationTools::displayResult("-- File compression", compress);
         string reference = ApplicationTools::getStringParameter("reference", cmdArgs, "");
         if (reference != "")
-        ApplicationTools::displayResult("-- Reference sequence", reference);
- 
+          ApplicationTools::displayResult("-- Reference sequence", reference);
+
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "", "", false, false);
 
         auto iterator = make_shared<TableOutputMafIterator>(currentIterator, out, species, reference);
@@ -1453,24 +1693,30 @@ int main(int args, char** argv)
       }
 
 
-
-
       // +------------+
       // | VCF output |
       // +------------+
-      else if (cmdName == "VcfOutput") {
+      else if (cmdName == "VcfOutput")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1480,19 +1726,23 @@ int main(int args, char** argv)
         if (reference == "")
           throw Exception("A reference sequence should be provided for filter 'VcfOutput'.");
         ApplicationTools::displayResult("-- Reference sequence", reference);
-        
-        vector< vector<string> >genotypes = ApplicationTools::getVectorOfVectorsParameter<string>("genotypes", cmdArgs, ',', "");
-      	bool allSingles = true;
-        for (size_t i = 0; i < genotypes.size(); ++i) {
+
+        vector<vector<string>> genotypes = ApplicationTools::getVectorOfVectorsParameter<string>("genotypes", cmdArgs, ',', "");
+        bool allSingles = true;
+        for (size_t i = 0; i < genotypes.size(); ++i)
+        {
           string tmp = "";
-	      if (genotypes[i].size() > 1) allSingles = false;
-          for (auto g : genotypes[i]) {
-            if (tmp != "") tmp += "|";
+          if (genotypes[i].size() > 1)
+            allSingles = false;
+          for (auto g : genotypes[i])
+          {
+            if (tmp != "")
+              tmp += "|";
             tmp += g;
           }
           ApplicationTools::displayResult("-- Adding genotype info for", tmp);
         }
-        
+
         bool outputAll = ApplicationTools::getBooleanParameter("all", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output non-variable positions", outputAll);
 
@@ -1500,13 +1750,19 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- Consider gaps as a deletion allele", gapAsDel);
 
         shared_ptr<VcfOutputMafIterator> iterator;
-        if (genotypes.size() > 0 && allSingles) {
-	        vector<string> simpleGenotypes;
-	        for (auto g : genotypes) simpleGenotypes.push_back(g[0]);
+        if (genotypes.size() > 0 && allSingles)
+        {
+          vector<string> simpleGenotypes;
+          for (auto g : genotypes)
+          {
+            simpleGenotypes.push_back(g[0]);
+          }
           bool outputDiploids = ApplicationTools::getBooleanParameter("diploids", cmdArgs, false);
           ApplicationTools::displayBooleanResult("-- Output (homozygous) diploids", outputDiploids);
           iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, simpleGenotypes, outputAll, outputDiploids, gapAsDel);
-        } else {
+        }
+        else
+        {
           iterator = make_shared<VcfOutputMafIterator>(currentIterator, out, reference, genotypes, outputAll, gapAsDel);
         }
 
@@ -1516,23 +1772,30 @@ int main(int args, char** argv)
       }
 
 
-
       // +-------------+
       // | MSMC output |
       // +-------------+
-      else if (cmdName == "MsmcOutput") {
+      else if (cmdName == "MsmcOutput")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1542,7 +1805,7 @@ int main(int args, char** argv)
         if (reference == "")
           throw Exception("A reference sequence should be provided for filter 'MsmcOutput'.");
         ApplicationTools::displayResult("-- Reference sequence", reference);
-        
+
         vector<string> species = ApplicationTools::getVectorParameter<string>("genotypes", cmdArgs, ',', "");
         if (species.size() < 2)
           throw Exception("MsmcOutput: at least two genomes are necessary to call SNPs.");
@@ -1554,11 +1817,11 @@ int main(int args, char** argv)
       }
 
 
-
       // +--------------+
       // | PLINK output |
       // +--------------+
-      else if (cmdName == "PlinkOutput") {
+      else if (cmdName == "PlinkOutput")
+      {
         string outputPedFile = ApplicationTools::getAFilePath("ped_file", cmdArgs, true, false);
         string outputMapFile = ApplicationTools::getAFilePath("map_file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
@@ -1566,17 +1829,24 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Output Map file", outputMapFile);
         auto outPed = make_shared<filtering_ostream>();
         auto outMap = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           outPed->push(gzip_compressor());
           outMap->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           outPed->push(zlib_compressor());
           outMap->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           outPed->push(bzip2_compressor());
           outMap->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         outPed->push(file_sink(outputPedFile));
         outMap->push(file_sink(outputMapFile));
@@ -1588,16 +1858,16 @@ int main(int args, char** argv)
         if (reference == "")
           throw Exception("A reference sequence should be provided for filter 'PlinkOutput'.");
         ApplicationTools::displayResult("-- Reference sequence", reference);
-        
+
         bool map3 = ApplicationTools::getBooleanParameter("map3", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Output map3 file", map3);
 
         bool recodeChr = ApplicationTools::getBooleanParameter("recode_chr", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Recode chromosomes", recodeChr);
 
-	bool makeDiploids = ApplicationTools::getBooleanParameter("make_diploids", cmdArgs, false);
+        bool makeDiploids = ApplicationTools::getBooleanParameter("make_diploids", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Make diploids", makeDiploids);
- 
+
         bool tabSeparator = ApplicationTools::getBooleanParameter("tab_separator", cmdArgs, true);
         ApplicationTools::displayResult("-- Column separator", tabSeparator ? "<tab>" : "<space>");
 
@@ -1616,11 +1886,11 @@ int main(int args, char** argv)
       }
 
 
-
       // +----------------------+
       // | SequenceLDhot output |
       // +----------------------+
-      else if (cmdName == "SequenceLDhotOutput") {
+      else if (cmdName == "SequenceLDhotOutput")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         ApplicationTools::displayResult("-- Output file", outputFile);
 
@@ -1629,7 +1899,7 @@ int main(int args, char** argv)
           ApplicationTools::displayResult("-- Reference sequence", reference);
         else
           reference = "";
-        
+
         bool completeOnly = ApplicationTools::getBooleanParameter("complete_only", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Use only complete sites", completeOnly);
 
@@ -1641,23 +1911,30 @@ int main(int args, char** argv)
       }
 
 
-
       // +----------------+
       // | EST-SFS output |
       // +----------------+
-      else if (cmdName == "EstSfsOutput") {
+      else if (cmdName == "EstSfsOutput")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1665,36 +1942,44 @@ int main(int args, char** argv)
 
         vector<string> ingroup = ApplicationTools::getVectorParameter<string>("ingroup", cmdArgs, ',', "");
         string tmp = "";
-        for (auto sp : ingroup) {
-          if (tmp != "") tmp += "|";
+        for (auto sp : ingroup)
+        {
+          if (tmp != "")
+            tmp += "|";
           tmp += sp;
         }
         ApplicationTools::displayResult("-- Ingroup genomes", tmp);
-        
+
         vector<string> outgroup1 = ApplicationTools::getVectorParameter<string>("outgroup1", cmdArgs, ',', "");
         tmp = "";
-        for (auto sp : outgroup1) {
-          if (tmp != "") tmp += "|";
+        for (auto sp : outgroup1)
+        {
+          if (tmp != "")
+            tmp += "|";
           tmp += sp;
         }
         ApplicationTools::displayResult("-- Outgroup 1 genomes", tmp);
-        
+
         vector<string> outgroup2 = ApplicationTools::getVectorParameter<string>("outgroup2", cmdArgs, ',', "");
         tmp = "";
-        for (auto sp : outgroup2) {
-          if (tmp != "") tmp += "|";
+        for (auto sp : outgroup2)
+        {
+          if (tmp != "")
+            tmp += "|";
           tmp += sp;
         }
         ApplicationTools::displayResult("-- Outgroup 2 genomes", tmp);
 
         vector<string> outgroup3 = ApplicationTools::getVectorParameter<string>("outgroup3", cmdArgs, ',', "");
         tmp = "";
-        for (auto sp : outgroup3) {
-          if (tmp != "") tmp += "|";
+        for (auto sp : outgroup3)
+        {
+          if (tmp != "")
+            tmp += "|";
           tmp += sp;
         }
         ApplicationTools::displayResult("-- Outgroup 3 genomes", tmp);
-  
+
         shared_ptr<EstSfsOutputMafIterator> iterator;
         iterator = make_shared<EstSfsOutputMafIterator>(currentIterator, out, ingroup, outgroup1, outgroup2, outgroup3);
 
@@ -1704,23 +1989,30 @@ int main(int args, char** argv)
       }
 
 
-
       // +--------------------+
       // | Coordinates output |
       // +--------------------+
-      else if (cmdName == "OutputCoordinates") {
+      else if (cmdName == "OutputCoordinates")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1730,11 +2022,12 @@ int main(int args, char** argv)
         if (species.size() == 0)
           throw Exception("At least one species should be provided for filter 'OutputCoordinates'.");
         ApplicationTools::displayResult("-- Output coordinates for", TextTools::toString(species.size()) + " species");
-        
+
         bool includeSrcSize = ApplicationTools::getBooleanParameter("output_src_size", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Output src size", includeSrcSize);
-        
-        for (size_t i = 0; i < species.size(); ++i) {
+
+        for (size_t i = 0; i < species.size(); ++i)
+        {
           ApplicationTools::displayResult("-- Output coordinates for species", species[i]);
         }
         auto iterator = make_shared<CoordinatesOutputMafIterator>(currentIterator, out, species, includeSrcSize);
@@ -1745,13 +2038,12 @@ int main(int args, char** argv)
       }
 
 
-
-
       // +------------------------+
       // | Coordinates conversion |
       // +------------------------+
-      else if (cmdName == "LiftOver") {
-        //Input
+      else if (cmdName == "LiftOver")
+      {
+        // Input
         string refSpecies    = ApplicationTools::getStringParameter("ref_species", cmdArgs, "none");
         string targetSpecies = ApplicationTools::getStringParameter("target_species", cmdArgs, "none");
         string featureFile   = ApplicationTools::getAFilePath("feature.file", cmdArgs, false, false);
@@ -1763,48 +2055,68 @@ int main(int args, char** argv)
         ApplicationTools::displayBooleanResult("-- closest position if gap", outputClosest);
         compress = ApplicationTools::getStringParameter("feature.file.compression", cmdArgs, "none");
         filtering_istream featureStream;
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           featureStream.push(gzip_decompressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           featureStream.push(zlib_decompressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           featureStream.push(bzip2_decompressor());
-        } else
+        }
+        else
           throw Exception("Bad input incompression format: " + compress);
         featureStream.push(file_source(featureFile));
         unique_ptr<FeatureReader> ftReader;
         SequenceFeatureSet featuresSet;
-        if (featureFormat == "GFF") {
+        if (featureFormat == "GFF")
+        {
           ftReader.reset(new GffFeatureReader(featureStream));
-        } else if (featureFormat == "GTF") {
+        }
+        else if (featureFormat == "GTF")
+        {
           ftReader.reset(new GtfFeatureReader(featureStream));
-        } else if (featureFormat == "BedGraph") {
+        }
+        else if (featureFormat == "BedGraph")
+        {
           ftReader.reset(new BedGraphFeatureReader(featureStream));
-        } else
+        }
+        else
           throw Exception("Unsupported feature format: " + featureFormat);
         ftReader->getAllFeatures(featuresSet);
         ApplicationTools::displayResult("-- Total number of features", featuresSet.getNumberOfFeatures());
-        
-        //Output
+
+        // Output
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
         ApplicationTools::displayResult("-- File compression", compress);
-        
-        //Iterator initialization:
+
+        // Iterator initialization:
         auto iterator = make_shared<CoordinateTranslatorMafIterator>(currentIterator, refSpecies, targetSpecies, featuresSet, *out, outputClosest);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
@@ -1813,23 +2125,30 @@ int main(int args, char** argv)
       }
 
 
-
       // +--------------+
       // | Output trees |
       // +--------------+
-      else if (cmdName == "OutputTrees") {
+      else if (cmdName == "OutputTrees")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output tree file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1842,26 +2161,32 @@ int main(int args, char** argv)
         auto iterator = make_shared<OutputTreeMafIterator>(currentIterator, out, treeProperty, !stripNames);
         currentIterator = iterator;
       }
-    
-
 
 
       // +--------------------------+
       // | Output Distance matrices |
       // +--------------------------+
-      else if (cmdName == "OutputDistanceMatrices") {
+      else if (cmdName == "OutputDistanceMatrices")
+      {
         string outputFile = ApplicationTools::getAFilePath("file", cmdArgs, true, false);
         compress = ApplicationTools::getStringParameter("compression", cmdArgs, "none");
         ApplicationTools::displayResult("-- Output matrix file", outputFile);
         auto out = make_shared<filtering_ostream>();
-        if (compress == "none") {
-        } else if (compress == "gzip") {
+        if (compress == "none")
+        {}
+        else if (compress == "gzip")
+        {
           out->push(gzip_compressor());
-        } else if (compress == "zip") {
+        }
+        else if (compress == "zip")
+        {
           out->push(zlib_compressor());
-        } else if (compress == "bzip2") {
+        }
+        else if (compress == "bzip2")
+        {
           out->push(bzip2_compressor());
-        } else
+        }
+        else
           throw Exception("Bad output compression format: " + compress);
         out->push(file_sink(outputFile));
         ostreams.push_back(out);
@@ -1874,14 +2199,13 @@ int main(int args, char** argv)
         auto iterator = make_shared<OutputDistanceMatrixMafIterator>(currentIterator, out, distProperty, !stripNames);
         currentIterator = iterator;
       }
-    
-
 
 
       // +--------------------------+
       // | External program wrapper |
       // +--------------------------+
-      else if (cmdName == "SystemCall") {
+      else if (cmdName == "SystemCall")
+      {
         string name = ApplicationTools::getStringParameter("name", cmdArgs, "external");
 
         string programInputFile = ApplicationTools::getAFilePath("input.file", cmdArgs, true, false);
@@ -1893,21 +2217,21 @@ int main(int args, char** argv)
         string programOutputFormat = ApplicationTools::getStringParameter("output.format", cmdArgs, "Fasta");
         BppOAlignmentReaderFormat bppoReader(1);
         auto alnReader = bppoReader.read(programOutputFormat);
-        
+
         bool hotTest = ApplicationTools::getBooleanParameter("hot", cmdArgs, false);
         const string hotSpecies = ApplicationTools::getStringParameter("species_to_annotate", cmdArgs, "");
         ApplicationTools::displayBooleanResult("-- Compute HoT score", hotTest);
         ApplicationTools::displayResult("-- HoT score annotation to species", hotSpecies == "" ? "(no annotation)" : hotSpecies);
 
         string command = ApplicationTools::getStringParameter("call", cmdArgs, "echo \"TODO: implement wrapper!\"");
-        
+
         ApplicationTools::displayResult("-- External call", name);
         ApplicationTools::displayResult("   Command", command);
 
-        auto iterator = make_shared<SystemCallMafIterator>(currentIterator, 
-            std::move(alnWriter), programInputFile, 
-	    std::move(alnReader), programOutputFile,
-	    command, hotTest, hotSpecies);
+        auto iterator = make_shared<SystemCallMafIterator>(currentIterator,
+            std::move(alnWriter), programInputFile,
+            std::move(alnReader), programOutputFile,
+            command, hotTest, hotSpecies);
 
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
@@ -1915,11 +2239,11 @@ int main(int args, char** argv)
       }
 
 
-      else 
+      else
         throw Exception("Unknown filter: " + cmdName);
     }
 
-    //Now loop over the last iterator and that's it!
+    // Now loop over the last iterator and that's it!
     size_t blockCounter = 0;
     size_t alnSize = 0;
     cout << "Parsing..." << endl;
@@ -1928,12 +2252,13 @@ int main(int args, char** argv)
       alnSize += block->getNumberOfSites();
       cout << '\r' << ++blockCounter << " blocks kept, totalizing " << alnSize << "bp.";
       cout.flush();
-      //ApplicationTools::displayUnlimitedGauge(blockCounter++, "Parsing...");
+      // ApplicationTools::displayUnlimitedGauge(blockCounter++, "Parsing...");
     }
     ApplicationTools::message->endLine();
 
-    //Flush all streams:
-    for (auto& os : ostreams) {
+    // Flush all streams:
+    for (auto& os : ostreams)
+    {
       close(*os);
     }
 
@@ -1945,6 +2270,5 @@ int main(int args, char** argv)
     exit(-1);
   }
 
-  return (0);
+  return 0;
 }
-

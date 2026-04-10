@@ -1,10 +1,3 @@
-//
-// File: TreeBuildingSystemCallMafIterator.cpp
-// Authors: Julien Dutheil
-// Created: Sat Jun 18 2016
-//
-
-// Copyright or © or Copr. Julien Y. Dutheil, (2016)
 // SPDX-FileCopyrightText: 2026 Julien Y. Dutheil <jy.dutheil@gmail.com>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -17,38 +10,41 @@
 using namespace bpp;
 using namespace std;
 
-unique_ptr<MafBlock> TreeBuildingSystemCallMafIterator::analyseCurrentBlock_() {
+unique_ptr<MafBlock> TreeBuildingSystemCallMafIterator::analyseCurrentBlock_()
+{
   currentBlock_ = iterator_->nextBlock();
-  if (! currentBlock_)
+  if (!currentBlock_)
     return nullptr;
   auto aln = currentBlock_->getAlignment();
-  
-  //We translate sequence names to avoid compatibility issues
+
+  // We translate sequence names to avoid compatibility issues
   vector<string> names(aln->getNumberOfSequences());
   map<string, string> nameIndex;
-  for (size_t i = 0; i < names.size(); ++i) {
+  for (size_t i = 0; i < names.size(); ++i)
+  {
     names[i] = "seq" + TextTools::toString(i);
     nameIndex[names[i]] = currentBlock_->sequence(i).getName();
   }
   aln->setSequenceNames(names, true);
-  
-  //Write sequences to file:
+
+  // Write sequences to file:
   alnWriter_->writeAlignment(inputFile_, *aln, true);
 
-  //Call the external program:
+  // Call the external program:
   int rc = system(call_.c_str());
-  if (rc) throw Exception("TreeBuildingSystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
+  if (rc)
+    throw Exception("TreeBuildingSystemCallMafIterator::analyseCurrentBlock_(). System call exited with non-zero status.");
 
-  //Then read the generated tree and assign sequence names:
+  // Then read the generated tree and assign sequence names:
   unique_ptr<Tree> result(treeReader_->readTree(outputFile_));
   unique_ptr<TreeTemplate<Node>> tree(new TreeTemplate<Node>(*result));
   vector<Node*> leaves = tree->getLeaves();
-  for (size_t i = 0; i < leaves.size(); ++i) {
+  for (size_t i = 0; i < leaves.size(); ++i)
+  {
     leaves[i]->setName(nameIndex[leaves[i]->getName()]);
   }
   currentBlock_->setProperty(propertyName_, std::move(tree));
 
-  //Done:
+  // Done:
   return std::move(currentBlock_);
 }
-
