@@ -1555,6 +1555,7 @@ int main(int args, char** argv)
         bool mask = ApplicationTools::getBooleanParameter("mask", cmdArgs, true);
         ApplicationTools::displayBooleanResult("-- Output mask", mask);
         auto iterator = make_shared<OutputMafIterator>(currentIterator, out, mask);
+        iterator->setLogStream(log);
         currentIterator = iterator;
       }
 
@@ -1612,6 +1613,7 @@ int main(int args, char** argv)
           iterator = make_shared<OutputAlignmentMafIterator>(currentIterator,
               out, std::move(oAln), mask, coords, header, reference);
         }
+        iterator->setLogStream(log);
         currentIterator = iterator;
       }
 
@@ -1650,6 +1652,7 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Species to use", species);
 
         auto iterator = make_shared<OutputAsFeaturesMafIterator>(currentIterator, out, species);
+        iterator->setLogStream(log);
         currentIterator = iterator;
       }
 
@@ -1689,6 +1692,7 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "", "", false, false);
 
         auto iterator = make_shared<TableOutputMafIterator>(currentIterator, out, species, reference);
+        iterator->setLogStream(log);
         currentIterator = iterator;
       }
 
