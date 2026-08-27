@@ -103,8 +103,6 @@ if(Boost_FOUND)
     message("   libraries: ${Boost_LIBRARIES}")
 endif()
 
-find_package(Eigen3 3.3 REQUIRED PATHS /usr/lib NO_MODULE)
-
 #here is a useful function:
 macro(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
     #start:

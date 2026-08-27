@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename maffilter.info
-@settitle MafFilter Manual 1.4.0
+@settitle MafFilter Manual 1.4.1
 @c @documentencoding UTF-8
 @afourpaper
 @dircategory Science Biology Genetics
@@ -12,7 +12,7 @@
 
 
 @copying
-This is the manual of MafFilter, version 1.4.0.
+This is the manual of MafFilter, version 1.4.1.
 
 Copyright @copyright{} 2026 Julien Y. Dutheil
 @end copying
@@ -370,7 +370,8 @@ maf.filter=                                 \
         species=(species1, species2, etc),  \
         strict=yes,                         \
         keep=no,                            \
-        remove_duplicates=yes),             \
+        remove_duplicates=yes,              \
+        duplicate_policy=discard),
     [...]
 @end example
 @end cartouche
@@ -389,7 +390,12 @@ If set to yes, only blocks containing at least one sequence from each species in
 If strict is set to yes, tells if additional sequences should be kept in the block, or remove so that the output blocks only contain species from the selection.
         
 @item remove_duplicates=yes/no
-If set to yes, only keep blocks for which only one sequence for each species is present. Blocks with paralogous sequences in at least one species will therefore be discarded. 
+If set to yes, check for duplicated sequence within each block. If any, apply the duplicate_policy rule.
+
+@item duplicate_policy = [discard|remove|sample]
+If set to 'discard' (the default), only keep blocks for which only one sequence for each species is present. Blocks with paralogous sequences in at least one species will therefore be discarded. 
+If set to 'remove', remove all duplicated sequences in each block. This option is not compatible with 'strict = yes'.
+If set to 'sample', only keep one sequence among the duplicated ones (currently keeps the last sequence for each species in the block).
 
 @end table
 

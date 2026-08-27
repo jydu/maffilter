@@ -111,9 +111,9 @@ void help()
 int main(int args, char** argv)
 {
   cout << "******************************************************************" << endl;
-  cout << "*                  MAF Filter, version 1.4.0                     *" << endl;
+  cout << "*                  MAF Filter, version 1.4.1                     *" << endl;
   cout << "* Author: J. Dutheil                        Created on  10/09/10 *" << endl;
-  cout << "*                                           Last Modif. 29/01/26 *" << endl;
+  cout << "*                                           Last Modif. 27/08/26 *" << endl;
   cout << "******************************************************************" << endl;
   cout << endl;
 
@@ -226,7 +226,21 @@ int main(int args, char** argv)
         vector<string> species = ApplicationTools::getVectorParameter<string>("species", cmdArgs, ',', "");
         if (species.size() == 0)
           throw Exception("At least one species should be provided for command 'Subset'.");
-        auto iterator = make_shared<SequenceFilterMafIterator>(currentIterator, species, strict, keep, rmdupl);
+        string duplicatePolicyStr = ApplicationTools::getStringParameter("duplicate_policy", cmdArgs, "discard");
+	short duplicatePolicy;
+	if (duplicatePolicyStr == "discard") {
+	  duplicatePolicy = SequenceFilterMafIterator::DUPLICATE_POLICY_DISCARD;
+	} else if (duplicatePolicyStr == "sample") {
+	  duplicatePolicy = SequenceFilterMafIterator::DUPLICATE_POLICY_SAMPLE;
+	} else if (duplicatePolicyStr == "remove") {
+	  duplicatePolicy = SequenceFilterMafIterator::DUPLICATE_POLICY_REMOVE;
+	} else {
+          throw Exception("'duplicate_policy' should be one of 'discard', 'sample', or 'remove'.");
+	}
+	if (strict && duplicatePolicy == SequenceFilterMafIterator::DUPLICATE_POLICY_REMOVE) {
+          throw Exception("'duplicate_policy = remove' cannot be used with 'strict = yes'.");
+	}
+        auto iterator = make_shared<SequenceFilterMafIterator>(currentIterator, species, strict, keep, rmdupl, duplicatePolicy);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         currentIterator = iterator;
