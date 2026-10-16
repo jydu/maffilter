@@ -469,7 +469,8 @@ maf.filter=                                 \
         species=(species1, species2, etc),  \
         dist_max=0,                         \
         ignore_chr=(Random,Unknown),        \
-        rename_chimeric_chromosomes=yes),   \
+        rename_chimeric_chromosomes=yes,    \
+        allow_variable_distance=no),        \
     [...]
 @end example
 @end cartouche
@@ -495,6 +496,9 @@ Sequences annotated with such chromosomes will not be checked for synteny and th
 When distinct chromosomes are merged (in non specified species), their names are concatenated. If this option is set to "yes",
 then merged chromosomes will be renamed as "chimtigXXX" where XXX is a number auto-incremented for each species.
 
+@item allow_variable_distance=@{boolean@}
+If set to yes, syntenic block will be merged even if the distances are heterogeneous (still all below the max threshold).
+N will be added to keep coordinates, and then gap characters will be arbitrarily added at the end of the N stretch.
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------

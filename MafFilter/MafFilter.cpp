@@ -285,7 +285,9 @@ int main(int args, char** argv)
         ApplicationTools::displayResult("-- Maximum distance allowed", distMax);
         bool renameChimeras = ApplicationTools::getBooleanParameter("rename_chimeric_chromosomes", cmdArgs, false);
         ApplicationTools::displayBooleanResult("-- Rename chimeric chromosomes", renameChimeras);
-        auto iterator = make_shared<BlockMergerMafIterator>(currentIterator, species, distMax, renameChimeras);
+        bool varDist = ApplicationTools::getBooleanParameter("allow_variable_distance", cmdArgs, false);
+        ApplicationTools::displayBooleanResult("-- Allow variable distance", varDist);
+        auto iterator = make_shared<BlockMergerMafIterator>(currentIterator, species, distMax, renameChimeras, varDist);
         iterator->setLogStream(log);
         iterator->setVerbose(verbose);
         if (cmdArgs.find("ignore.chr") != cmdArgs.end())
